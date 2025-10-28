@@ -34,3 +34,24 @@ button:hover {
   background: var(--color-secondary);
 }
 
+.card-accent {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+.card-accent:hover {
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
+  background: linear-gradient(135deg, #ffffff, #f3f0ff);
+}
+
+@keyframes progressMove {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+
