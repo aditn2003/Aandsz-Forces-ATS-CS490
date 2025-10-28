@@ -1,0 +1,103 @@
+/* ===============================
+   Navbar — Centered, Balanced, and Clean
+================================= */
+.navbar {
+  background: linear-gradient(135deg, #6a11cb, #2575fc);
+  color: #fff;
+  text-align: center;
+  padding: 2rem 3rem;
+  border-radius: 20px;
+
+  /* 👇 key line: make it longer horizontally but still responsive */
+  width: clamp(750px, 72vw, 1000px);
+  /* 900px minimum, grows with the viewport to 72% of width, capped at 1280px */
+
+  margin: 2rem auto;            /* centers it */
+  box-shadow: 0 8px 25px rgba(0,0,0,.15);
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.4rem;
+  box-sizing: border-box;
+}
+/* ===============================
+   Logo Container
+================================= */
+.navbar-logo {
+  height: 70px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.navbar-logo > * {
+  transform: scale(1.5);
+  transition: transform 0.3s ease;
+}
+
+.navbar-logo > *:hover {
+  transform: scale(1.7);
+}
+
+/* ===============================
+   Title Styling
+================================= */
+.navbar-title {
+  font-size: 2.6rem;
+  font-weight: 700;
+  color: #ffffff;
+  margin: 0.3rem 0 0.8rem 0;
+  letter-spacing: 0.6px;
+}
+
+/* ===============================
+   Horizontal Menu
+================================= */
+.navbar-right {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: row;
+  gap: 2rem;
+}
+
+.navbar-right button {
+  background: rgba(255, 255, 255, 0.15);
+  border: none;
+  color: #fff;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0.8rem 1.8rem;
+  border-radius: 12px;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.navbar-right button:hover {
+  background: rgba(255, 255, 255, 0.25);
+  transform: translateY(-2px);
+}
+
+/* ===============================
+   Mobile Responsive
+================================= */
+@media (max-width: 768px) {
+  .navbar {
+    width: 95%;
+    padding: 1.5rem 1rem;
+  }
+
+  .navbar-title {
+    font-size: 1.8rem;
+  }
+
+  .navbar-right {
+    flex-direction: column;
+    gap: 1rem;
+  }
+}
+

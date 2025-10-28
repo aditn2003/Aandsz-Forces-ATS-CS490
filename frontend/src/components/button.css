@@ -1,0 +1,8 @@
+.btn{padding:.6rem 1.2rem;border:none;border-radius:var(--radius-md);
+     font-weight:600;cursor:pointer;}
+.btn-primary{background:var(--color-primary);color:#fff;}
+.btn-primary:hover{background:#1d4ed8;}
+.btn-secondary{background:var(--color-secondary);color:#fff;}
+.btn-danger{background:var(--color-error);color:#fff;}
+.btn:disabled{opacity:.6;cursor:not-allowed;}
+

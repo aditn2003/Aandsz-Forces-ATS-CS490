@@ -1,45 +1,111 @@
 import { useEffect, useState } from "react";
 import { api } from "./api";
+import "./design/base.css";
+import "./design/form.css";
+import NavBar from "./components/NavBar";
+import Spinner from "./components/Spinner";
 
 export default function App() {
   const [page, setPage] = useState("home");
-  const [form, setForm] = useState({});     // reused for inputs
+  const [form, setForm] = useState({});
   const [token, setToken] = useState(localStorage.getItem("token"));
   const [me, setMe] = useState(null);
+  const [loading, setLoading] = useState(false);
   const authed = !!token;
 
+  // Manage token persistence
   useEffect(() => {
     if (token) localStorage.setItem("token", token);
     else localStorage.removeItem("token");
   }, [token]);
 
+  // === AUTH FUNCTIONS ===
   async function register() {
     try {
+      setLoading(true);
       const body = {
         firstName: form.firstName || "",
         lastName: form.lastName || "",
         email: form.email || "",
         password: form.password || "",
-        confirmPassword: form.confirmPassword || ""
+        confirmPassword: form.confirmPassword || "",
       };
       const { data } = await api.post("/register", body);
-      alert("Registered!");
+      alert("Registered successfully!");
       setToken(data.token);
       setPage("profile");
     } catch (e) {
       alert(e?.response?.data?.error || "Registration failed");
+    } finally {
+      setLoading(false);
     }
   }
 
   async function login() {
     try {
-      const { data } = await api.post("/login", { email: form.email, password: form.password });
-      alert("Logged in!");
+      setLoading(true);
+      const { data } = await api.post("/login", {
+        email: form.email,
+        password: form.password,
+      });
+      alert("Login successful!");
       setToken(data.token);
       setPage("profile");
     } catch (e) {
       alert(e?.response?.data?.error || "Login failed");
-      setForm({ ...form, password: "" }); // clear after failure
+      setForm({ ...form, password: "" });
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function googleLogin() {
+    try {
+      const email = prompt("Enter your Google email for demo:") || "";
+      if (!email) return;
+      const { data } = await api.post("/google", { email });
+      alert("Google login demo successful!");
+      setToken(data.token);
+      setPage("profile");
+    } catch (e) {
+      alert(e?.response?.data?.error || "Google login failed");
+    }
+  }
+
+  async function forgotPassword() {
+    try {
+      setLoading(true);
+      const { data } = await api.post("/forgot", { email: form.email });
+      alert(
+        data.demoCode
+          ? `Demo reset code: ${data.demoCode}`
+          : "If that email exists, a reset link/code was sent."
+      );
+      setPage("reset");
+    } catch (e) {
+      alert(e?.response?.data?.error || "Request failed");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function resetPassword() {
+    try {
+      setLoading(true);
+      const body = {
+        email: form.email || "",
+        code: form.code || "",
+        newPassword: form.newPassword || "",
+        confirmPassword: form.confirmPassword || "",
+      };
+      const { data } = await api.post("/reset", body);
+      alert("Password reset successful!");
+      setToken(data.token);
+      setPage("profile");
+    } catch (e) {
+      alert(e?.response?.data?.error || "Reset failed");
+    } finally {
+      setLoading(false);
     }
   }
 
@@ -52,63 +118,25 @@ export default function App() {
 
   async function loadMe() {
     try {
-      const { data } = await api.get("/me", { headers: { Authorization: `Bearer ${token}` } });
+      const { data } = await api.get("/me", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
       setMe(data.user);
     } catch {
-      alert("Please login again");
+      alert("Session expired, please log in again.");
       setToken(null);
     }
   }
 
-  async function saveMe() {
-    try {
-      const body = { firstName: form.firstName || me?.firstName, lastName: form.lastName || me?.lastName };
-      const { data } = await api.put("/me", body, { headers: { Authorization: `Bearer ${token}` } });
-      alert("Saved");
-      await loadMe();
-    } catch {
-      alert("Save failed");
-    }
-  }
-
-  async function requestReset() {
-    const { data } = await api.post("/forgot", { email: form.email });
-    alert("If the account exists, a reset was sent.\nDEMO code (for testing): " + (data.demoCode || "check email"));
-    setPage("reset");
-  }
-
-  async function completeReset() {
-    try {
-      const body = {
-        email: form.email,
-        code: form.code,
-        newPassword: form.newPassword,
-        confirmPassword: form.confirmPassword
-      };
-      const { data } = await api.post("/reset", body);
-      alert("Password updated + logged in");
-      setToken(data.token);
-      setPage("profile");
-    } catch (e) {
-      alert(e?.response?.data?.error || "Reset failed");
-    }
-  }
-
-  async function googleLogin() {
-    // DEMO: we just send an email and pretend Google verified it.
-    const email = prompt("Enter your Google email for demo:");
-    if (!email) return;
-    const { data } = await api.post("/google", { email, firstName: "Google", lastName: "User" });
-    setToken(data.token);
-    alert("Google login OK");
-    setPage("profile");
-  }
-
   async function deleteAccount() {
-    const password = prompt("Confirm your password (leave blank if you used Google):") || "";
+    const password = prompt("Enter your password to confirm deletion:") || "";
     try {
-      await api.post("/delete", { password }, { headers: { Authorization: `Bearer ${token}` } });
-      alert("Account deleted");
+      await api.post(
+        "/delete",
+        { password },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      alert("Account deleted successfully.");
       setToken(null);
       setMe(null);
       setPage("home");
@@ -117,97 +145,180 @@ export default function App() {
     }
   }
 
-  // UI
+  // === MAIN UI ===
   return (
-    <div style={{ maxWidth: 520, margin: "40px auto", fontFamily: "system-ui, Arial" }}>
-      <h1>ATS — Auth (Group 1)</h1>
+    <div>
+      <NavBar authed={authed} onNavigate={setPage} onLogout={logout} />
 
-      <nav style={{ display: "flex", gap: 8, marginBottom: 20 }}>
-        <button onClick={() => setPage("home")}>Home</button>
-        <button onClick={() => setPage("register")}>Register</button>
-        <button onClick={() => setPage("login")}>Login</button>
-        <button onClick={() => setPage("forgot")}>Forgot</button>
-        <button onClick={() => { setPage("profile"); if (authed) loadMe(); }}>Profile</button>
-        {authed && <button onClick={logout}>Logout</button>}
-      </nav>
+      <main
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          paddingTop: "2rem",
+          minHeight: "80vh",
+        }}
+      >
+        <div className="card">
+          {loading && <Spinner />}
 
-      {page === "home" && (
-        <div>
-          <p>Welcome! Do UC-001..UC-009 here.</p>
-          <ul>
-            <li>Register → Login → Profile → Logout</li>
-            <li>Forgot/Reset password</li>
-            <li>Google login (demo)</li>
-            <li>Delete account</li>
-          </ul>
+          {page === "home" && (
+            <>
+              <h2>Welcome to ATS for Candidates</h2>
+              <p>
+                This is your all-in-one platform for managing applications,
+                resumes, and profiles. Use the navigation bar above to register,
+                log in, or view your profile.
+              </p>
+            </>
+          )}
+
+          {page === "register" && (
+            <>
+              <h2>Create an Account</h2>
+              <input
+                placeholder="First name"
+                onChange={(e) =>
+                  setForm({ ...form, firstName: e.target.value })
+                }
+              />
+              <input
+                placeholder="Last name"
+                onChange={(e) => setForm({ ...form, lastName: e.target.value })}
+              />
+              <input
+                placeholder="Email"
+                onChange={(e) => setForm({ ...form, email: e.target.value })}
+              />
+              <input
+                type="password"
+                placeholder="Password"
+                onChange={(e) => setForm({ ...form, password: e.target.value })}
+              />
+              <input
+                type="password"
+                placeholder="Confirm password"
+                onChange={(e) =>
+                  setForm({ ...form, confirmPassword: e.target.value })
+                }
+              />
+              <button onClick={register}>Register</button>
+            </>
+          )}
+
+          {page === "login" && (
+            <>
+              <h2>Login to Your Account</h2>
+              <input
+                placeholder="Email"
+                onChange={(e) => setForm({ ...form, email: e.target.value })}
+              />
+              <input
+                type="password"
+                placeholder="Password"
+                value={form.password || ""}
+                onChange={(e) => setForm({ ...form, password: e.target.value })}
+              />
+              <button onClick={login}>Login</button>
+
+              <div style={{ marginTop: "10px" }}>
+                <a
+                  href="#"
+                  onClick={() => setPage("forgot")}
+                  style={{ fontSize: "14px", color: "var(--color-primary)" }}
+                >
+                  Forgot password?
+                </a>
+              </div>
+
+              <button
+                onClick={googleLogin}
+                style={{
+                  marginTop: 15,
+                  background: "#DB4437",
+                  color: "white",
+                  width: "100%",
+                  padding: "8px 0",
+                  borderRadius: 5,
+                  border: "none",
+                  cursor: "pointer",
+                }}
+              >
+                Sign in with Google (Demo)
+              </button>
+            </>
+          )}
+
+          {page === "forgot" && (
+            <>
+              <h2>Forgot Password</h2>
+              <p>Enter your registered email to receive a reset code.</p>
+              <input
+                placeholder="Email"
+                onChange={(e) => setForm({ ...form, email: e.target.value })}
+              />
+              <button onClick={forgotPassword}>Send Reset Code</button>
+            </>
+          )}
+
+          {page === "reset" && (
+            <>
+              <h2>Reset Password</h2>
+              <input
+                placeholder="Email"
+                onChange={(e) => setForm({ ...form, email: e.target.value })}
+              />
+              <input
+                placeholder="Reset code"
+                onChange={(e) => setForm({ ...form, code: e.target.value })}
+              />
+              <input
+                type="password"
+                placeholder="New password"
+                onChange={(e) =>
+                  setForm({ ...form, newPassword: e.target.value })
+                }
+              />
+              <input
+                type="password"
+                placeholder="Confirm new password"
+                onChange={(e) =>
+                  setForm({ ...form, confirmPassword: e.target.value })
+                }
+              />
+              <button onClick={resetPassword}>Reset Password</button>
+            </>
+          )}
+
+          {page === "profile" &&
+            (authed ? (
+              <>
+                <h2>My Profile</h2>
+                <button onClick={loadMe}>Reload Profile</button>
+                <pre>{me ? JSON.stringify(me, null, 2) : "No data loaded."}</pre>
+                <hr />
+                <h3>Edit Profile</h3>
+                <input
+                  placeholder="First name"
+                  onChange={(e) =>
+                    setForm({ ...form, firstName: e.target.value })
+                  }
+                />
+                <input
+                  placeholder="Last name"
+                  onChange={(e) =>
+                    setForm({ ...form, lastName: e.target.value })
+                  }
+                />
+                <button onClick={loadMe}>Save</button>
+                <hr />
+                <h3 style={{ color: "crimson" }}>Danger Zone</h3>
+                <button onClick={deleteAccount}>Delete Account</button>
+              </>
+            ) : (
+              <p>You must log in to view your profile.</p>
+            ))}
         </div>
-      )}
-
-      {page === "register" && (
-        <div>
-          <h2>Register</h2>
-          <input placeholder="First name" onChange={e => setForm({ ...form, firstName: e.target.value })} /><br />
-          <input placeholder="Last name" onChange={e => setForm({ ...form, lastName: e.target.value })} /><br />
-          <input placeholder="Email" onChange={e => setForm({ ...form, email: e.target.value })} /><br />
-          <input type="password" placeholder="Password" onChange={e => setForm({ ...form, password: e.target.value })} /><br />
-          <input type="password" placeholder="Confirm password" onChange={e => setForm({ ...form, confirmPassword: e.target.value })} /><br />
-          <button onClick={register}>Create Account</button>
-        </div>
-      )}
-
-      {page === "login" && (
-        <div>
-          <h2>Login</h2>
-          <input placeholder="Email" onChange={e => setForm({ ...form, email: e.target.value })} /><br />
-          <input type="password" placeholder="Password" value={form.password || ""} onChange={e => setForm({ ...form, password: e.target.value })} /><br />
-          <button onClick={login}>Login</button>
-          <div style={{ height: 10 }} />
-          <button onClick={googleLogin}>Sign in with Google (demo)</button>
-          <p style={{ marginTop: 8 }}>
-            Invalid credentials show “Invalid email or password”.<br />
-            After failure, password field is cleared.
-          </p>
-        </div>
-      )}
-
-      {page === "forgot" && (
-        <div>
-          <h2>Forgot Password</h2>
-          <input placeholder="Your account email" onChange={e => setForm({ ...form, email: e.target.value })} /><br />
-          <button onClick={requestReset}>Send Reset Code</button>
-          <p>We show a demo code so you can test immediately (real app would email it).</p>
-        </div>
-      )}
-
-      {page === "reset" && (
-        <div>
-          <h2>Reset Password</h2>
-          <input placeholder="Email (same as forgot)" onChange={e => setForm({ ...form, email: e.target.value })} /><br />
-          <input placeholder="Code from email" onChange={e => setForm({ ...form, code: e.target.value })} /><br />
-          <input type="password" placeholder="New password" onChange={e => setForm({ ...form, newPassword: e.target.value })} /><br />
-          <input type="password" placeholder="Confirm new password" onChange={e => setForm({ ...form, confirmPassword: e.target.value })} /><br />
-          <button onClick={completeReset}>Change Password</button>
-        </div>
-      )}
-
-      {page === "profile" && (
-        !authed ? (
-          <p>You must log in to view your profile.</p>
-        ) : (
-          <div>
-            <h2>My Profile</h2>
-            <button onClick={loadMe}>Reload</button>
-            <pre>{me ? JSON.stringify(me, null, 2) : "No data yet. Click Reload."}</pre>
-            <h3>Edit</h3>
-            <input placeholder="First name" onChange={e => setForm({ ...form, firstName: e.target.value })} /><br />
-            <input placeholder="Last name" onChange={e => setForm({ ...form, lastName: e.target.value })} /><br />
-            <button onClick={saveMe}>Save</button>
-            <hr />
-            <h3 style={{ color: "crimson" }}>Danger Zone</h3>
-            <button onClick={deleteAccount}>Delete My Account</button>
-          </div>
-        )
-      )}
+      </main>
     </div>
   );
 }

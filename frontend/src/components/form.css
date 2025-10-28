@@ -1,0 +1,6 @@
+.field{display:flex;flex-direction:column;margin-bottom:1rem;}
+label{font-weight:600;margin-bottom:.3rem;}
+input,textarea{padding:.6rem;border:1px solid #ccc;border-radius:var(--radius-md);
+               font-family:inherit;}
+input:focus,textarea:focus{border-color:var(--color-primary);outline:none;}
+

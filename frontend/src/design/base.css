@@ -1,0 +1,172 @@
+/* ===============================
+   GLOBAL THEME COLORS & VARIABLES
+   Modern Purple Gradient Design
+================================= */
+
+:root {
+  /* Brand Colors */
+  --color-primary: #4a00e0;
+  --color-secondary: #8e2de2;
+  --color-accent: #00e5ff;
+
+  /* Backgrounds */
+  --color-bg: #f5f3ff;
+  --color-card: #ffffff;
+
+  /* Text Colors */
+  --color-text: #1e1e2f;
+  --color-text-light: #5a5a7a;
+
+  /* Font Families */
+  --font-heading: "Poppins", sans-serif;
+  --font-body: "Inter", sans-serif;
+
+  /* Shadows & Effects */
+  --shadow-soft: 0 4px 20px rgba(0, 0, 0, 0.05);
+  --shadow-hover: 0 8px 24px rgba(0, 0, 0, 0.08);
+}
+
+/* ===============================
+   BASE STYLES
+================================= */
+
+body {
+  margin: 0;
+  background: var(--color-bg);
+  font-family: var(--font-body);
+  color: var(--color-text);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transition: background 0.3s ease, color 0.3s ease;
+}
+
+h1, h2, h3 {
+  color: var(--color-primary);
+  font-family: var(--font-heading);
+  margin-bottom: 0.8rem;
+}
+
+p {
+  color: var(--color-text-light);
+  line-height: 1.6;
+  font-size: 0.95rem;
+}
+
+/* ===============================
+   BUTTONS
+================================= */
+
+button {
+  background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 0.6rem 1.2rem;
+  font-size: 1rem;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.25s ease;
+  box-shadow: var(--shadow-soft);
+}
+
+button:hover {
+  background: linear-gradient(135deg, var(--color-secondary), var(--color-accent));
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-hover);
+}
+
+/* ===============================
+   CARD / FORM CONTAINERS
+================================= */
+
+.card {
+  background: var(--color-card);
+  box-shadow: var(--shadow-soft);
+  border-radius: 12px;
+  padding: 2rem;
+  width: 400px;
+  text-align: left;
+  transition: all 0.25s ease;
+}
+
+.card:hover {
+  box-shadow: var(--shadow-hover);
+}
+
+/* ===============================
+   INPUT FIELDS
+================================= */
+
+input {
+  width: 100%;
+  padding: 0.7rem;
+  margin-bottom: 1rem;
+  border: 1.5px solid #ddd;
+  border-radius: 6px;
+  font-size: 0.95rem;
+  transition: border-color 0.25s ease, box-shadow 0.25s ease;
+}
+
+input:focus {
+  border-color: var(--color-secondary);
+  box-shadow: 0 0 6px rgba(142, 45, 226, 0.3);
+  outline: none;
+}
+
+/* ===============================
+   SPINNER
+================================= */
+
+.spinner {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 1.5rem 0;
+}
+
+.spinner img {
+  width: 50px;
+  height: 50px;
+  filter: drop-shadow(0 0 8px var(--color-accent));
+  animation: spin 1.2s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ===============================
+   LINKS
+================================= */
+
+a {
+  color: var(--color-secondary);
+  text-decoration: none;
+  transition: 0.2s ease;
+}
+
+a:hover {
+  color: var(--color-accent);
+}
+
+/* ===============================
+   RESPONSIVENESS
+================================= */
+
+@media (max-width: 768px) {
+  .card {
+    width: 90%;
+  }
+
+  button {
+    width: 100%;
+  }
+}
+
