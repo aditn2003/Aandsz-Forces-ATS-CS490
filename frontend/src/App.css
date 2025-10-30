@@ -1,42 +1,391 @@
-#root {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
-  text-align: center;
+/* ---------- GLOBAL STYLES ---------- */
+body {
+  font-family: "Inter", sans-serif;
+  background: #f8f9fa;
+  color: #333;
+  margin: 0;
+  padding: 0;
 }
 
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
+.app-container {
+  display: flex;
+  justify-content: center;
+  padding-top: 2rem;
+  min-height: 80vh;
 }
 
-@keyframes logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
-  }
-}
-
+.card-container,
+section,
+.profile-box,
 .card {
-  padding: 2em;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+  padding: 2rem;
+  color: #333;
 }
 
-.read-the-docs {
-  color: #888;
+/* ---------- HEADERS ---------- */
+h2 {
+  text-align: center;
+  color: #222;
+  font-weight: 600;
+  margin-bottom: 1rem;
+}
+
+h3 {
+  color: #333;
+  font-size: 1.1rem;
+  margin: 1.8rem 0 0.5rem;
+  font-weight: 600;
+}
+
+/* ---------- FORM ELEMENTS ---------- */
+label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 0.8rem;
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: #444;
+}
+
+input,
+textarea,
+select {
+  width: 100%;
+  padding: 0.7rem;
+  margin-top: 0.3rem;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 1rem;
+  transition: border-color 0.2s ease-in-out;
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+  outline: none;
+  border-color: #7f00ff;
+}
+
+textarea {
+  resize: vertical;
+  min-height: 90px;
+}
+
+/* ---------- GLOBAL BUTTONS ---------- */
+button:not(.navbar-btn),
+.btn,
+.add-btn,
+.form-btn,
+.cancel-btn {
+  background: #6f42c1; /* solid purple base */
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 0.6rem 1.3rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(127, 0, 255, 0.25);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+button:not(.navbar-btn):hover,
+.btn:hover,
+.add-btn:hover,
+.form-btn:hover {
+  background: linear-gradient(135deg, #7f00ff, #3b82f6);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 14px rgba(127, 0, 255, 0.4);
+}
+
+button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Cancel Button */
+.cancel-btn {
+  background: #ccc !important;
+  color: #333 !important;
+}
+
+.cancel-btn:hover {
+  background: #bdbdbd !important;
+}
+
+/* ---------- BUTTON SPACING ---------- */
+.form-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-top: 1.2rem;
+}
+
+.form-actions.left {
+  justify-content: flex-start;
+}
+
+/* ---------- PROFILE BOX ---------- */
+.profile-box {
+  background: #f7f2ff;
+  margin-bottom: 2rem;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.profile-box:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+}
+
+.profile-box h3 {
+  color: #5a2cd1;
+  margin-bottom: 1rem;
+  border-bottom: 1px solid rgba(90, 44, 209, 0.2);
+  padding-bottom: 0.4rem;
+}
+
+/* ---------- PROFILE PICTURE ---------- */
+.profile-picture {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  margin: 1.5rem 0 2rem;
+}
+
+.profile-picture img {
+  width: 140px;
+  height: 140px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid #6f42c1;
+  box-shadow: 0 4px 12px rgba(111, 66, 193, 0.3);
+}
+
+/* ---------- TIMELINE ---------- */
+.timeline {
+  margin: 2rem 0;
+  padding-left: 2rem;
+  border-left: 3px solid #a855f7;
+}
+
+.timeline-item {
+  background: #fff;
+  border: 1px solid #eee;
+  border-radius: 10px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  position: relative;
+}
+
+.timeline-item::before {
+  content: "●";
+  position: absolute;
+  left: -1.2rem;
+  top: 0;
+  color: #a855f7;
+  font-size: 1.2rem;
+}
+
+.timeline-item strong {
+  color: #4a00e0;
+  font-weight: 600;
+}
+
+.timeline-item small {
+  display: block;
+  color: #666;
+  margin: 0.3rem 0;
+}
+
+.timeline-item p {
+  color: #555;
+  margin-top: 0.5rem;
+  line-height: 1.4;
+}
+
+.timeline-item .actions {
+  display: flex;
+  gap: 0.8rem;
+  justify-content: center;
+  margin-top: 1rem;
+}
+
+/* ---------- PORTFOLIO ---------- */
+.portfolio {
+  padding: 2rem;
+}
+
+.controls {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.controls input,
+.controls select {
+  padding: 0.5rem;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 1.5rem;
+}
+
+.card img {
+  width: 100%;
+  height: 150px;
+  border-radius: 8px;
+  object-fit: cover;
+}
+
+/* ---------- DARK MODE TOGGLE ---------- */
+.theme-toggle {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  margin: 1.5rem auto 2rem;
+  font-weight: 500;
+  color: #333;
+  font-size: 1rem;
+}
+
+/* Toggle Switch */
+.theme-toggle input[type="checkbox"] {
+  appearance: none;
+  width: 46px;
+  height: 24px;
+  background: #ccc;
+  border-radius: 20px;
+  position: relative;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.theme-toggle input[type="checkbox"]::before {
+  content: "";
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  top: 2px;
+  left: 2px;
+  background: white;
+  border-radius: 50%;
+  transition: transform 0.3s ease;
+}
+
+.theme-toggle input[type="checkbox"]:checked {
+  background: #6f42c1;
+}
+
+.theme-toggle input[type="checkbox"]:checked::before {
+  transform: translateX(22px);
+}
+
+/* ---------- DARK MODE ---------- */
+body.dark,
+.app-wrapper.dark {
+  background-color: #121212;
+  color: #e6e6e6;
+}
+
+.app-wrapper.dark .card-container,
+.app-wrapper.dark .profile-box,
+.app-wrapper.dark section,
+.app-wrapper.dark .card {
+  background-color: #1e1e1e;
+  border: 1px solid #2a2a2a;
+}
+
+.app-wrapper.dark input,
+.app-wrapper.dark textarea,
+.app-wrapper.dark select {
+  background-color: #2a2a2a;
+  color: #e6e6e6;
+  border: 1px solid #444;
+}
+
+.app-wrapper.dark button:not(.navbar-btn) {
+  background: #6f42c1;
+}
+
+.app-wrapper.dark button:not(.navbar-btn):hover {
+  background: linear-gradient(135deg, #8e2de2, #4a00e0);
+}
+
+/* ---------- CHECKBOX ALIGNMENT ---------- */
+.checkbox-group {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin: 0.8rem 0;
+}
+
+.checkbox-group label {
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: #333;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0;
+}
+
+input[type="checkbox"] {
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  border: 2px solid #6f42c1;
+  border-radius: 5px;
+  position: relative;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+input[type="checkbox"]:checked {
+  background-color: #6f42c1;
+  border-color: #6f42c1;
+}
+
+input[type="checkbox"]:checked::after {
+  content: "✔";
+  color: #fff;
+  font-size: 12px;
+  position: absolute;
+  top: 0;
+  left: 3px;
+}
+
+/* ---------- HOME SECTION (Centered Square) ---------- */
+.home-section {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+
+  min-height: 70vh;
+  width: 70%;
+  margin: 2rem auto;
+
+  background: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  padding: 3rem;
+
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.home-section:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 6px 20px rgba(127, 0, 255, 0.15);
 }
