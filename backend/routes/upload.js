@@ -41,4 +41,3 @@ router.post("/upload-profile-pic", upload.single("image"), (req, res) => {
 });
 
 export default router;
-

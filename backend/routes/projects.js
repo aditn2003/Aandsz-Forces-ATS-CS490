@@ -73,7 +73,7 @@ router.post("/projects", auth, async (req, res) => {
       role,
       start_date,
       end_date || null,
-      technologies ? technologies.split(",").map(t => t.trim()) : [],
+      technologies ? technologies.split(",").map((t) => t.trim()) : [],
       repository_link || null,
       team_size || null,
       collaboration_details || "",
@@ -139,7 +139,9 @@ router.put("/projects/:id", auth, async (req, res) => {
   if (!name || !description || !role || !start_date) {
     return res
       .status(400)
-      .json({ error: "Project name, description, role, and start date are required." });
+      .json({
+        error: "Project name, description, role, and start date are required.",
+      });
   }
 
   try {
@@ -158,7 +160,7 @@ router.put("/projects/:id", auth, async (req, res) => {
         role,
         start_date,
         end_date || null,
-        technologies ? technologies.split(",").map(t => t.trim()) : [],
+        technologies ? technologies.split(",").map((t) => t.trim()) : [],
         repository_link || null,
         team_size || null,
         collaboration_details || "",

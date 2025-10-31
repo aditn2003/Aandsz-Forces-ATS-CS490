@@ -8,6 +8,8 @@ import cors from "cors";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import pkg from "pg";
+import { Resend } from "resend";
+
 import profileRoutes from "./routes/profile.js";
 import uploadRoutes from "./routes/upload.js";
 import employmentRoutes from "./routes/employment.js";
@@ -17,6 +19,9 @@ import certifications from "./routes/certification.js";
 import projectRoutes from "./routes/projects.js";
 import path from "path";
 import { fileURLToPath } from "url";
+import { OAuth2Client } from "google-auth-library";
+
+const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 // ===== Initialize =====
 dotenv.config();
@@ -46,9 +51,29 @@ pool
 // ===== Helpers =====
 const JWT_SECRET = process.env.JWT_SECRET || "dev_secret_change_me";
 const PASSWORD_RULE = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
+const resend = new Resend(process.env.RESEND_API_KEY);
 
+async function sendResetEmail(to, code) {
+  try {
+    await resend.emails.send({
+      from: "an238@njit.edu",
+      to,
+      subject: "Your Password Reset Code",
+      html: `
+        <p>Hello,</p>
+        <p>Your password reset code is <b>${code}</b>.</p>
+        <p>This code will expire in 1 hour.</p>
+        <p>If you did not request this, you can ignore this email.</p>
+      `,
+    });
+  } catch (err) {
+    console.error("Error sending reset email:", err.message);
+  }
+}
 function makeToken(user) {
-  return jwt.sign({ id: user.id, email: user.email }, JWT_SECRET, { expiresIn: "2h" });
+  return jwt.sign({ id: user.id, email: user.email }, JWT_SECRET, {
+    expiresIn: "2h",
+  });
 }
 
 function auth(req, res, next) {
@@ -69,24 +94,37 @@ const resetCodes = new Map(); // for demo; moves to DB later
 
 // ========== UC-001: Register ==========
 app.post("/register", async (req, res) => {
-  const { email = "", password = "", confirmPassword = "", firstName = "", lastName = "" } = req.body;
+  const {
+    email = "",
+    password = "",
+    confirmPassword = "",
+    firstName = "",
+    lastName = "",
+  } = req.body;
   try {
     if (!email.includes("@") || !email.split("@")[1]?.includes(".")) {
       return res.status(400).json({ error: "Invalid email format" });
     }
     if (!PASSWORD_RULE.test(password)) {
-      return res.status(400).json({ error: "Password must be 8+ chars incl. uppercase, lowercase, number" });
+      return res.status(400).json({
+        error: "Password must be 8+ chars incl. uppercase, lowercase, number",
+      });
     }
     if (password !== confirmPassword) {
       return res.status(400).json({ error: "Passwords do not match" });
     }
     if (!firstName.trim() || !lastName.trim()) {
-      return res.status(400).json({ error: "First and last name are required" });
+      return res
+        .status(400)
+        .json({ error: "First and last name are required" });
     }
 
     const lower = email.toLowerCase();
-    const existing = await pool.query("SELECT id FROM users WHERE email=$1", [lower]);
-    if (existing.rows.length > 0) return res.status(409).json({ error: "Email already in use" });
+    const existing = await pool.query("SELECT id FROM users WHERE email=$1", [
+      lower,
+    ]);
+    if (existing.rows.length > 0)
+      return res.status(409).json({ error: "Email already in use" });
 
     const passwordHash = await bcrypt.hash(password, 10);
     const result = await pool.query(
@@ -106,13 +144,16 @@ app.post("/login", async (req, res) => {
   const { email = "", password = "" } = req.body;
   try {
     const lower = email.toLowerCase();
-    const result = await pool.query("SELECT * FROM users WHERE email=$1", [lower]);
+    const result = await pool.query("SELECT * FROM users WHERE email=$1", [
+      lower,
+    ]);
     if (result.rows.length === 0)
       return res.status(401).json({ error: "Invalid email or password" });
 
     const user = result.rows[0];
     const ok = await bcrypt.compare(password, user.password_hash || "");
-    if (!ok) return res.status(401).json({ error: "Invalid email or password" });
+    if (!ok)
+      return res.status(401).json({ error: "Invalid email or password" });
 
     const token = makeToken({ id: user.id, email: user.email });
     return res.json({ message: "Logged in", token });
@@ -127,51 +168,156 @@ app.post("/logout", (_req, res) => {
   return res.json({ message: "Logged out" });
 });
 
-// ========== UC-006: Password Reset Request ==========
+// // ========== UC-006: Password Reset Request ==========
+// app.post("/forgot", async (req, res) => {
+//   try {
+//     const { email = "" } = req.body;
+//     const lower = email.toLowerCase();
+//     const result = await pool.query("SELECT id FROM users WHERE email=$1", [
+//       lower,
+//     ]);
+
+//     if (result.rows.length > 0) {
+//       const code = Math.floor(100000 + Math.random() * 900000).toString();
+//       const expires = Date.now() + 60 * 60 * 1000;
+//       resetCodes.set(lower, { code, expires });
+//       return res.json({
+//         message: "If that email exists, a reset code was sent.",
+//         demoCode: code,
+//       });
+//     }
+//     return res.json({
+//       message: "If that email exists, a reset code was sent.",
+//     });
+//   } catch (err) {
+//     console.error(err);
+//     return res.status(500).json({ error: "Server error" });
+//   }
+// });
+
+// // ========== UC-007: Password Reset Completion ==========
+// app.post("/reset", async (req, res) => {
+//   const {
+//     email = "",
+//     code = "",
+//     newPassword = "",
+//     confirmPassword = "",
+//   } = req.body;
+//   const lower = email.toLowerCase();
+
+//   try {
+//     const entry = resetCodes.get(lower);
+//     if (
+//       !entry ||
+//       !entry.code ||
+//       Date.now() > entry.expires ||
+//       entry.code !== String(code).trim()
+//     ) {
+//       return res.status(400).json({ error: "Invalid or expired code" });
+//     }
+
+//     if (newPassword !== confirmPassword)
+//       return res.status(400).json({ error: "Passwords do not match" });
+//     if (!PASSWORD_RULE.test(newPassword))
+//       return res.status(400).json({ error: "Weak password" });
+
+//     const hash = await bcrypt.hash(newPassword, 10);
+//     const upd = await pool.query(
+//       "UPDATE users SET password_hash=$1 WHERE email=$2 RETURNING id",
+//       [hash, lower]
+//     );
+//     if (upd.rows.length === 0)
+//       return res.status(404).json({ error: "User not found" });
+
+//     resetCodes.delete(lower);
+//     const token = makeToken({ id: upd.rows[0].id, email: lower });
+//     res.json({ message: "Password updated", token });
+//   } catch (err) {
+//     console.error(err);
+//     res.status(500).json({ error: "Server error" });
+//   }
+// });
+
+// ========== UC-006: Request Password Reset ==========
+// ========== UC-006: Request Password Reset ==========
 app.post("/forgot", async (req, res) => {
   try {
     const { email = "" } = req.body;
-    const lower = email.toLowerCase();
-    const result = await pool.query("SELECT id FROM users WHERE email=$1", [lower]);
+    const lower = email.toLowerCase().trim();
 
+    const result = await pool.query("SELECT id FROM users WHERE email=$1", [
+      lower,
+    ]);
     if (result.rows.length > 0) {
       const code = Math.floor(100000 + Math.random() * 900000).toString();
-      const expires = Date.now() + 60 * 60 * 1000;
+      const expires = Date.now() + 60 * 60 * 1000; // 1 hour expiry
       resetCodes.set(lower, { code, expires });
-      return res.json({ message: "If that email exists, a reset code was sent.", demoCode: code });
+
+      // ✅ Send reset email using Resend
+      try {
+        await resend.emails.send({
+          from: process.env.FROM_EMAIL,
+          to: lower,
+          subject: "Your Password Reset Code",
+          html: `
+            <p>Hello,</p>
+            <p>Your password reset code is <b>${code}</b>.</p>
+            <p>This code will expire in 1 hour.</p>
+            <p>If you didn’t request this, you can safely ignore this email.</p>
+          `,
+        });
+        console.log(`📧 Reset email sent to ${lower}`);
+      } catch (mailErr) {
+        console.error("Email sending failed:", mailErr);
+      }
     }
-    return res.json({ message: "If that email exists, a reset code was sent." });
+
+    // Always return generic response for security
+    return res.json({
+      message: "If that email exists, a reset code was sent.",
+    });
   } catch (err) {
-    console.error(err);
+    console.error("Error in /forgot:", err);
     return res.status(500).json({ error: "Server error" });
   }
 });
 
-// ========== UC-007: Password Reset Completion ==========
+// ========== UC-007: Complete Password Reset ==========
 app.post("/reset", async (req, res) => {
-  const { email = "", code = "", newPassword = "", confirmPassword = "" } = req.body;
-  const lower = email.toLowerCase();
-
   try {
+    const {
+      email = "",
+      code = "",
+      newPassword = "",
+      confirmPassword = "",
+    } = req.body;
+    const lower = email.toLowerCase().trim();
+
     const entry = resetCodes.get(lower);
-    if (!entry || !entry.code || Date.now() > entry.expires || entry.code !== String(code).trim()) {
+    if (!entry || entry.code !== code.trim() || Date.now() > entry.expires)
       return res.status(400).json({ error: "Invalid or expired code" });
-    }
 
     if (newPassword !== confirmPassword)
       return res.status(400).json({ error: "Passwords do not match" });
+
     if (!PASSWORD_RULE.test(newPassword))
       return res.status(400).json({ error: "Weak password" });
 
     const hash = await bcrypt.hash(newPassword, 10);
-    const upd = await pool.query("UPDATE users SET password_hash=$1 WHERE email=$2 RETURNING id", [hash, lower]);
-    if (upd.rows.length === 0) return res.status(404).json({ error: "User not found" });
+    const upd = await pool.query(
+      "UPDATE users SET password_hash=$1 WHERE email=$2 RETURNING id",
+      [hash, lower]
+    );
+
+    if (upd.rows.length === 0)
+      return res.status(404).json({ error: "User not found" });
 
     resetCodes.delete(lower);
+
     const token = makeToken({ id: upd.rows[0].id, email: lower });
-    res.json({ message: "Password updated", token });
+    res.json({ message: "Password updated successfully", token });
   } catch (err) {
-    console.error(err);
+    console.error("Error in /reset:", err);
     res.status(500).json({ error: "Server error" });
   }
 });
@@ -183,7 +329,8 @@ app.get("/me", auth, async (req, res) => {
       "SELECT id, email, first_name AS firstName, last_name AS lastName FROM users WHERE id=$1",
       [req.userId]
     );
-    if (result.rows.length === 0) return res.status(404).json({ error: "Not found" });
+    if (result.rows.length === 0)
+      return res.status(404).json({ error: "Not found" });
     res.json({ user: result.rows[0] });
   } catch (err) {
     console.error(err);
@@ -209,8 +356,11 @@ app.put("/me", auth, async (req, res) => {
 app.post("/delete", auth, async (req, res) => {
   try {
     const { password = "" } = req.body;
-    const userRes = await pool.query("SELECT * FROM users WHERE id=$1", [req.userId]);
-    if (userRes.rows.length === 0) return res.status(404).json({ error: "Not found" });
+    const userRes = await pool.query("SELECT * FROM users WHERE id=$1", [
+      req.userId,
+    ]);
+    if (userRes.rows.length === 0)
+      return res.status(404).json({ error: "Not found" });
 
     const user = userRes.rows[0];
     const ok = await bcrypt.compare(password, user.password_hash || "");
@@ -225,26 +375,77 @@ app.post("/delete", auth, async (req, res) => {
 });
 
 // ========== UC-003 & UC-004: OAuth (demo stubs) ==========
-app.post("/google", async (req, res) => {
-  const { email = "", firstName = "Google", lastName = "User" } = req.body;
-  if (!email.includes("@")) return res.status(400).json({ error: "Bad google token/email" });
+// app.post("/google", async (req, res) => {
+//   const { email = "", firstName = "Google", lastName = "User" } = req.body;
+//   if (!email.includes("@"))
+//     return res.status(400).json({ error: "Bad google token/email" });
 
-  const lower = email.toLowerCase();
+//   const lower = email.toLowerCase();
+//   try {
+//     let result = await pool.query("SELECT id FROM users WHERE email=$1", [
+//       lower,
+//     ]);
+//     if (result.rows.length === 0) {
+//       result = await pool.query(
+//         "INSERT INTO users (email, first_name, last_name, provider) VALUES ($1,$2,$3,'google') RETURNING id",
+//         [lower, firstName, lastName]
+//       );
+//     }
+//     const token = makeToken({ id: result.rows[0].id, email: lower });
+//     res.json({ message: "Google login ok", token });
+//   } catch (err) {
+//     console.error(err);
+//     res.status(500).json({ error: "Server error" });
+//   }
+// });
+
+app.post("/google", async (req, res) => {
   try {
-    let result = await pool.query("SELECT id FROM users WHERE email=$1", [lower]);
+    const { credential } = req.body; // token sent by frontend Google Login
+    if (!credential)
+      return res.status(400).json({ error: "Missing Google credential" });
+
+    // ✅ Verify the ID token with Google
+    const ticket = await client.verifyIdToken({
+      idToken: credential,
+      audience: process.env.GOOGLE_CLIENT_ID,
+    });
+
+    const payload = ticket.getPayload();
+    const email = payload.email.toLowerCase();
+    const firstName = payload.given_name || "Google";
+    const lastName = payload.family_name || "User";
+
+    // ✅ Find or create user in PostgreSQL
+    let result = await pool.query("SELECT id FROM users WHERE email=$1", [
+      email,
+    ]);
     if (result.rows.length === 0) {
       result = await pool.query(
         "INSERT INTO users (email, first_name, last_name, provider) VALUES ($1,$2,$3,'google') RETURNING id",
-        [lower, firstName, lastName]
+        [email, firstName, lastName]
       );
     }
-    const token = makeToken({ id: result.rows[0].id, email: lower });
-    res.json({ message: "Google login ok", token });
+
+    // ✅ Create JWT for your app
+    const token = makeToken({ id: result.rows[0].id, email });
+
+    res.json({
+      message: "Google login successful",
+      token,
+      user: { email, firstName, lastName },
+    });
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Server error" });
+    console.error("Google login error:", err);
+    res.status(500).json({ error: "Server error during Google login" });
   }
 });
+if (process.env.NODE_ENV === "test") {
+  app.use((req, res, next) => {
+    req.user = { id: 1 }; // mock user globally
+    next();
+  });
+}
 
 // ===== Routes =====
 app.use("/api", profileRoutes);
@@ -265,4 +466,8 @@ app.use((err, req, res, next) => {
 app.get("/", (_req, res) => res.json({ ok: true }));
 
 // ===== Start Server =====
-app.listen(4000, () => console.log("✅ API running at http://localhost:4000"));
+if (process.env.NODE_ENV !== "test") {
+  app.listen(4000, () => console.log(`Server running on port 4000`));
+}
+
+export default app;

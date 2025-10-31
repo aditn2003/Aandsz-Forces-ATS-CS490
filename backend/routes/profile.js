@@ -31,20 +31,52 @@ function auth(req, res, next) {
 
 // ---------- SAVE OR UPDATE PROFILE ----------
 router.post("/profile", auth, async (req, res) => {
-  const { full_name, email, phone, location, title, bio, industry, experience } = req.body;
+  const {
+    full_name,
+    email,
+    phone,
+    location,
+    title,
+    bio,
+    industry,
+    experience,
+  } = req.body;
   try {
-    const existing = await pool.query("SELECT id FROM profiles WHERE user_id=$1", [req.userId]);
+    const existing = await pool.query(
+      "SELECT id FROM profiles WHERE user_id=$1",
+      [req.userId]
+    );
     if (existing.rows.length > 0) {
       await pool.query(
         `UPDATE profiles SET full_name=$1, email=$2, phone=$3, location=$4,
          title=$5, bio=$6, industry=$7, experience=$8 WHERE user_id=$9`,
-        [full_name, email, phone, location, title, bio, industry, experience, req.userId]
+        [
+          full_name,
+          email,
+          phone,
+          location,
+          title,
+          bio,
+          industry,
+          experience,
+          req.userId,
+        ]
       );
     } else {
       await pool.query(
         `INSERT INTO profiles (user_id, full_name, email, phone, location, title, bio, industry, experience)
          VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)`,
-        [req.userId, full_name, email, phone, location, title, bio, industry, experience]
+        [
+          req.userId,
+          full_name,
+          email,
+          phone,
+          location,
+          title,
+          bio,
+          industry,
+          experience,
+        ]
       );
     }
     res.json({ message: "Profile saved successfully" });
@@ -79,17 +111,25 @@ router.post("/profile/picture", auth, async (req, res) => {
     const fullUrl = `http://localhost:4000${url}`;
 
     // Check if the profile already exists
-    const check = await pool.query("SELECT id FROM profiles WHERE user_id=$1", [req.userId]);
+    const check = await pool.query("SELECT id FROM profiles WHERE user_id=$1", [
+      req.userId,
+    ]);
     if (check.rows.length === 0) {
-      await pool.query("INSERT INTO profiles (user_id, picture_url) VALUES ($1, $2)", [
-        req.userId,
-        fullUrl,
-      ]);
+      await pool.query(
+        "INSERT INTO profiles (user_id, picture_url) VALUES ($1, $2)",
+        [req.userId, fullUrl]
+      );
     } else {
-      await pool.query("UPDATE profiles SET picture_url=$1 WHERE user_id=$2", [fullUrl, req.userId]);
+      await pool.query("UPDATE profiles SET picture_url=$1 WHERE user_id=$2", [
+        fullUrl,
+        req.userId,
+      ]);
     }
 
-    res.json({ message: "✅ Profile picture saved successfully", picture_url: fullUrl });
+    res.json({
+      message: "✅ Profile picture saved successfully",
+      picture_url: fullUrl,
+    });
   } catch (err) {
     console.error("❌ Error updating profile picture:", err);
     res.status(500).json({ error: "Database error while saving picture" });
@@ -97,4 +137,3 @@ router.post("/profile/picture", auth, async (req, res) => {
 });
 
 export default router;
-

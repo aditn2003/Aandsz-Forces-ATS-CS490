@@ -120,7 +120,8 @@ router.put("/education/:id", auth, async (req, res) => {
       ]
     );
 
-    if (!rows.length) return res.status(404).json({ error: "Education not found" });
+    if (!rows.length)
+      return res.status(404).json({ error: "Education not found" });
     res.json({ message: "Education updated successfully", education: rows[0] });
   } catch (err) {
     console.error("Update education error:", err);
