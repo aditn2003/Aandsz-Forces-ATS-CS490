@@ -1,0 +1,13 @@
+# Node dependencies
+node_modules/
+frontend/node_modules/
+
+# Vite build artifacts
+.vite/
+frontend/.vite/
+frontend/.vite-temp/
+
+# macOS
+.DS_Store
+frontend/.DS_Store
+frontend/public/.DS_Store
