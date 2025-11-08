@@ -3,13 +3,15 @@ import "./JobPipeline.css";
 import JobDetailsModal from "./JobsDetailsModal";
 import JobSearchFilter from "./JobSearchFilter";
 import UpcomingDeadlinesWidget from "./UpcomingDeadlinesWidget";
+import CompanyDetailsModal from "./CompanyDetailsModal";
 
-// 🟡 highlight helper: wraps matching text with <mark> tag
+// 🟡 highlight helper
 function highlight(text, term) {
   if (!term || !text) return text;
   const regex = new RegExp(`(${term})`, "gi");
   return text.replace(regex, "<mark>$1</mark>");
 }
+
 const STAGES = [
   { name: "Interested", color: "#a78bfa" },
   { name: "Applied", color: "#60a5fa" },
@@ -31,6 +33,68 @@ export default function JobPipeline({ token }) {
   );
   const [loading, setLoading] = useState(false);
   const [bulkDays, setBulkDays] = useState("");
+  const [selectedCompany, setSelectedCompany] = useState(null);
+  const [hoveredLogo, setHoveredLogo] = useState(null);
+  const [companyLogos, setCompanyLogos] = useState({}); // 🟣 dynamic logos
+
+  // 🔄 Function to fetch company logos
+  async function loadCompanyLogos() {
+    const logos = {};
+    for (const job of jobs) {
+      if (!job.company) continue;
+      try {
+        const res = await fetch(
+          `http://localhost:4000/api/companies/${job.company}`,
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        if (res.ok) {
+          const data = await res.json();
+          if (data.logo_url) {
+            logos[job.company] = `http://localhost:4000${data.logo_url}`;
+          }
+        }
+      } catch (err) {
+        console.warn("⚠️ Could not fetch logo for", job.company);
+      }
+    }
+    setCompanyLogos(logos);
+  }
+
+  // 🔄 load jobs
+  async function loadJobs(currentFilters = filters) {
+    try {
+      setLoading(true);
+      const clean = Object.fromEntries(
+        Object.entries(currentFilters).filter(
+          ([, v]) => v !== "" && v !== null && v !== undefined
+        )
+      );
+      const query = new URLSearchParams(clean).toString();
+      const res = await fetch(`http://localhost:4000/api/jobs?${query}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const data = await res.json();
+      setJobs(data.jobs || []);
+    } catch (err) {
+      console.error("❌ Failed to load jobs", err);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    loadJobs();
+  }, [token]);
+
+  useEffect(() => {
+    localStorage.setItem("jobSearch", JSON.stringify(filters));
+    loadJobs(filters);
+  }, [filters]);
+
+  // 🔁 Fetch logos whenever jobs change
+  useEffect(() => {
+    if (jobs.length > 0) loadCompanyLogos();
+  }, [jobs, token]);
 
   async function handleBulkDeadlineExtend() {
     if (!bulkDays || selectedJobs.length === 0)
@@ -47,7 +111,7 @@ export default function JobPipeline({ token }) {
       const data = await res.json();
       if (res.ok) {
         alert(`✅ Extended deadlines for ${data.updated.length} jobs`);
-        loadJobs(); // reload updated jobs
+        loadJobs();
         setSelectedJobs([]);
         setBulkDays("");
       } else {
@@ -58,42 +122,6 @@ export default function JobPipeline({ token }) {
     }
   }
 
-  // 🔄 Fetch jobs from backend based on filters/search
-  async function loadJobs(currentFilters = filters) {
-    try {
-      setLoading(true);
-      // remove empty keys
-      const clean = Object.fromEntries(
-        Object.entries(currentFilters).filter(
-          ([, v]) => v !== "" && v !== null && v !== undefined
-        )
-      );
-      const query = new URLSearchParams(clean).toString();
-
-      const res = await fetch(`http://localhost:4000/api/jobs?${query}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      const data = await res.json();
-      setJobs(data.jobs || data || []);
-    } catch (err) {
-      console.error("❌ Failed to load jobs", err);
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  // initial load
-  useEffect(() => {
-    loadJobs();
-  }, [token]);
-
-  // reload when filters change
-  useEffect(() => {
-    localStorage.setItem("jobSearch", JSON.stringify(filters));
-    loadJobs(filters);
-  }, [filters]);
-
-  // 🟪 Update stage for a single job
   async function updateJobStage(jobId, newStage) {
     try {
       await fetch(`http://localhost:4000/api/jobs/${jobId}/status`, {
@@ -115,27 +143,21 @@ export default function JobPipeline({ token }) {
       console.error("❌ Failed to update stage:", err);
     }
   }
-  // 🗓️ Days in current stage (for display)
 
-  // 🗓️ Deadline tracking helpers
   function daysUntilDeadline(deadline) {
     if (!deadline) return null;
-    const diffDays = Math.ceil(
-      (new Date(deadline) - Date.now()) / (1000 * 60 * 60 * 24)
-    );
-    return diffDays;
+    return Math.ceil((new Date(deadline) - Date.now()) / (1000 * 60 * 60 * 24));
   }
 
   function deadlineColor(deadline) {
     const days = daysUntilDeadline(deadline);
     if (days === null) return "gray";
-    if (days < 0) return "#ef4444"; // red = overdue
-    if (days <= 2) return "#f87171"; // urgent
-    if (days <= 7) return "#fbbf24"; // warning
-    return "#4ade80"; // safe (green)
+    if (days < 0) return "#ef4444";
+    if (days <= 2) return "#f87171";
+    if (days <= 7) return "#fbbf24";
+    return "#4ade80";
   }
 
-  // 🟨 Bulk update selected jobsa
   async function handleBulkUpdate() {
     if (!bulkStage || selectedJobs.length === 0) return;
     for (const id of selectedJobs) await updateJobStage(id, bulkStage);
@@ -143,11 +165,9 @@ export default function JobPipeline({ token }) {
     setBulkStage("");
   }
 
-  // 🔍 Filter pipeline stages
   const filteredStages =
     filter === "All" ? STAGES : STAGES.filter((s) => s.name === filter);
 
-  // 🗓 Format "days in stage"
   const formatDaysInStage = (date) => {
     if (!date) return "-";
     const days = Math.round(
@@ -158,7 +178,6 @@ export default function JobPipeline({ token }) {
 
   return (
     <div className="pipeline-wrapper">
-      {/* === Job Search & Filter Bar === */}
       <JobSearchFilter onFilterChange={setFilters} savedPreferences={filters} />
 
       {/* === Toolbar === */}
@@ -188,6 +207,7 @@ export default function JobPipeline({ token }) {
           </select>
           <button onClick={handleBulkUpdate}>Move Selected</button>
         </div>
+
         <div className="toolbar-right">
           <label>Extend Deadline:</label>
           <select
@@ -204,7 +224,6 @@ export default function JobPipeline({ token }) {
         </div>
       </div>
 
-      {/* === Loading Indicator === */}
       {loading && <p className="loading-text">Loading jobs...</p>}
 
       {/* === Pipeline Columns === */}
@@ -258,43 +277,70 @@ export default function JobPipeline({ token }) {
                         );
                       }}
                     />
-                    <div className="job-info">
-                      <strong
-                        dangerouslySetInnerHTML={{
-                          __html: highlight(job.title, filters.search),
-                        }}
-                      />
-                      <p
-                        dangerouslySetInnerHTML={{
-                          __html: highlight(job.company, filters.search),
-                        }}
-                      />
 
-                      {/* 🗓️ Deadline indicator (added) */}
-                      {job.deadline && (
-                        <small
-                          style={{
-                            color: deadlineColor(job.deadline),
-                            fontWeight: 500,
-                            display: "block",
+                    {/* 🧩 Job Info + Logo aligned right */}
+                    <div className="job-info-with-logo">
+                      <div className="job-info">
+                        <strong
+                          dangerouslySetInnerHTML={{
+                            __html: highlight(job.title, filters.search),
                           }}
-                        >
-                          {daysUntilDeadline(job.deadline) < 0
-                            ? `Overdue (${Math.abs(
-                                daysUntilDeadline(job.deadline)
-                              )} days ago)`
-                            : `${daysUntilDeadline(
-                                job.deadline
-                              )} days remaining`}
-                        </small>
-                      )}
-
-                      {/* existing stage info stays untouched */}
-                      <small>
-                        {formatDaysInStage(
-                          job.status_updated_at || job.created_at
+                        />
+                        <p
+                          dangerouslySetInnerHTML={{
+                            __html: highlight(job.company, filters.search),
+                          }}
+                        />
+                        {job.deadline && (
+                          <small
+                            style={{
+                              color: deadlineColor(job.deadline),
+                              fontWeight: 500,
+                              display: "block",
+                            }}
+                          >
+                            {daysUntilDeadline(job.deadline) < 0
+                              ? `Overdue (${Math.abs(
+                                  daysUntilDeadline(job.deadline)
+                                )} days ago)`
+                              : `${daysUntilDeadline(
+                                  job.deadline
+                                )} days remaining`}
+                          </small>
                         )}
-                      </small>
+                        <small>
+                          {formatDaysInStage(
+                            job.status_updated_at || job.created_at
+                          )}
+                        </small>
+                      </div>
+
+                      {/* 🏢 Logo on right */}
+                      <div
+                        className="logo-wrapper"
+                        onMouseEnter={() => setHoveredLogo(job.id)}
+                        onMouseLeave={() => setHoveredLogo(null)}
+                      >
+                        <img
+                          src={
+                            companyLogos[job.company] ||
+                            job.company_logo_url ||
+                            "/company-placeholder.png"
+                          }
+                          alt={`${job.company} Logo`}
+                          className="company-logo-right"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setSelectedCompany(job.company);
+                          }}
+                          onError={(e) =>
+                            (e.currentTarget.src = "/company-placeholder.png")
+                          }
+                        />
+                        {hoveredLogo === job.id && (
+                          <div className="react-tooltip">View Company Info</div>
+                        )}
+                      </div>
                     </div>
                   </div>
                 ))}
@@ -307,12 +353,24 @@ export default function JobPipeline({ token }) {
         })}
       </div>
 
-      {/* === Job Details Modal === */}
+      {/* Modals */}
       {selectedJobId && (
         <JobDetailsModal
           jobId={selectedJobId}
           token={token}
           onClose={() => setSelectedJobId(null)}
+        />
+      )}
+
+      {selectedCompany && (
+        <CompanyDetailsModal
+          token={token}
+          companyName={selectedCompany}
+          onClose={() => {
+            setSelectedCompany(null);
+            setTimeout(() => loadCompanyLogos(), 300); // wait briefly for backend update
+          }}
+          onLogoUpdated={loadCompanyLogos} // 🔁 live refresh when logo uploaded
         />
       )}
     </div>

@@ -1,146 +1,272 @@
 .pipeline-wrapper {
-    padding: 2rem 1.5rem;
-    background: #faf5ff;
-    min-height: 100vh;
-  }
-  
-  .pipeline-toolbar {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    background: #ffffff;
-    border-radius: 12px;
-    padding: 0.8rem 1rem;
-    margin-bottom: 1.5rem;
-    box-shadow: 0 1px 6px rgba(0, 0, 0, 0.06);
-  }
-  
-  .toolbar-left select,
-  .toolbar-right select {
-    border-radius: 8px;
-    border: 1px solid #ccc;
-    padding: 0.5rem 0.75rem;
-  }
-  
-  .toolbar-right button {
-    background: #8b5cf6;
-    color: white;
-    border: none;
-    border-radius: 8px;
-    padding: 0.55rem 1rem;
-    margin-left: 0.75rem;
-    cursor: pointer;
-    transition: 0.2s;
-  }
-  
-  .toolbar-right button:hover {
-    background: #7c3aed;
-  }
-  
-  .pipeline {
-    display: flex;
-    justify-content: space-between;
-    gap: 1.2rem;
-    flex-wrap: wrap;
-  }
-  
-  .pipeline-column {
-    flex: 1;
-    min-width: 220px;
-    background: white;
-    border-radius: 16px;
-    padding: 1rem;
-    border-top: 5px solid transparent;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
-  }
-  
-  .column-content {
-    margin-top: 0.75rem;
-  }
-  
-  .job-card {
-    background: #fff;
-    border: 1px solid #eee;
-    border-radius: 12px;
-    padding: 0.75rem;
-    margin-bottom: 0.75rem;
-    cursor: pointer;
-    display: flex;
-    align-items: flex-start;
-    gap: 0.5rem;
-    transition: box-shadow 0.2s;
-  }
-  
-  .job-card:hover {
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-  }
-  
-  .job-card.selected {
-    border: 2px solid #8b5cf6;
-    background: #f5f3ff;
-  }
-  
-  .job-info strong {
-    font-size: 0.95rem;
-    color: #4c1d95;
-  }
-  
-  .job-info p {
-    margin: 0;
-    font-size: 0.85rem;
-    color: #333;
-  }
-  
-  .job-info small {
-    color: #666;
-    font-size: 0.75rem;
-  }
-  
-  .empty-column {
-    text-align: center;
-    color: #aaa;
-    font-size: 0.85rem;
-    margin-top: 1rem;
-  }
-  .loading { margin: 0.5rem 0 1rem; font-size: 0.9rem; color: #6b7280; }
+  padding: 2rem 1.5rem;
+  background: #faf5ff;
+  min-height: 100vh;
+}
 
-  mark {
-    background-color: #fde047; /* soft yellow highlight */
-    color: #111827;
-    padding: 0 2px;
-    border-radius: 3px;
-  }
-  .job-info small {
-    display: block;
-    margin-top: 2px;
-  }
-  
-  mark {
-    background-color: #fde047;
-    color: #111827;
-    padding: 0 2px;
-    border-radius: 3px;
-  }
-  .pipeline-toolbar .toolbar-right select {
-    margin-left: 8px;
-    padding: 4px 6px;
-    border-radius: 6px;
-    border: 1px solid #ccc;
-  }
-  .pipeline-toolbar .toolbar-right button {
-    margin-left: 6px;
-    background-color: #6366f1;
-    color: white;
-    border: none;
-    border-radius: 6px;
-    padding: 5px 10px;
-    cursor: pointer;
-  }
-  .pipeline-toolbar .toolbar-right button:hover {
-    background-color: #4f46e5;
-  }
-  
+.pipeline-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 0.8rem 1rem;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.06);
+}
 
-  
-  
-  
+.toolbar-left select,
+.toolbar-right select {
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  padding: 0.5rem 0.75rem;
+}
+
+.toolbar-right button {
+  background: #8b5cf6;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 0.55rem 1rem;
+  margin-left: 0.75rem;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.toolbar-right button:hover {
+  background: #7c3aed;
+}
+
+.pipeline {
+  display: flex;
+  justify-content: space-between;
+  gap: 1.2rem;
+  flex-wrap: wrap;
+}
+
+.pipeline-column {
+  flex: 1;
+  min-width: 220px;
+  background: white;
+  border-radius: 16px;
+  padding: 1rem;
+  border-top: 5px solid transparent;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+}
+
+.column-content {
+  margin-top: 0.75rem;
+}
+
+.job-card {
+  background: #fff;
+  border: 1px solid #eee;
+  border-radius: 12px;
+  padding: 0.75rem;
+  margin-bottom: 0.75rem;
+  cursor: pointer;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  transition: box-shadow 0.2s;
+}
+
+.job-card:hover {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.job-card.selected {
+  border: 2px solid #8b5cf6;
+  background: #f5f3ff;
+}
+
+.job-info strong {
+  font-size: 0.95rem;
+  color: #4c1d95;
+}
+
+.job-info p {
+  margin: 0;
+  font-size: 0.85rem;
+  color: #333;
+}
+
+.job-info small {
+  color: #666;
+  font-size: 0.75rem;
+}
+
+.empty-column {
+  text-align: center;
+  color: #aaa;
+  font-size: 0.85rem;
+  margin-top: 1rem;
+}
+.loading {
+  margin: 0.5rem 0 1rem;
+  font-size: 0.9rem;
+  color: #6b7280;
+}
+
+mark {
+  background-color: #fde047; /* soft yellow highlight */
+  color: #111827;
+  padding: 0 2px;
+  border-radius: 3px;
+}
+.job-info small {
+  display: block;
+  margin-top: 2px;
+}
+
+mark {
+  background-color: #fde047;
+  color: #111827;
+  padding: 0 2px;
+  border-radius: 3px;
+}
+.pipeline-toolbar .toolbar-right select {
+  margin-left: 8px;
+  padding: 4px 6px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+}
+.pipeline-toolbar .toolbar-right button {
+  margin-left: 6px;
+  background-color: #6366f1;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 5px 10px;
+  cursor: pointer;
+}
+.pipeline-toolbar .toolbar-right button:hover {
+  background-color: #4f46e5;
+}
+
+/* Ensure job cards don't clip tooltips */
+.job-card {
+  position: relative;
+  overflow: visible !important;
+}
+
+/* Centered layout for job info + logo */
+.job-info-with-logo {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+
+/* 🏢 Logo styling */
+.company-logo-right {
+  width: 48px;
+  height: 48px;
+  object-fit: contain;
+  cursor: pointer;
+  margin-left: 10px;
+  margin-right: 4px;
+  position: relative;
+  top: 4px;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+  z-index: 10;
+}
+
+.company-logo-right:hover {
+  transform: scale(1.1);
+  box-shadow: 0 2px 8px rgba(167, 139, 250, 0.5); /* purple glow */
+}
+
+/* Force tooltip visibility on top of all columns/cards */
+.pipeline {
+  overflow: visible !important;
+  position: relative;
+  z-index: 1;
+}
+
+.pipeline-column {
+  overflow: visible !important;
+  position: relative;
+  z-index: 2;
+}
+
+.job-card {
+  overflow: visible !important;
+  position: relative;
+  z-index: 3;
+}
+
+/* Re-apply tooltip below logo */
+.company-logo-right::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  top: 120%;
+  left: 50%;
+  transform: translateX(-50%) translateY(5px);
+  background: linear-gradient(135deg, #a78bfa, #6366f1);
+  color: #fff;
+  font-size: 12px;
+  padding: 5px 9px;
+  border-radius: 6px;
+  white-space: nowrap;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+  transition: opacity 0.25s ease, transform 0.25s ease;
+  z-index: 99999;
+}
+
+.company-logo-right::before {
+  content: "";
+  position: absolute;
+  top: 112%;
+  left: 50%;
+  transform: translateX(-50%);
+  border-width: 6px;
+  border-style: solid;
+  border-color: transparent transparent #a78bfa transparent;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.25s ease;
+  z-index: 99998;
+}
+
+.company-logo-right:hover::after,
+.company-logo-right:hover::before {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(-50%) translateY(0);
+}
+.logo-wrapper {
+  position: relative;
+  display: inline-block;
+}
+
+.react-tooltip {
+  position: absolute;
+  top: 110%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: linear-gradient(135deg, #a78bfa, #6366f1);
+  color: #fff;
+  padding: 5px 8px;
+  border-radius: 6px;
+  font-size: 12px;
+  white-space: nowrap;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+  opacity: 0;
+  animation: fadeUp 0.25s ease forwards;
+  z-index: 9999;
+}
+
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
