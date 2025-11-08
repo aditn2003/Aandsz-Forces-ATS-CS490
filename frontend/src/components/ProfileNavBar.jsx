@@ -11,6 +11,7 @@ export default function ProfileNavBar() {
     { key: "projects", label: "Projects" },
     { key: "dashboard", label: "Dashboard" },
     { key: "jobs", label: "Jobs" },
+    { key: "resume", label: "Resume Builder" },
     { key: "danger", label: "Danger Zone" },
   ];
 

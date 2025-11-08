@@ -20,6 +20,7 @@ import { fileURLToPath } from "url";
 import jobRoutes from "./routes/job.js";
 import { auth } from "./auth.js";
 import companyRoutes from "./routes/company.js";
+import resumeRoutes from "./routes/resumes.js";
 
 // ====== 🔔 DAILY DEADLINE REMINDER CRON JOB (UC-012) ======
 import crons from "node-cron";
@@ -492,6 +493,7 @@ async function sendDeadlineReminders() {
   }
 }
 app.use("/api/companies", companyRoutes);
+app.use("/api/resumes", resumeRoutes);
 
 const REMINDER_DAYS =
   parseInt(process.env.REMINDER_DAYS_BEFORE || "3", 10) || 3;
