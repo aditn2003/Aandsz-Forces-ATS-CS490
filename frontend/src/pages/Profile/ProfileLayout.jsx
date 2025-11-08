@@ -11,6 +11,10 @@ import ProjectsTab from "./ProjectsTab";
 import JobsTab from "./JobsTab";
 import DashboardTab from "./DashboardTab";
 import DangerTab from "./DangerTab";
+import ResumeBuilder from "./ResumeBuilder";
+import ResumeSetup from "./ResumeSetup";
+import ResumeEditor from "../../components/ResumeEditor"; // 🆕 added
+
 import { useAuth } from "../../contexts/AuthContext";
 
 export default function ProfileLayout() {
@@ -35,10 +39,8 @@ export default function ProfileLayout() {
       <Routes>
         {/* /profile → Info by default */}
         <Route index element={<InfoTab />} />
-
         {/* /profile/info → Info tab */}
         <Route path="info" element={<InfoTab />} />
-
         {/* Other tabs */}
         <Route path="dashboard" element={<DashboardTab />} />
         <Route path="employment" element={<EmploymentTab />} />
@@ -47,8 +49,10 @@ export default function ProfileLayout() {
         <Route path="certifications" element={<CertificationsTab />} />
         <Route path="projects" element={<ProjectsTab />} />
         <Route path="jobs" element={<JobsTab />} />
+        <Route path="resume" element={<ResumeBuilder />} />
+        <Route path="resume/setup" element={<ResumeSetup />} />
+        <Route path="resume/editor" element={<ResumeEditor />} /> {/* ✅ new */}
         <Route path="danger" element={<DangerTab />} />
-
         {/* Fallback: any unknown /profile/... → /profile/info */}
         <Route path="*" element={<Navigate to="/profile/info" replace />} />
       </Routes>

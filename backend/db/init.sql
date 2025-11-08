@@ -159,3 +159,35 @@ CREATE TABLE companies (
     created_at TIMESTAMP DEFAULT NOW(),
     updated_at TIMESTAMP DEFAULT NOW()
 );
+
+-- resume_templates table
+CREATE TABLE resume_templates (
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+    name VARCHAR(100) NOT NULL,
+    layout_type VARCHAR(50) NOT NULL,     -- e.g. 'chronological', 'functional', 'hybrid'
+    font VARCHAR(50) DEFAULT 'Inter',
+    color_scheme VARCHAR(50) DEFAULT 'blue',
+    preview_url TEXT,                     -- optional: screenshot or preview image
+    is_default BOOLEAN DEFAULT false,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE resumes (
+  id SERIAL PRIMARY KEY,
+  user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+  title VARCHAR(255) NOT NULL,
+  template_id INTEGER,
+  sections JSONB DEFAULT '{}'::jsonb,
+  created_at TIMESTAMP DEFAULT NOW(),
+  updated_at TIMESTAMP DEFAULT NOW()
+);
+
+
+
+INSERT INTO resume_templates (user_id, name, layout_type, font, color_scheme, is_default)
+VALUES
+  (NULL, 'Chronological', 'chronological', 'Inter', 'blue', true),
+  (NULL, 'Functional', 'functional', 'Arial', 'green', false),
+  (NULL, 'Hybrid', 'hybrid', 'Roboto', 'purple', false)
+ON CONFLICT DO NOTHING;
