@@ -6,6 +6,7 @@ import "react-big-calendar/lib/css/react-big-calendar.css";
 import "./JobsCalendar.css";
 
 const locales = { "en-US": enUS };
+
 const localizer = dateFnsLocalizer({
   format,
   parse,
@@ -16,7 +17,6 @@ const localizer = dateFnsLocalizer({
 
 export default function JobsCalendar({ token }) {
   const [jobs, setJobs] = useState([]);
-  const [open, setOpen] = useState(false);
 
   useEffect(() => {
     async function loadJobs() {
@@ -33,58 +33,63 @@ export default function JobsCalendar({ token }) {
     loadJobs();
   }, [token]);
 
-  // 🗓️ Convert jobs → calendar events
+  // 🟣 Build events with urgency colors identical to UpcomingDeadlinesWidget
   const events = useMemo(() => {
     return jobs
       .filter((j) => j.deadline)
-      .map((j) => ({
-        id: j.id,
-        title: `${j.title} — ${j.company}`,
-        start: new Date(j.deadline),
-        end: new Date(j.deadline),
-        allDay: true,
-        color: getEventColor(j),
-      }));
+      .map((j) => {
+        const color = getUrgencyColor(j.deadline);
+        return {
+          id: j.id,
+          title: `${j.title} — ${j.company}`,
+          start: new Date(j.deadline),
+          end: new Date(j.deadline),
+          allDay: true,
+          color,
+        };
+      });
   }, [jobs]);
 
-  function getEventColor(job) {
-    const daysLeft = Math.ceil(
-      (new Date(job.deadline) - new Date()) / (1000 * 60 * 60 * 24)
+  // 🎨 Same color logic as UpcomingDeadlinesWidget
+  function getUrgencyColor(deadline) {
+    if (!deadline) return "#9ca3af"; // gray (no date)
+    const diff = Math.ceil(
+      (new Date(deadline) - Date.now()) / (1000 * 60 * 60 * 24)
     );
-    if (daysLeft < 0) return "#ef4444";   // red
-    if (daysLeft <= 3) return "#facc15";  // yellow
-    return "#4ade80";                     // green
+    if (diff < 0) return "#ef4444"; // red (overdue)
+    if (diff <= 2) return "#f87171"; // light red (urgent)
+    if (diff <= 7) return "#fbbf24"; // yellow (soon)
+    return "#4ade80"; // green (safe)
   }
 
   return (
     <div className="calendar-container">
-      <button className="calendar-toggle" onClick={() => setOpen(!open)}>
-        📅 {open ? "Hide Calendar" : "View Calendar"}
-      </button>
-
-      {open && (
-        <div className="big-calendar-wrapper fade-in">
-          <Calendar
-            localizer={localizer}
-            events={events}
-            startAccessor="start"
-            endAccessor="end"
-            style={{ height: 500 }}
-            views={["month"]}
-            defaultView="month"
-            toolbar={true}
-            popup
-            eventPropGetter={(event) => ({
-              style: {
-                backgroundColor: event.color,
-                borderRadius: "6px",
-                color: "#1e293b",
-                fontWeight: 500,
-              },
-            })}
-          />
-        </div>
-      )}
+      <div className="big-calendar-wrapper">
+        <Calendar
+          localizer={localizer}
+          events={events}
+          startAccessor="start"
+          endAccessor="end"
+          views={["month"]}
+          defaultView="month"
+          toolbar={true}
+          popup
+          style={{ height: 500 }}
+          eventPropGetter={(event) => ({
+            style: {
+              backgroundColor: event.color,
+              borderRadius: "6px",
+              color:
+                event.color === "#fbbf24" || event.color === "#facc15"
+                  ? "#1e1b4b"
+                  : "#f9fafb",
+              fontWeight: 500,
+              border: "none",
+              padding: "2px 4px",
+            },
+          })}
+        />
+      </div>
     </div>
   );
 }
