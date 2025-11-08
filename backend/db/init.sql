@@ -140,3 +140,22 @@ CREATE TABLE IF NOT EXISTS jobs (
 -- JOBS INDEXES
 CREATE INDEX IF NOT EXISTS idx_jobs_user_id ON jobs(user_id);
 CREATE INDEX IF NOT EXISTS idx_jobs_status ON jobs(status);
+
+
+CREATE TABLE companies (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(255) UNIQUE NOT NULL,
+    size VARCHAR(100),
+    industry VARCHAR(100),
+    location VARCHAR(255),
+    website TEXT,
+    description TEXT,
+    mission TEXT,
+    news TEXT,
+    glassdoor_rating DECIMAL(2,1),
+    contact_email VARCHAR(255),
+    contact_phone VARCHAR(50),
+    logo_url TEXT,
+    created_at TIMESTAMP DEFAULT NOW(),
+    updated_at TIMESTAMP DEFAULT NOW()
+);
