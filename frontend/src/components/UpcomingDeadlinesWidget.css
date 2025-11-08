@@ -1,64 +1,169 @@
+/* === Base Card === */
 .widget-card {
-    background: #ffffff;
-    border-radius: 12px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-    padding: 16px;
-    width: 100%;
-    max-width: 400px;
-    transition: all 0.2s ease;
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  padding: 16px;
+  width: 100%;
+  max-width: 400px;
+  transition: all 0.2s ease;
+}
+
+/* === Header === */
+.widget-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  border-bottom: 1px solid #ede9fe;
+  padding-bottom: 6px;
+}
+
+.widget-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.calendar-icon {
+  color: #6d28d9;
+  font-size: 1.2rem;
+}
+
+.widget-card h3 {
+  font-size: 1.05rem;
+  color: #1f2937;
+  font-weight: 600;
+  margin: 0;
+}
+
+.calendar-open-btn {
+  background: #6d28d9;
+  border: none;
+  color: white;
+  font-size: 0.9rem;
+  border-radius: 8px;
+  padding: 6px 8px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.calendar-open-btn:hover {
+  background: #5b21b6;
+}
+
+/* === List === */
+.deadlines-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.deadlines-list li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid #e5e7eb;
+  padding: 8px 0;
+}
+
+.deadlines-list li:last-child {
+  border-bottom: none;
+}
+
+.dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  margin-right: 10px;
+  flex-shrink: 0;
+}
+
+.job-info {
+  flex-grow: 1;
+  margin-left: 8px;
+}
+
+.job-info strong {
+  display: block;
+  font-size: 0.9rem;
+  color: #111827;
+}
+
+.job-info small {
+  font-size: 0.8rem;
+  color: #6b7280;
+}
+
+.date {
+  font-size: 0.8rem;
+  color: #374151;
+}
+
+/* === Modal Overlay === */
+.calendar-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(17, 24, 39, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  backdrop-filter: blur(4px);
+}
+
+.calendar-modal {
+  background: white;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 900px;
+  max-height: 90vh;
+  overflow: hidden;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+  display: flex;
+  flex-direction: column;
+  animation: modalFadeIn 0.25s ease;
+}
+
+.calendar-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #ede9fe;
+  color: #4c1d95;
+  padding: 10px 16px;
+  font-weight: 600;
+}
+
+.calendar-close-btn {
+  background: transparent;
+  border: none;
+  font-size: 1.2rem;
+  color: #4c1d95;
+  cursor: pointer;
+}
+
+.calendar-close-btn:hover {
+  color: #6d28d9;
+}
+
+.calendar-modal-body {
+  max-height: 80vh;
+  overflow-y: auto;
+  padding: 0.5rem 1rem 1rem;
+  background: #fff;
+}
+
+@keyframes modalFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
   }
-  
-  .widget-card h3 {
-    margin-top: 0;
-    margin-bottom: 12px;
-    font-size: 1.1rem;
-    color: #1f2937;
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
-  
-  .widget-card ul {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-  }
-  
-  .widget-card li {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    border-bottom: 1px solid #e5e7eb;
-    padding: 8px 0;
-  }
-  
-  .widget-card li:last-child {
-    border-bottom: none;
-  }
-  
-  .widget-card .dot {
-    width: 10px;
-    height: 10px;
-    border-radius: 50%;
-    margin-right: 10px;
-    flex-shrink: 0;
-  }
-  
-  .widget-card .job-info {
-    flex-grow: 1;
-    margin-left: 8px;
-  }
-  
-  .widget-card .job-info strong {
-    display: block;
-    font-size: 0.9rem;
-    color: #111827;
-  }
-  
-  .widget-card .job-info small {
-    font-size: 0.8rem;
-    color: #6b7280;
-  }
-  
-  .widget-card .date {
-    font-size: 0.8rem;
-    color: #374151;
-  }
-  
+}

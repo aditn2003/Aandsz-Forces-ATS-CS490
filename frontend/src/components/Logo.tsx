@@ -2,7 +2,13 @@ import React from "react";
 
 export default function Logo({ size = 100 }: { size?: number }) {
   return (
-    <div style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
+    <div
+      style={{
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+      }}
+    >
       <img
         src="/logo.png"
         alt="ATS Logo"
@@ -13,4 +19,3 @@ export default function Logo({ size = 100 }: { size?: number }) {
     </div>
   );
 }
-

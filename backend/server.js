@@ -19,6 +19,7 @@ import path from "path";
 import { fileURLToPath } from "url";
 import jobRoutes from "./routes/job.js";
 import { auth } from "./auth.js";
+
 // ====== 🔔 DAILY DEADLINE REMINDER CRON JOB (UC-012) ======
 import crons from "node-cron";
 
@@ -84,11 +85,9 @@ app.post("/register", async (req, res) => {
       return res.status(400).json({ error: "Invalid email format" });
     }
     if (!PASSWORD_RULE.test(password)) {
-      return res
-        .status(400)
-        .json({
-          error: "Password must be 8+ chars incl. uppercase, lowercase, number",
-        });
+      return res.status(400).json({
+        error: "Password must be 8+ chars incl. uppercase, lowercase, number",
+      });
     }
     if (password !== confirmPassword) {
       return res.status(400).json({ error: "Passwords do not match" });
@@ -203,11 +202,9 @@ app.post("/reset", async (req, res) => {
     if (newPassword !== confirmPassword)
       return res.status(400).json({ error: "Passwords do not match" });
     if (!PASSWORD_RULE.test(newPassword)) {
-      return res
-        .status(400)
-        .json({
-          error: "Password must be 8+ chars incl. uppercase, lowercase, number",
-        });
+      return res.status(400).json({
+        error: "Password must be 8+ chars incl. uppercase, lowercase, number",
+      });
     }
 
     const lower = email.toLowerCase();
