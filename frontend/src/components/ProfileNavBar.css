@@ -1,0 +1,28 @@
+.profile-navbar {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 0.8rem;
+    margin-bottom: 1.5rem;
+  }
+  
+  .profile-navbar button {
+    border: none;
+    background: #f4f4f4;
+    padding: 0.6rem 1.2rem;
+    border-radius: 8px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: 0.2s;
+    color: #333;
+  }
+  
+  .profile-navbar button:hover {
+    background-color: #e0e0e0;
+  }
+  
+  .profile-navbar button.active {
+    background-color: #007bff;
+    color: white;
+  }
+  
