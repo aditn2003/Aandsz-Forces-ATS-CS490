@@ -1,16 +1,15 @@
 import React, { useEffect, useState } from "react";
-import "./jobPipeline.css";
+import "./JobPipeline.css";
 import JobDetailsModal from "./JobsDetailsModal";
 import JobSearchFilter from "./JobSearchFilter";
 import UpcomingDeadlinesWidget from "./UpcomingDeadlinesWidget";
 
-
 // 🟡 highlight helper: wraps matching text with <mark> tag
 function highlight(text, term) {
-    if (!term || !text) return text;
-    const regex = new RegExp(`(${term})`, "gi");
-    return text.replace(regex, "<mark>$1</mark>");
-  }
+  if (!term || !text) return text;
+  const regex = new RegExp(`(${term})`, "gi");
+  return text.replace(regex, "<mark>$1</mark>");
+}
 const STAGES = [
   { name: "Interested", color: "#a78bfa" },
   { name: "Applied", color: "#60a5fa" },
@@ -19,7 +18,6 @@ const STAGES = [
   { name: "Offer", color: "#4ade80" },
   { name: "Rejected", color: "#f87171" },
 ];
-  
 
 export default function JobPipeline({ token }) {
   const [jobs, setJobs] = useState([]);
@@ -34,31 +32,31 @@ export default function JobPipeline({ token }) {
   const [loading, setLoading] = useState(false);
   const [bulkDays, setBulkDays] = useState("");
 
-async function handleBulkDeadlineExtend() {
-  if (!bulkDays || selectedJobs.length === 0) return alert("Select jobs and a duration");
-  try {
-    const res = await fetch("http://localhost:4000/api/jobs/bulk/deadline", {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify({ jobIds: selectedJobs, daysToAdd: bulkDays }),
-    });
-    const data = await res.json();
-    if (res.ok) {
-      alert(`✅ Extended deadlines for ${data.updated.length} jobs`);
-      loadJobs(); // reload updated jobs
-      setSelectedJobs([]);
-      setBulkDays("");
-    } else {
-      alert(data.error || "Failed to extend deadlines");
+  async function handleBulkDeadlineExtend() {
+    if (!bulkDays || selectedJobs.length === 0)
+      return alert("Select jobs and a duration");
+    try {
+      const res = await fetch("http://localhost:4000/api/jobs/bulk/deadline", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ jobIds: selectedJobs, daysToAdd: bulkDays }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        alert(`✅ Extended deadlines for ${data.updated.length} jobs`);
+        loadJobs(); // reload updated jobs
+        setSelectedJobs([]);
+        setBulkDays("");
+      } else {
+        alert(data.error || "Failed to extend deadlines");
+      }
+    } catch (err) {
+      console.error("❌ Bulk deadline update failed:", err);
     }
-  } catch (err) {
-    console.error("❌ Bulk deadline update failed:", err);
   }
-}
-
 
   // 🔄 Fetch jobs from backend based on filters/search
   async function loadJobs(currentFilters = filters) {
@@ -108,7 +106,9 @@ async function handleBulkDeadlineExtend() {
       });
       setJobs((prev) =>
         prev.map((j) =>
-          j.id === jobId ? { ...j, status: newStage, status_updated_at: new Date() } : j
+          j.id === jobId
+            ? { ...j, status: newStage, status_updated_at: new Date() }
+            : j
         )
       );
     } catch (err) {
@@ -116,7 +116,7 @@ async function handleBulkDeadlineExtend() {
     }
   }
   // 🗓️ Days in current stage (for display)
-  
+
   // 🗓️ Deadline tracking helpers
   function daysUntilDeadline(deadline) {
     if (!deadline) return null;
@@ -125,7 +125,7 @@ async function handleBulkDeadlineExtend() {
     );
     return diffDays;
   }
-  
+
   function deadlineColor(deadline) {
     const days = daysUntilDeadline(deadline);
     if (days === null) return "gray";
@@ -134,7 +134,6 @@ async function handleBulkDeadlineExtend() {
     if (days <= 7) return "#fbbf24"; // warning
     return "#4ade80"; // safe (green)
   }
-  
 
   // 🟨 Bulk update selected jobsa
   async function handleBulkUpdate() {
@@ -145,7 +144,8 @@ async function handleBulkDeadlineExtend() {
   }
 
   // 🔍 Filter pipeline stages
-  const filteredStages = filter === "All" ? STAGES : STAGES.filter((s) => s.name === filter);
+  const filteredStages =
+    filter === "All" ? STAGES : STAGES.filter((s) => s.name === filter);
 
   // 🗓 Format "days in stage"
   const formatDaysInStage = (date) => {
@@ -175,7 +175,10 @@ async function handleBulkDeadlineExtend() {
 
         <div className="toolbar-right">
           <label>Bulk Update:</label>
-          <select value={bulkStage} onChange={(e) => setBulkStage(e.target.value)}>
+          <select
+            value={bulkStage}
+            onChange={(e) => setBulkStage(e.target.value)}
+          >
             <option value="">Select stage</option>
             {STAGES.map((s) => (
               <option key={s.name} value={s.name}>
@@ -186,18 +189,18 @@ async function handleBulkDeadlineExtend() {
           <button onClick={handleBulkUpdate}>Move Selected</button>
         </div>
         <div className="toolbar-right">
-        <label>Extend Deadline:</label>
-        <select
+          <label>Extend Deadline:</label>
+          <select
             value={bulkDays || ""}
             onChange={(e) => setBulkDays(Number(e.target.value))}
-        >
+          >
             <option value="">Select</option>
             <option value="1">+1 days</option>
             <option value="3">+3 days</option>
             <option value="7">+7 days</option>
             <option value="14">+14 days</option>
-        </select>
-        <button onClick={handleBulkDeadlineExtend}>Apply</button>
+          </select>
+          <button onClick={handleBulkDeadlineExtend}>Apply</button>
         </div>
       </div>
 
@@ -224,7 +227,9 @@ async function handleBulkDeadlineExtend() {
                 {stageJobs.map((job) => (
                   <div
                     key={job.id}
-                    className={`job-card ${selectedJobs.includes(job.id) ? "selected" : ""}`}
+                    className={`job-card ${
+                      selectedJobs.includes(job.id) ? "selected" : ""
+                    }`}
                     draggable
                     onDragStart={() => setDragged(job)}
                     onClick={(e) => {
@@ -254,37 +259,43 @@ async function handleBulkDeadlineExtend() {
                       }}
                     />
                     <div className="job-info">
-                    <strong
+                      <strong
                         dangerouslySetInnerHTML={{
-                        __html: highlight(job.title, filters.search),
+                          __html: highlight(job.title, filters.search),
                         }}
-                    />
-                    <p
+                      />
+                      <p
                         dangerouslySetInnerHTML={{
-                        __html: highlight(job.company, filters.search),
+                          __html: highlight(job.company, filters.search),
                         }}
-                    />
+                      />
 
-                    {/* 🗓️ Deadline indicator (added) */}
-                    {job.deadline && (
+                      {/* 🗓️ Deadline indicator (added) */}
+                      {job.deadline && (
                         <small
-                        style={{
+                          style={{
                             color: deadlineColor(job.deadline),
                             fontWeight: 500,
                             display: "block",
-                        }}
+                          }}
                         >
-                        {daysUntilDeadline(job.deadline) < 0
-                            ? `Overdue (${Math.abs(daysUntilDeadline(job.deadline))} days ago)`
-                            : `${daysUntilDeadline(job.deadline)} days remaining`}
+                          {daysUntilDeadline(job.deadline) < 0
+                            ? `Overdue (${Math.abs(
+                                daysUntilDeadline(job.deadline)
+                              )} days ago)`
+                            : `${daysUntilDeadline(
+                                job.deadline
+                              )} days remaining`}
                         </small>
-                    )}
+                      )}
 
-                    {/* existing stage info stays untouched */}
-                    <small>{formatDaysInStage(job.status_updated_at || job.created_at)}</small>
+                      {/* existing stage info stays untouched */}
+                      <small>
+                        {formatDaysInStage(
+                          job.status_updated_at || job.created_at
+                        )}
+                      </small>
                     </div>
-
-
                   </div>
                 ))}
                 {stageJobs.length === 0 && (

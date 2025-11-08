@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import ProfileCompletenessMeter from "./ProfileCompleteness";
 import SkillDistributionChart from "./SkillDist";
-import "./profileDashboard.css";
+import "./ProfileDashboard.css";
 
 export default function ProfileDashboard({ token, setActiveTab }) {
   const [summary, setSummary] = useState(null);
@@ -59,7 +59,9 @@ export default function ProfileDashboard({ token, setActiveTab }) {
         <div className="summary-card">
           <h3>Projects</h3>
           <p>{summary.projects_count || 0} entries</p>
-          <button onClick={() => setActiveTab("projects")}>➕ Add Project</button>
+          <button onClick={() => setActiveTab("projects")}>
+            ➕ Add Project
+          </button>
         </div>
       </div>
 

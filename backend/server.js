@@ -22,7 +22,6 @@ import { auth } from "./auth.js";
 // ====== 🔔 DAILY DEADLINE REMINDER CRON JOB (UC-012) ======
 import crons from "node-cron";
 
-
 // ===== Initialize =====
 dotenv.config();
 const { Pool } = pkg;
@@ -63,33 +62,49 @@ const JWT_SECRET = process.env.JWT_SECRET || "dev_secret_change_me";
 const PASSWORD_RULE = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
 
 function makeToken(user) {
-  return jwt.sign({ id: user.id, email: user.email }, JWT_SECRET, { expiresIn: "2h" });
+  return jwt.sign({ id: user.id, email: user.email }, JWT_SECRET, {
+    expiresIn: "2h",
+  });
 }
-
 
 // ===== In-memory password reset store (email -> { code, expires }) =====
 const resetCodes = new Map(); // for demo; moves to DB later
 
 // ========== UC-001: Register ==========
 app.post("/register", async (req, res) => {
-  const { email = "", password = "", confirmPassword = "", firstName = "", lastName = "" } = req.body;
+  const {
+    email = "",
+    password = "",
+    confirmPassword = "",
+    firstName = "",
+    lastName = "",
+  } = req.body;
   try {
     if (!email.includes("@") || !email.split("@")[1]?.includes(".")) {
       return res.status(400).json({ error: "Invalid email format" });
     }
     if (!PASSWORD_RULE.test(password)) {
-      return res.status(400).json({ error: "Password must be 8+ chars incl. uppercase, lowercase, number" });
+      return res
+        .status(400)
+        .json({
+          error: "Password must be 8+ chars incl. uppercase, lowercase, number",
+        });
     }
     if (password !== confirmPassword) {
       return res.status(400).json({ error: "Passwords do not match" });
     }
     if (!firstName.trim() || !lastName.trim()) {
-      return res.status(400).json({ error: "First and last name are required" });
+      return res
+        .status(400)
+        .json({ error: "First and last name are required" });
     }
 
     const lower = email.toLowerCase();
-    const existing = await pool.query("SELECT id FROM users WHERE email=$1", [lower]);
-    if (existing.rows.length > 0) return res.status(409).json({ error: "Email already in use" });
+    const existing = await pool.query("SELECT id FROM users WHERE email=$1", [
+      lower,
+    ]);
+    if (existing.rows.length > 0)
+      return res.status(409).json({ error: "Email already in use" });
 
     const passwordHash = await bcrypt.hash(password, 10);
     const result = await pool.query(
@@ -109,13 +124,16 @@ app.post("/login", async (req, res) => {
   const { email = "", password = "" } = req.body;
   try {
     const lower = email.toLowerCase();
-    const result = await pool.query("SELECT * FROM users WHERE email=$1", [lower]);
+    const result = await pool.query("SELECT * FROM users WHERE email=$1", [
+      lower,
+    ]);
     if (result.rows.length === 0)
       return res.status(401).json({ error: "Invalid email or password" });
 
     const user = result.rows[0];
     const ok = await bcrypt.compare(password, user.password_hash || "");
-    if (!ok) return res.status(401).json({ error: "Invalid email or password" });
+    if (!ok)
+      return res.status(401).json({ error: "Invalid email or password" });
 
     const token = makeToken({ id: user.id, email: user.email });
     return res.json({ message: "Logged in", token });
@@ -139,7 +157,9 @@ app.post("/forgot", async (req, res) => {
   try {
     const { email = "" } = req.body;
     const lower = email.toLowerCase();
-    const result = await pool.query("SELECT id FROM users WHERE email=$1", [lower]);
+    const result = await pool.query("SELECT id FROM users WHERE email=$1", [
+      lower,
+    ]);
 
     // Always send success message to avoid revealing user existence
     const code = Math.floor(100000 + Math.random() * 900000).toString();
@@ -160,18 +180,18 @@ app.post("/forgot", async (req, res) => {
           </div>
         `,
       });
-      
+
       console.log(`📤 Sent reset code ${code} to ${lower}`);
     }
 
-    return res.json({ message: "If that email exists, a reset code was sent." });
+    return res.json({
+      message: "If that email exists, a reset code was sent.",
+    });
   } catch (err) {
     console.error("❌ Reset email error:", err);
     return res.status(500).json({ error: "Server error" });
   }
 });
-
-
 
 // ========== UC-007: Password Reset Completion ==========
 app.post("/reset", async (req, res) => {
@@ -183,7 +203,11 @@ app.post("/reset", async (req, res) => {
     if (newPassword !== confirmPassword)
       return res.status(400).json({ error: "Passwords do not match" });
     if (!PASSWORD_RULE.test(newPassword)) {
-      return res.status(400).json({ error: "Password must be 8+ chars incl. uppercase, lowercase, number" });
+      return res
+        .status(400)
+        .json({
+          error: "Password must be 8+ chars incl. uppercase, lowercase, number",
+        });
     }
 
     const lower = email.toLowerCase();
@@ -193,7 +217,10 @@ app.post("/reset", async (req, res) => {
     }
 
     const passwordHash = await bcrypt.hash(newPassword, 10);
-    await pool.query("UPDATE users SET password_hash=$1 WHERE email=$2", [passwordHash, lower]);
+    await pool.query("UPDATE users SET password_hash=$1 WHERE email=$2", [
+      passwordHash,
+      lower,
+    ]);
     resetCodes.delete(lower);
 
     return res.json({ message: "Password reset successful!" });
@@ -203,8 +230,6 @@ app.post("/reset", async (req, res) => {
   }
 });
 
-
-
 // ========== UC-008: Profile Access Control ==========
 app.get("/me", auth, async (req, res) => {
   try {
@@ -212,7 +237,8 @@ app.get("/me", auth, async (req, res) => {
       "SELECT id, email, first_name AS firstName, last_name AS lastName FROM users WHERE id=$1",
       [req.userId]
     );
-    if (result.rows.length === 0) return res.status(404).json({ error: "Not found" });
+    if (result.rows.length === 0)
+      return res.status(404).json({ error: "Not found" });
     res.json({ user: result.rows[0] });
   } catch (err) {
     console.error(err);
@@ -238,8 +264,11 @@ app.put("/me", auth, async (req, res) => {
 app.post("/delete", auth, async (req, res) => {
   try {
     const { password = "" } = req.body;
-    const userRes = await pool.query("SELECT * FROM users WHERE id=$1", [req.userId]);
-    if (userRes.rows.length === 0) return res.status(404).json({ error: "Not found" });
+    const userRes = await pool.query("SELECT * FROM users WHERE id=$1", [
+      req.userId,
+    ]);
+    if (userRes.rows.length === 0)
+      return res.status(404).json({ error: "Not found" });
 
     const user = userRes.rows[0];
     const ok = await bcrypt.compare(password, user.password_hash || "");
@@ -261,7 +290,8 @@ const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 app.post("/google", async (req, res) => {
   try {
     const { idToken } = req.body;
-    if (!idToken) return res.status(400).json({ error: "Missing Google ID token" });
+    if (!idToken)
+      return res.status(400).json({ error: "Missing Google ID token" });
 
     // ✅ Verify the ID token with Google
     const ticket = await client.verifyIdToken({
@@ -275,7 +305,9 @@ app.post("/google", async (req, res) => {
     const lastName = payload.family_name || "User";
 
     // ✅ Check or create user in DB
-    let result = await pool.query("SELECT id FROM users WHERE email=$1", [email]);
+    let result = await pool.query("SELECT id FROM users WHERE email=$1", [
+      email,
+    ]);
     if (result.rows.length === 0) {
       result = await pool.query(
         "INSERT INTO users (email, first_name, last_name, provider) VALUES ($1,$2,$3,'google') RETURNING id",
@@ -291,18 +323,15 @@ app.post("/google", async (req, res) => {
   }
 });
 
-
-
 // ===== Routes =====
 app.use("/api", profileRoutes);
 app.use("/api", uploadRoutes);
-app.use("/api", auth,employmentRoutes);
+app.use("/api", auth, employmentRoutes);
 app.use("/skills", skillsRouter);
 app.use("/api", educationRoutes);
 app.use("/api", certifications);
 app.use("/api", projectRoutes);
 app.use("/api/jobs", jobRoutes);
-
 
 // ===== Global Error Handler =====
 app.use((err, req, res, next) => {
@@ -340,14 +369,22 @@ cron.schedule("0 9 * * *", async () => {
       const daysLeft = Math.ceil(
         (new Date(job.deadline) - new Date()) / (1000 * 60 * 60 * 24)
       );
-      const subject = `⏰ Reminder: ${job.title} deadline in ${daysLeft} day${daysLeft !== 1 ? "s" : ""}`;
+      const subject = `⏰ Reminder: ${job.title} deadline in ${daysLeft} day${
+        daysLeft !== 1 ? "s" : ""
+      }`;
       const html = `
         <div style="font-family:Arial,sans-serif;line-height:1.5;">
           <h2 style="color:#4f46e5;">Upcoming Application Deadline</h2>
           <p>Hi ${job.first_name || "there"},</p>
           <p>This is a friendly reminder that your job application for 
-          <strong>${job.title}</strong> is due in <strong>${daysLeft}</strong> day${daysLeft !== 1 ? "s" : ""}.</p>
-          <p><strong>Deadline:</strong> ${new Date(job.deadline).toLocaleDateString()}</p>
+          <strong>${
+            job.title
+          }</strong> is due in <strong>${daysLeft}</strong> day${
+        daysLeft !== 1 ? "s" : ""
+      }.</p>
+          <p><strong>Deadline:</strong> ${new Date(
+            job.deadline
+          ).toLocaleDateString()}</p>
           <p>Please review your application status in your <a href="http://localhost:5173/profile/jobs">ATS Dashboard</a>.</p>
           <p style="color:#888;">— ATS for Candidates</p>
         </div>

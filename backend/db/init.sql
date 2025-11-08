@@ -1,0 +1,142 @@
+-- ======================================
+-- DATABASE INITIALIZATION SCRIPT (init.sql)
+-- ======================================
+
+-- USERS TABLE
+CREATE TABLE IF NOT EXISTS users (
+    id SERIAL PRIMARY KEY,
+    email TEXT NOT NULL UNIQUE,
+    password_hash TEXT NOT NULL,
+    first_name TEXT,
+    last_name TEXT,
+    provider TEXT DEFAULT 'local',
+    created_at TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- PROFILES TABLE
+CREATE TABLE IF NOT EXISTS profiles (
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    full_name VARCHAR(255),
+    email VARCHAR(255),
+    phone VARCHAR(50),
+    location VARCHAR(255),
+    title VARCHAR(255),
+    bio TEXT,
+    industry VARCHAR(255),
+    experience VARCHAR(50),
+    picture_url TEXT,
+    created_at TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- EDUCATION TABLE
+CREATE TABLE IF NOT EXISTS education (
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    institution VARCHAR(150) NOT NULL,
+    degree_type VARCHAR(100) NOT NULL,
+    field_of_study VARCHAR(100) NOT NULL,
+    graduation_date DATE,
+    currently_enrolled BOOLEAN DEFAULT FALSE,
+    education_level VARCHAR(50),
+    gpa NUMERIC(3,2),
+    gpa_private BOOLEAN DEFAULT FALSE,
+    honors TEXT,
+    created_at TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- EMPLOYMENT TABLE
+CREATE TABLE IF NOT EXISTS employment (
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    title VARCHAR(255) NOT NULL,
+    company VARCHAR(255) NOT NULL,
+    location VARCHAR(255),
+    start_date DATE NOT NULL,
+    end_date DATE,
+    current BOOLEAN DEFAULT FALSE,
+    description TEXT CHECK (char_length(description) <= 1000),
+    created_at TIMESTAMP WITHOUT TIME ZONE DEFAULT NOW()
+);
+
+-- PROJECTS TABLE
+CREATE TABLE IF NOT EXISTS projects (
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    name VARCHAR(255) NOT NULL,
+    description TEXT NOT NULL,
+    role VARCHAR(255) NOT NULL,
+    start_date DATE,
+    end_date DATE,
+    technologies TEXT[],
+    repository_link TEXT,
+    team_size INTEGER,
+    collaboration_details TEXT,
+    outcomes TEXT,
+    industry VARCHAR(100),
+    project_type VARCHAR(100),
+    media_url TEXT,
+    status VARCHAR(50) DEFAULT 'Planned'
+        CHECK (status IN ('Completed', 'Ongoing', 'Planned')),
+    created_at TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- SKILLS TABLE
+CREATE TABLE IF NOT EXISTS skills (
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    name VARCHAR(100) NOT NULL,
+    category VARCHAR(50) NOT NULL
+        CHECK (category IN ('Technical', 'Soft Skills', 'Languages', 'Industry-Specific')),
+    proficiency VARCHAR(20) NOT NULL
+        CHECK (proficiency IN ('Beginner', 'Intermediate', 'Advanced', 'Expert')),
+    created_at TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE (user_id, name)
+);
+
+-- CERTIFICATIONS TABLE
+CREATE TABLE IF NOT EXISTS certifications (
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    name VARCHAR(255) NOT NULL,
+    organization VARCHAR(255) NOT NULL,
+    category VARCHAR(255),
+    cert_number VARCHAR(100),
+    date_earned DATE NOT NULL,
+    expiration_date DATE,
+    does_not_expire BOOLEAN DEFAULT FALSE,
+    document_url TEXT,
+    verified BOOLEAN DEFAULT FALSE,
+    renewal_reminder DATE,
+    created_at TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- JOBS TABLE
+CREATE TABLE IF NOT EXISTS jobs (
+    id SERIAL PRIMARY KEY,
+    user_id INT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    title TEXT NOT NULL,
+    company TEXT NOT NULL,
+    location TEXT,
+    salary_min INT,
+    salary_max INT,
+    url TEXT,
+    deadline DATE,
+    description TEXT,
+    industry TEXT,
+    type TEXT,
+    status VARCHAR(50) DEFAULT 'Interested',
+    status_updated_at TIMESTAMP DEFAULT NOW(),
+    created_at TIMESTAMP DEFAULT NOW(),
+    notes TEXT,
+    contact_name TEXT,
+    contact_email TEXT,
+    contact_phone TEXT,
+    salary_notes TEXT,
+    interview_notes TEXT,
+    application_history JSONB DEFAULT '[]'::jsonb
+);
+
+-- JOBS INDEXES
+CREATE INDEX IF NOT EXISTS idx_jobs_user_id ON jobs(user_id);
+CREATE INDEX IF NOT EXISTS idx_jobs_status ON jobs(status);

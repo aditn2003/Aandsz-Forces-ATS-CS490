@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import "./jobEntryForm.css";
+import "./JobEntryForm.css";
 
 export default function JobEntryForm({ token, onSaved, onCancel }) {
   const [form, setForm] = useState({
@@ -20,7 +20,7 @@ export default function JobEntryForm({ token, onSaved, onCancel }) {
     if (!form.title.trim() || !form.company.trim()) {
       return alert("Job Title and Company Name are required.");
     }
-  
+
     try {
       setLoading(true);
       const res = await fetch("http://localhost:4000/api/jobs", {
@@ -31,14 +31,13 @@ export default function JobEntryForm({ token, onSaved, onCancel }) {
         },
         body: JSON.stringify(form),
       });
-  
+
       if (!res.ok) throw new Error("Failed to save job");
-  
-     // alert("✅ Job entry saved successfully!");
-  
+
+      // alert("✅ Job entry saved successfully!");
+
       // ⬇️ trigger refresh immediately
       onSaved?.(); // this will call loadJobs() in JobPipeline
-  
     } catch (err) {
       console.error("Job save error:", err);
       alert("❌ Could not save job entry.");
@@ -46,7 +45,6 @@ export default function JobEntryForm({ token, onSaved, onCancel }) {
       setLoading(false);
     }
   }
-  
 
   return (
     <div className="job-form">
