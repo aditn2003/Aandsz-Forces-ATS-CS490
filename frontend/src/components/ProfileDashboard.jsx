@@ -4,7 +4,15 @@ import SkillDistributionChart from "./SkillDist";
 import "./ProfileDashboard.css";
 
 export default function ProfileDashboard({ token, setActiveTab }) {
-  const [summary, setSummary] = useState(null);
+  // ✅ default to safe empty object to avoid null errors
+  const [summary, setSummary] = useState({
+    completeness: { score: 0, suggestions: [] },
+    employment_count: 0,
+    skills_count: 0,
+    education_count: 0,
+    projects_count: 0,
+    skills_distribution: [],
+  });
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -15,7 +23,19 @@ export default function ProfileDashboard({ token, setActiveTab }) {
           headers: { Authorization: `Bearer ${token}` },
         });
         const data = await res.json();
-        setSummary(data);
+
+        // ✅ merge defaults with backend data so nothing breaks
+        setSummary((prev) => ({
+          ...prev,
+          ...data,
+          completeness: {
+            score: data?.completeness?.score ?? prev.completeness.score,
+            suggestions:
+              data?.completeness?.suggestions ?? prev.completeness.suggestions,
+          },
+          skills_distribution:
+            data?.skills_distribution ?? prev.skills_distribution,
+        }));
       } catch (err) {
         console.error("Failed to load dashboard summary", err);
       } finally {
@@ -25,7 +45,7 @@ export default function ProfileDashboard({ token, setActiveTab }) {
     loadSummary();
   }, [token]);
 
-  if (loading || !summary) return <p>Loading dashboard...</p>;
+  if (loading) return <p>Loading dashboard...</p>;
 
   return (
     <div className="dashboard">
@@ -74,9 +94,13 @@ export default function ProfileDashboard({ token, setActiveTab }) {
       <div className="tips-section">
         <h3>Suggestions for Improvement</h3>
         <ul>
-          {summary.completeness.suggestions.map((tip, i) => (
-            <li key={i}>💡 {tip}</li>
-          ))}
+          {summary?.completeness?.suggestions?.length > 0 ? (
+            summary.completeness.suggestions.map((tip, i) => (
+              <li key={i}>💡 {tip}</li>
+            ))
+          ) : (
+            <li>No suggestions available yet.</li>
+          )}
         </ul>
       </div>
     </div>

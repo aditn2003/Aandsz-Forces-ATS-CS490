@@ -14,7 +14,7 @@ import DangerTab from "./DangerTab";
 import ResumeBuilder from "./ResumeBuilder";
 import ResumeSetup from "./ResumeSetup";
 import ResumeEditor from "../../components/ResumeEditor"; // 🆕 added
-
+import SavedResumes from "../Resume/SavedResumes";
 import { useAuth } from "../../contexts/AuthContext";
 
 export default function ProfileLayout() {
@@ -52,6 +52,7 @@ export default function ProfileLayout() {
         <Route path="resume" element={<ResumeBuilder />} />
         <Route path="resume/setup" element={<ResumeSetup />} />
         <Route path="resume/editor" element={<ResumeEditor />} /> {/* ✅ new */}
+        <Route path="resume/saved" element={<SavedResumes />} />
         <Route path="danger" element={<DangerTab />} />
         {/* Fallback: any unknown /profile/... → /profile/info */}
         <Route path="*" element={<Navigate to="/profile/info" replace />} />

@@ -1,7 +1,6 @@
 -- ======================================
 -- DATABASE INITIALIZATION SCRIPT (init.sql)
 -- ======================================
-
 -- USERS TABLE
 CREATE TABLE IF NOT EXISTS users (
     id SERIAL PRIMARY KEY,
@@ -12,7 +11,6 @@ CREATE TABLE IF NOT EXISTS users (
     provider TEXT DEFAULT 'local',
     created_at TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
-
 -- PROFILES TABLE
 CREATE TABLE IF NOT EXISTS profiles (
     id SERIAL PRIMARY KEY,
@@ -28,7 +26,6 @@ CREATE TABLE IF NOT EXISTS profiles (
     picture_url TEXT,
     created_at TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
-
 -- EDUCATION TABLE
 CREATE TABLE IF NOT EXISTS education (
     id SERIAL PRIMARY KEY,
@@ -39,12 +36,11 @@ CREATE TABLE IF NOT EXISTS education (
     graduation_date DATE,
     currently_enrolled BOOLEAN DEFAULT FALSE,
     education_level VARCHAR(50),
-    gpa NUMERIC(3,2),
+    gpa NUMERIC(3, 2),
     gpa_private BOOLEAN DEFAULT FALSE,
     honors TEXT,
     created_at TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
-
 -- EMPLOYMENT TABLE
 CREATE TABLE IF NOT EXISTS employment (
     id SERIAL PRIMARY KEY,
@@ -58,7 +54,6 @@ CREATE TABLE IF NOT EXISTS employment (
     description TEXT CHECK (char_length(description) <= 1000),
     created_at TIMESTAMP WITHOUT TIME ZONE DEFAULT NOW()
 );
-
 -- PROJECTS TABLE
 CREATE TABLE IF NOT EXISTS projects (
     id SERIAL PRIMARY KEY,
@@ -68,7 +63,7 @@ CREATE TABLE IF NOT EXISTS projects (
     role VARCHAR(255) NOT NULL,
     start_date DATE,
     end_date DATE,
-    technologies TEXT[],
+    technologies TEXT [],
     repository_link TEXT,
     team_size INTEGER,
     collaboration_details TEXT,
@@ -76,24 +71,28 @@ CREATE TABLE IF NOT EXISTS projects (
     industry VARCHAR(100),
     project_type VARCHAR(100),
     media_url TEXT,
-    status VARCHAR(50) DEFAULT 'Planned'
-        CHECK (status IN ('Completed', 'Ongoing', 'Planned')),
+    status VARCHAR(50) DEFAULT 'Planned' CHECK (status IN ('Completed', 'Ongoing', 'Planned')),
     created_at TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
-
 -- SKILLS TABLE
 CREATE TABLE IF NOT EXISTS skills (
     id SERIAL PRIMARY KEY,
     user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     name VARCHAR(100) NOT NULL,
-    category VARCHAR(50) NOT NULL
-        CHECK (category IN ('Technical', 'Soft Skills', 'Languages', 'Industry-Specific')),
-    proficiency VARCHAR(20) NOT NULL
-        CHECK (proficiency IN ('Beginner', 'Intermediate', 'Advanced', 'Expert')),
+    category VARCHAR(50) NOT NULL CHECK (
+        category IN (
+            'Technical',
+            'Soft Skills',
+            'Languages',
+            'Industry-Specific'
+        )
+    ),
+    proficiency VARCHAR(20) NOT NULL CHECK (
+        proficiency IN ('Beginner', 'Intermediate', 'Advanced', 'Expert')
+    ),
     created_at TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     UNIQUE (user_id, name)
 );
-
 -- CERTIFICATIONS TABLE
 CREATE TABLE IF NOT EXISTS certifications (
     id SERIAL PRIMARY KEY,
@@ -110,7 +109,6 @@ CREATE TABLE IF NOT EXISTS certifications (
     renewal_reminder DATE,
     created_at TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
-
 -- JOBS TABLE
 CREATE TABLE IF NOT EXISTS jobs (
     id SERIAL PRIMARY KEY,
@@ -136,12 +134,9 @@ CREATE TABLE IF NOT EXISTS jobs (
     interview_notes TEXT,
     application_history JSONB DEFAULT '[]'::jsonb
 );
-
 -- JOBS INDEXES
 CREATE INDEX IF NOT EXISTS idx_jobs_user_id ON jobs(user_id);
 CREATE INDEX IF NOT EXISTS idx_jobs_status ON jobs(status);
-
-
 CREATE TABLE companies (
     id SERIAL PRIMARY KEY,
     name VARCHAR(255) UNIQUE NOT NULL,
@@ -152,42 +147,94 @@ CREATE TABLE companies (
     description TEXT,
     mission TEXT,
     news TEXT,
-    glassdoor_rating DECIMAL(2,1),
+    glassdoor_rating DECIMAL(2, 1),
     contact_email VARCHAR(255),
     contact_phone VARCHAR(50),
     logo_url TEXT,
     created_at TIMESTAMP DEFAULT NOW(),
     updated_at TIMESTAMP DEFAULT NOW()
 );
-
 -- resume_templates table
 CREATE TABLE resume_templates (
     id SERIAL PRIMARY KEY,
     user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
     name VARCHAR(100) NOT NULL,
-    layout_type VARCHAR(50) NOT NULL,     -- e.g. 'chronological', 'functional', 'hybrid'
+    layout_type VARCHAR(50) NOT NULL,
+    -- e.g. 'chronological', 'functional', 'hybrid'
     font VARCHAR(50) DEFAULT 'Inter',
     color_scheme VARCHAR(50) DEFAULT 'blue',
-    preview_url TEXT,                     -- optional: screenshot or preview image
+    preview_url TEXT,
+    -- optional: screenshot or preview image
     is_default BOOLEAN DEFAULT false,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
-
 CREATE TABLE resumes (
-  id SERIAL PRIMARY KEY,
-  user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
-  title VARCHAR(255) NOT NULL,
-  template_id INTEGER,
-  sections JSONB DEFAULT '{}'::jsonb,
-  created_at TIMESTAMP DEFAULT NOW(),
-  updated_at TIMESTAMP DEFAULT NOW()
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+    title VARCHAR(255) NOT NULL,
+    template_id INTEGER,
+    format VARCHAR(10) DEFAULT 'pdf',
+    sections JSONB DEFAULT '{}'::jsonb,
+    created_at TIMESTAMP DEFAULT NOW(),
+    updated_at TIMESTAMP DEFAULT NOW()
+);
+INSERT INTO resume_templates (
+        user_id,
+        name,
+        layout_type,
+        font,
+        color_scheme,
+        is_default
+    )
+VALUES (
+        NULL,
+        'Chronological',
+        'chronological',
+        'Inter',
+        'blue',
+        true
+    ),
+    (
+        NULL,
+        'Functional',
+        'functional',
+        'Arial',
+        'green',
+        false
+    ),
+    (
+        NULL,
+        'Hybrid',
+        'hybrid',
+        'Roboto',
+        'purple',
+        false
+    ) ON CONFLICT DO NOTHING;
+
+
+CREATE TABLE resume_presets (
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    name VARCHAR(100) NOT NULL,
+    section_order TEXT [],
+    -- e.g. ['profile', 'education', 'skills', 'projects']
+    visible_sections JSONB,
+    -- { "profile": true, "skills": false, ... }
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+CREATE TABLE section_presets (
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    section_name VARCHAR(100) NOT NULL,         -- e.g. "education", "skills"
+    preset_name VARCHAR(100) NOT NULL,          -- e.g. "Short Internship Version"
+    section_data JSONB NOT NULL,                -- stores the actual data (entries or object)
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
 
-
-INSERT INTO resume_templates (user_id, name, layout_type, font, color_scheme, is_default)
-VALUES
-  (NULL, 'Chronological', 'chronological', 'Inter', 'blue', true),
-  (NULL, 'Functional', 'functional', 'Arial', 'green', false),
-  (NULL, 'Hybrid', 'hybrid', 'Roboto', 'purple', false)
-ON CONFLICT DO NOTHING;
+CREATE TABLE job_descriptions (
+  id SERIAL PRIMARY KEY,
+  user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  content TEXT NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);

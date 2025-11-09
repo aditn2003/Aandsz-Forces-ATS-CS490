@@ -1,4 +1,3 @@
-// auth.js (or inside your routes file before routes)
 import jwt from "jsonwebtoken";
 
 export function auth(req, res, next) {
@@ -7,8 +6,9 @@ export function auth(req, res, next) {
   if (!token) return res.status(401).json({ error: "NO_TOKEN" });
 
   try {
-    const data = jwt.verify(token, process.env.JWT_SECRET); // don't ignore exp
-    req.userId = data.id;
+    const data = jwt.verify(token, process.env.JWT_SECRET);
+    // ✅ Attach user object so routes can use req.user.id
+    req.user = { id: data.id, email: data.email };
     next();
   } catch (err) {
     if (err.name === "TokenExpiredError") {

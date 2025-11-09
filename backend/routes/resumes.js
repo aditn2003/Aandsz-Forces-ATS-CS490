@@ -1,39 +1,111 @@
-// backend/routes/resumes.js
 import express from "express";
 import { Pool } from "pg";
 import dotenv from "dotenv";
-import { auth } from "../auth.js"; // uses same auth as the rest of your app
+import { auth } from "../auth.js";
 import multer from "multer";
-import { createRequire } from "module";
-import { readFileSync } from "fs";
+import fs, { readFileSync } from "fs";
+import path from "path";
+import { fileURLToPath } from "url";
+import { GoogleGenerativeAI } from "@google/generative-ai";
+import * as pdfjsLib from "pdfjs-dist/legacy/build/pdf.mjs";
+import PDFDocument from "pdfkit";
+import { Document, Packer, Paragraph } from "docx";
 
 dotenv.config();
 
+/* ------------------------------------------------------------------
+   ⚙️ Setup
+------------------------------------------------------------------ */
 const router = express.Router();
 const pool = new Pool({ connectionString: process.env.DATABASE_URL });
-const require = createRequire(import.meta.url);
-const pdfParse = require("pdf-parse");
+const upload = multer({ dest: "uploads/" });
+const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY);
 
-// ===========================
-// 🔹 BASIC ROUTES
-// ===========================
+// __dirname in ESM
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
-router.get("/test", (_req, res) => {
-  res.json({ ok: true, message: "Resume routes reachable ✅" });
-});
+// Ensure export folder exists
+const EXPORT_DIR = path.join(__dirname, "..", "exports");
+if (!fs.existsSync(EXPORT_DIR)) fs.mkdirSync(EXPORT_DIR, { recursive: true });
 
-// ===========================
-// 🔹 TEMPLATE ROUTES
-// ===========================
+/* ------------------------------------------------------------------
+   🧩 DOCX fallback loader (lazy import)
+------------------------------------------------------------------ */
+let mammoth;
+try {
+  const mod = await import("mammoth");
+  mammoth = mod.default || mod;
+} catch {
+  mammoth = null;
+  console.warn("⚠️ DOCX parsing disabled (mammoth not available)");
+}
 
+/* ------------------------------------------------------------------
+   📄 PDF extraction (pdfjs-dist) — Buffer → Uint8Array
+------------------------------------------------------------------ */
+async function extractPdfText(buffer) {
+  const uint8Array = new Uint8Array(buffer);
+  const loadingTask = pdfjsLib.getDocument({ data: uint8Array });
+  const pdfDoc = await loadingTask.promise;
+  let textContent = "";
+
+  for (let pageNum = 1; pageNum <= pdfDoc.numPages; pageNum++) {
+    const page = await pdfDoc.getPage(pageNum);
+    const content = await page.getTextContent();
+    const pageText = content.items.map((i) => i.str).join(" ");
+    textContent += pageText + "\n";
+  }
+
+  return textContent.trim();
+}
+
+/* ------------------------------------------------------------------
+   🧠 Simple text parser fallback (if Gemini fails)
+------------------------------------------------------------------ */
+function basicSectionParser(text = "") {
+  const lines = text
+    .split(/\r?\n/)
+    .map((l) => l.trim())
+    .filter(Boolean);
+
+  return {
+    summary: {
+      full_name: lines[0] || "",
+      title: "",
+      contact: { email: "", phone: "", location: "" },
+      bio: lines.slice(1, 5).join(" "),
+    },
+    experience: [],
+    education: [],
+    skills: [],
+    projects: [],
+    certifications: [],
+  };
+}
+
+/* ------------------------------------------------------------------
+   ✅ ROUTE: Quick test
+------------------------------------------------------------------ */
+router.get("/test", (_req, res) =>
+  res.json({ ok: true, message: "Resume routes reachable ✅" })
+);
+
+/* ------------------------------------------------------------------
+   🔹 TEMPLATE ROUTES
+------------------------------------------------------------------ */
 router.get("/templates", auth, async (req, res) => {
   try {
-    const q = `
-      SELECT * FROM resume_templates
+    const userId = req.user.id;
+    const { rows } = await pool.query(
+      `
+      SELECT *
+      FROM resume_templates
       WHERE user_id = $1 OR user_id IS NULL
       ORDER BY is_default DESC, name;
-    `;
-    const { rows } = await pool.query(q, [req.userId]);
+      `,
+      [userId]
+    );
     res.json(rows);
   } catch (err) {
     console.error("❌ Error loading templates:", err);
@@ -42,20 +114,17 @@ router.get("/templates", auth, async (req, res) => {
 });
 
 router.post("/templates", auth, async (req, res) => {
+  const userId = req.user.id;
   const { name, layout_type, font, color_scheme } = req.body;
   try {
-    const q = `
+    const { rows } = await pool.query(
+      `
       INSERT INTO resume_templates (user_id, name, layout_type, font, color_scheme)
       VALUES ($1, $2, $3, $4, $5)
       RETURNING *;
-    `;
-    const { rows } = await pool.query(q, [
-      req.userId,
-      name,
-      layout_type,
-      font,
-      color_scheme,
-    ]);
+      `,
+      [userId, name, layout_type, font, color_scheme]
+    );
     res.json(rows[0]);
   } catch (err) {
     console.error("❌ Error creating template:", err);
@@ -64,21 +133,22 @@ router.post("/templates", auth, async (req, res) => {
 });
 
 router.patch("/templates/:id/default", auth, async (req, res) => {
+  const userId = req.user.id;
   const templateId = req.params.id;
   try {
     await pool.query(
       `UPDATE resume_templates SET is_default = false WHERE user_id = $1`,
-      [req.userId]
+      [userId]
     );
-
     const { rows } = await pool.query(
-      `UPDATE resume_templates
-         SET is_default = true
-       WHERE id = $1 AND user_id = $2
-       RETURNING *`,
-      [templateId, req.userId]
+      `
+      UPDATE resume_templates
+      SET is_default = true
+      WHERE id = $1 AND user_id = $2
+      RETURNING *;
+      `,
+      [templateId, userId]
     );
-
     res.json(rows[0]);
   } catch (err) {
     console.error("❌ Error setting default template:", err);
@@ -86,42 +156,84 @@ router.patch("/templates/:id/default", auth, async (req, res) => {
   }
 });
 
-// ===========================
-// 🔹 CREATE FINALIZED RESUME
-// ===========================
-
+/* ------------------------------------------------------------------
+   🔹 CREATE / SAVE FINALIZED RESUME
+   (used by ResumeEditor "Save as PDF/DOCX/TXT/HTML")
+------------------------------------------------------------------ */
+// backend/routes/resumes.js
 router.post("/", auth, async (req, res) => {
-  const { title, template_id, sections } = req.body;
-
   try {
-    const insertQuery = `
-      INSERT INTO resumes (user_id, title, template_id, sections, created_at)
-      VALUES ($1, $2, $3, $4, NOW())
-      RETURNING *;
-    `;
-    const { rows } = await pool.query(insertQuery, [
-      req.userId,
-      title,
-      template_id,
-      sections || {},
-    ]);
-    res.json(rows[0]);
+    const userId = req.user.id;
+    const { title, template_id = 1, sections, format = "pdf" } = req.body;
+
+    if (!title || !sections)
+      return res.status(400).json({ error: "Title and sections are required" });
+
+    // 🟢 If resume with same title already exists, update it instead of inserting duplicate
+    const { rows: existing } = await pool.query(
+      `SELECT id FROM resumes WHERE user_id=$1 AND title=$2`,
+      [userId, title]
+    );
+
+    let resume;
+    if (existing.length > 0) {
+      const { rows } = await pool.query(
+        `UPDATE resumes
+         SET sections=$1, template_id=$2, format=$3, updated_at=NOW()
+         WHERE id=$4
+         RETURNING id, title, format, updated_at`,
+        [sections, template_id, format, existing[0].id]
+      );
+      resume = rows[0];
+    } else {
+      const { rows } = await pool.query(
+        `INSERT INTO resumes (user_id, title, template_id, sections, format, created_at)
+         VALUES ($1, $2, $3, $4, $5, NOW())
+         RETURNING id, title, format, created_at`,
+        [userId, title, template_id, sections, format]
+      );
+      resume = rows[0];
+    }
+
+    res.json({ message: "✅ Resume saved", resume });
   } catch (err) {
-    console.error("❌ Error creating resume:", err);
-    res.status(500).json({ error: "Failed to create resume" });
+    console.error("❌ Save resume error:", err);
+    res.status(500).json({ error: "Failed to save resume" });
+  }
+});
+router.get("/:id/download", auth, async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { id } = req.params;
+    const format = req.query.format || "pdf";
+
+    const { rows } = await pool.query(
+      "SELECT * FROM resumes WHERE id=$1 AND user_id=$2",
+      [id, userId]
+    );
+    if (!rows.length) return res.status(404).json({ error: "Not found" });
+
+    const resume = rows[0];
+    const filename = `${resume.title || "resume"}.${format}`;
+
+    // send a simple test file first
+    res.setHeader("Content-Disposition", `attachment; filename="${filename}"`);
+    res.setHeader("Content-Type", "text/plain");
+    res.send(`This is a ${format.toUpperCase()} export for ${resume.title}`);
+  } catch (err) {
+    console.error("Download error:", err);
+    res.status(500).json({ error: "Failed to download" });
   }
 });
 
-// ===========================
-// 🔹 AUTOFILL FROM PROFILE (no DB insert)
-// ===========================
-
+/* ------------------------------------------------------------------
+   🔹 AUTOFILL FROM PROFILE
+------------------------------------------------------------------ */
 router.get("/from-profile", auth, async (req, res) => {
   try {
-    const userId = req.userId;
-
-    // Fetch all user sections in parallel
+    const userId = req.user.id;
     const q = (text, params) => pool.query(text, params);
+
     const [profile, employment, education, skills, projects, certs] =
       await Promise.all([
         q("SELECT * FROM profiles WHERE user_id=$1", [userId]),
@@ -146,8 +258,6 @@ router.get("/from-profile", auth, async (req, res) => {
       ]);
 
     const p = profile.rows[0] || {};
-
-    // Construct sections JSON (used to prefill form)
     const sections = {
       summary: {
         full_name: p.full_name || "",
@@ -181,13 +291,13 @@ router.get("/from-profile", auth, async (req, res) => {
         category: s.category,
         proficiency: s.proficiency,
       })),
-      projects: projects.rows.map((p) => ({
-        name: p.name,
-        description: p.description,
-        role: p.role,
-        technologies: p.technologies,
-        start_date: p.start_date,
-        end_date: p.end_date,
+      projects: projects.rows.map((pRow) => ({
+        name: pRow.name,
+        description: pRow.description,
+        role: pRow.role,
+        technologies: pRow.technologies,
+        start_date: pRow.start_date,
+        end_date: pRow.end_date,
       })),
       certifications: certs.rows.map((c) => ({
         name: c.name,
@@ -197,10 +307,10 @@ router.get("/from-profile", auth, async (req, res) => {
       })),
     };
 
-    // ✅ Return the JSON — frontend will prefill an editable form
     res.json({
       message: "✅ Draft resume sections generated successfully.",
       sections,
+      title: "Profile-based Resume",
     });
   } catch (err) {
     console.error("❌ Error building draft resume:", err);
@@ -208,27 +318,271 @@ router.get("/from-profile", auth, async (req, res) => {
   }
 });
 
-// ===========================
-// 🔹 IMPORT (PDF/DOCX PARSING)
-// ===========================
-
-const upload = multer({ dest: "uploads/" });
-
+/* ------------------------------------------------------------------
+   🔹 IMPORT (PDF/DOCX + GEMINI AI)
+------------------------------------------------------------------ */
 router.post("/import", auth, upload.single("resume"), async (req, res) => {
   try {
-    if (!req.file) return res.status(400).json({ error: "No file uploaded" });
+    if (!req.file) return res.status(400).json({ error: "No file uploaded." });
 
+    console.log("📥 File received:", req.file.originalname);
     const buffer = readFileSync(req.file.path);
-    const data = await pdfParse(buffer);
+    const ext = path.extname(req.file.originalname).toLowerCase();
+    let text = "";
 
-    // In future: use NLP or LLM to segment text into structured fields
+    // STEP 1: Extract text
+    try {
+      if (ext === ".pdf") {
+        console.log("🔹 Parsing PDF (pdfjs-dist)...");
+        text = await extractPdfText(buffer);
+      } else if (ext === ".docx" && mammoth) {
+        console.log("🔹 Parsing DOCX (mammoth)...");
+        const result = await mammoth.extractRawText({ buffer });
+        text = result.value || "";
+      } else {
+        return res.status(400).json({
+          error: "Unsupported file type. Upload PDF or DOCX.",
+        });
+      }
+    } catch (parseErr) {
+      console.error("❌ PDF/DOCX parsing failed:", parseErr);
+      return res.status(500).json({
+        error: "Failed to extract text",
+        details: parseErr.message,
+      });
+    }
+
+    if (!text.trim()) {
+      console.warn("⚠️ No readable text extracted.");
+      return res.status(400).json({
+        error: "File text could not be read (possibly scanned).",
+      });
+    }
+
+    console.log("🧾 Extracted resume length:", text.length);
+
+    // STEP 2: Gemini parsing
+    const prompt = `
+You are an ATS resume parser. Convert the resume text below into structured JSON strictly matching this schema:
+{
+  "summary": { "full_name": string, "title": string, "contact": { "email": string, "phone": string, "location": string }, "bio": string },
+  "experience": [{ "title": string, "company": string, "location": string, "start_date": string, "end_date": string, "current": boolean, "description": string }],
+  "education": [{ "institution": string, "degree": string, "field": string, "graduation_date": string, "honors": string, "gpa": string }],
+  "skills": [{ "name": string, "category": string, "proficiency": string }],
+  "projects": [{ "name": string, "description": string, "role": string, "technologies": string, "start_date": string, "end_date": string }],
+  "certifications": [{ "name": string, "organization": string, "date_earned": string, "expiration_date": string }]
+}
+Return ONLY valid JSON.
+
+Resume text:
+${text.slice(0, 15000)}
+`;
+
+    console.log("🚀 Sending to Gemini...");
+    let structured = {};
+
+    try {
+      const model = genAI.getGenerativeModel({
+        model: "gemini-2.5-flash",
+        generationConfig: {
+          temperature: 0.2,
+          responseMimeType: "application/json",
+        },
+      });
+
+      const result = await model.generateContent(prompt);
+      const aiResponse = result.response.text();
+      structured = JSON.parse(aiResponse);
+      console.log("✅ Gemini returned structured JSON");
+    } catch (err) {
+      console.error("⚠️ Gemini failed:", err.message);
+      structured = basicSectionParser(text);
+    }
+
     res.json({
-      message: "File parsed successfully (preview snippet).",
-      text: data.text.slice(0, 1000),
+      message: "✅ Resume parsed successfully",
+      sections: structured,
+      preview: text.slice(0, 800),
     });
   } catch (err) {
-    console.error("❌ Error parsing resume:", err);
-    res.status(500).json({ error: "Failed to parse resume" });
+    console.error("❌ Fatal error:", err);
+    res.status(500).json({
+      error: "Failed to parse resume",
+      details: err.message,
+    });
+  }
+});
+
+/* ------------------------------------------------------------------
+   🔹 LIST SAVED RESUMES (for sidebar)
+------------------------------------------------------------------ */
+router.get("/", auth, async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { rows } = await pool.query(
+      `
+      SELECT id, title, created_at, format
+      FROM resumes
+      WHERE user_id=$1
+      ORDER BY created_at DESC;
+      `,
+      [userId]
+    );
+    res.json({ resumes: rows });
+  } catch (err) {
+    console.error("❌ Fetch resumes error:", err);
+    res.status(500).json({ error: "Failed to load saved resumes" });
+  }
+});
+
+/* ------------------------------------------------------------------
+   🔹 DELETE SAVED RESUME
+------------------------------------------------------------------ */
+router.delete("/:id", auth, async (req, res) => {
+  try {
+    const userId = req.user.id;
+    await pool.query(`DELETE FROM resumes WHERE id=$1 AND user_id=$2`, [
+      req.params.id,
+      userId,
+    ]);
+    res.json({ message: "Resume deleted" });
+  } catch (err) {
+    console.error("❌ Delete resume error:", err);
+    res.status(500).json({ error: "Failed to delete resume" });
+  }
+});
+
+/* ------------------------------------------------------------------
+   🔹 DOWNLOAD SAVED RESUME (PDF / DOCX / TXT / HTML)
+------------------------------------------------------------------ */
+router.get("/:id/download", auth, async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { rows } = await pool.query(
+      `SELECT * FROM resumes WHERE id=$1 AND user_id=$2`,
+      [req.params.id, userId]
+    );
+    if (!rows.length)
+      return res.status(404).json({ error: "Resume not found" });
+
+    const resume = rows[0];
+
+    const rawSections = resume.sections || {};
+    const sections =
+      typeof rawSections === "string" ? JSON.parse(rawSections) : rawSections;
+
+    const format = (resume.format || "pdf").toLowerCase();
+    const baseName = `${resume.title || "resume"}_${resume.id}`
+      .replace(/[^\w\-]+/g, "_")
+      .slice(0, 80);
+    const basePath = path.join(EXPORT_DIR, baseName);
+
+    // Helper: build a readable text from sections
+    const sectionsToText = () =>
+      Object.entries(sections)
+        .map(
+          ([key, val]) =>
+            `${key.toUpperCase()}\n${JSON.stringify(val, null, 2)}`
+        )
+        .join("\n\n");
+
+    if (format === "pdf") {
+      const pdfPath = `${basePath}.pdf`;
+      const doc = new PDFDocument({ margin: 40 });
+
+      const stream = fs.createWriteStream(pdfPath);
+      doc.pipe(stream);
+
+      doc.fontSize(22).text(resume.title || "Resume", { align: "center" });
+      doc.moveDown();
+
+      for (const [key, val] of Object.entries(sections)) {
+        doc
+          .fontSize(14)
+          .fillColor("#111827")
+          .text(key.toUpperCase(), { underline: true });
+        doc.moveDown(0.2);
+
+        doc
+          .fontSize(10)
+          .fillColor("#111827")
+          .text(JSON.stringify(val, null, 2), {
+            align: "left",
+          });
+        doc.moveDown();
+      }
+
+      doc.end();
+      stream.on("finish", () => res.download(pdfPath));
+      return;
+    }
+
+    if (format === "docx") {
+      const children = [
+        new Paragraph({
+          text: resume.title || "Resume",
+          heading: "Heading1",
+        }),
+      ];
+
+      for (const [key, val] of Object.entries(sections)) {
+        children.push(
+          new Paragraph({
+            text: key.toUpperCase(),
+            heading: "Heading2",
+          })
+        );
+        children.push(
+          new Paragraph({
+            text: JSON.stringify(val, null, 2),
+          })
+        );
+      }
+
+      const doc = new Document({ sections: [{ children }] });
+      const buffer = await Packer.toBuffer(doc);
+      const docxPath = `${basePath}.docx`;
+      fs.writeFileSync(docxPath, buffer);
+      return res.download(docxPath);
+    }
+
+    if (format === "txt") {
+      const txtPath = `${basePath}.txt`;
+      fs.writeFileSync(txtPath, sectionsToText(), "utf8");
+      return res.download(txtPath);
+    }
+
+    if (format === "html") {
+      const htmlBody = Object.entries(sections)
+        .map(
+          ([key, val]) =>
+            `<h2>${key.toUpperCase()}</h2><pre>${JSON.stringify(
+              val,
+              null,
+              2
+            )}</pre>`
+        )
+        .join("");
+      const html = `<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8" />
+<title>${resume.title || "Resume"}</title>
+</head>
+<body style="font-family: Arial, sans-serif; margin: 40px;">
+<h1>${resume.title || "Resume"}</h1>
+${htmlBody}
+</body>
+</html>`;
+      const htmlPath = `${basePath}.html`;
+      fs.writeFileSync(htmlPath, html, "utf8");
+      return res.download(htmlPath);
+    }
+
+    return res.status(400).json({ error: "Unsupported format" });
+  } catch (err) {
+    console.error("❌ Download resume error:", err);
+    res.status(500).json({ error: "Failed to export resume" });
   }
 });
 

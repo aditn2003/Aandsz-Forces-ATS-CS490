@@ -19,6 +19,10 @@ import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
 import ProfileLayout from "./pages/Profile/ProfileLayout";
 
+// ---------- Resume Pipeline ----------
+import ResumeTemplateChooser from "./components/ResumeTemplateChooser";
+import ResumeEditor from "./components/ResumeEditor";
+
 // ---------- Context Providers ----------
 import { AuthProvider } from "./contexts/AuthContext";
 import { ProfileProvider } from "./contexts/ProfileContext";
@@ -63,6 +67,7 @@ function MainLayout() {
 
       <main className="app-container">
         {loading && <Spinner />}
+
         <Routes>
           {/* --- Public Routes --- */}
           <Route path="/" element={<Home />} />
@@ -73,6 +78,10 @@ function MainLayout() {
 
           {/* --- Protected Profile Routes --- */}
           <Route path="/profile/*" element={<ProfileLayout />} />
+
+          {/* --- Resume Builder Pipeline --- */}
+          <Route path="/resume/templates" element={<ResumeTemplateChooser />} />
+          <Route path="/resume/editor" element={<ResumeEditor />} />
 
           {/* --- Fallback --- */}
           <Route path="*" element={<Navigate to="/" replace />} />
