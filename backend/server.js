@@ -21,6 +21,9 @@ import jobRoutes from "./routes/job.js";
 import { auth } from "./auth.js";
 import companyRoutes from "./routes/company.js";
 import resumeRoutes from "./routes/resumes.js";
+import resumePresetsRoutes from "./routes/resumePresets.js";
+import sectionPresetsRoutes from "./routes/sectionPresets.js";
+import jobDescriptionsRoutes from "./routes/jobDescriptions.js";
 
 // ====== 🔔 DAILY DEADLINE REMINDER CRON JOB (UC-012) ======
 import crons from "node-cron";
@@ -494,6 +497,9 @@ async function sendDeadlineReminders() {
 }
 app.use("/api/companies", companyRoutes);
 app.use("/api/resumes", resumeRoutes);
+app.use("/api", resumePresetsRoutes);
+app.use("/api", sectionPresetsRoutes);
+app.use("/api", jobDescriptionsRoutes);
 
 const REMINDER_DAYS =
   parseInt(process.env.REMINDER_DAYS_BEFORE || "3", 10) || 3;

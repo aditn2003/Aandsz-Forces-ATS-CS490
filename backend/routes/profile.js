@@ -31,20 +31,52 @@ function auth(req, res, next) {
 
 // ---------- SAVE OR UPDATE PROFILE ----------
 router.post("/profile", auth, async (req, res) => {
-  const { full_name, email, phone, location, title, bio, industry, experience } = req.body;
+  const {
+    full_name,
+    email,
+    phone,
+    location,
+    title,
+    bio,
+    industry,
+    experience,
+  } = req.body;
   try {
-    const existing = await pool.query("SELECT id FROM profiles WHERE user_id=$1", [req.userId]);
+    const existing = await pool.query(
+      "SELECT id FROM profiles WHERE user_id=$1",
+      [req.userId]
+    );
     if (existing.rows.length > 0) {
       await pool.query(
         `UPDATE profiles SET full_name=$1, email=$2, phone=$3, location=$4,
          title=$5, bio=$6, industry=$7, experience=$8 WHERE user_id=$9`,
-        [full_name, email, phone, location, title, bio, industry, experience, req.userId]
+        [
+          full_name,
+          email,
+          phone,
+          location,
+          title,
+          bio,
+          industry,
+          experience,
+          req.userId,
+        ]
       );
     } else {
       await pool.query(
         `INSERT INTO profiles (user_id, full_name, email, phone, location, title, bio, industry, experience)
          VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)`,
-        [req.userId, full_name, email, phone, location, title, bio, industry, experience]
+        [
+          req.userId,
+          full_name,
+          email,
+          phone,
+          location,
+          title,
+          bio,
+          industry,
+          experience,
+        ]
       );
     }
     res.json({ message: "Profile saved successfully" });
@@ -79,17 +111,25 @@ router.post("/profile/picture", auth, async (req, res) => {
     const fullUrl = `http://localhost:4000${url}`;
 
     // Check if the profile already exists
-    const check = await pool.query("SELECT id FROM profiles WHERE user_id=$1", [req.userId]);
+    const check = await pool.query("SELECT id FROM profiles WHERE user_id=$1", [
+      req.userId,
+    ]);
     if (check.rows.length === 0) {
-      await pool.query("INSERT INTO profiles (user_id, picture_url) VALUES ($1, $2)", [
-        req.userId,
-        fullUrl,
-      ]);
+      await pool.query(
+        "INSERT INTO profiles (user_id, picture_url) VALUES ($1, $2)",
+        [req.userId, fullUrl]
+      );
     } else {
-      await pool.query("UPDATE profiles SET picture_url=$1 WHERE user_id=$2", [fullUrl, req.userId]);
+      await pool.query("UPDATE profiles SET picture_url=$1 WHERE user_id=$2", [
+        fullUrl,
+        req.userId,
+      ]);
     }
 
-    res.json({ message: "✅ Profile picture saved successfully", picture_url: fullUrl });
+    res.json({
+      message: "✅ Profile picture saved successfully",
+      picture_url: fullUrl,
+    });
   } catch (err) {
     console.error("❌ Error updating profile picture:", err);
     res.status(500).json({ error: "Database error while saving picture" });
@@ -101,21 +141,25 @@ router.get("/profile/summary", auth, async (req, res) => {
     // TODO: adjust table names/columns if yours differ
     const q = (text, params) => pool.query(text, params);
 
-    const [
-      employment,
-      skills,
-      education,
-      certifications,
-      projects,
-      info
-    ] = await Promise.all([
-      q("SELECT COUNT(*)::int AS c FROM employment WHERE user_id=$1", [req.userId]),
-      q("SELECT COUNT(*)::int AS c FROM skills WHERE user_id=$1", [req.userId]),
-      q("SELECT COUNT(*)::int AS c FROM education WHERE user_id=$1", [req.userId]),
-      q("SELECT COUNT(*)::int AS c FROM certifications WHERE user_id=$1", [req.userId]),
-      q("SELECT COUNT(*)::int AS c FROM projects WHERE user_id=$1", [req.userId]),
-      q(
-        `SELECT 
+    const [employment, skills, education, certifications, projects, info] =
+      await Promise.all([
+        q("SELECT COUNT(*)::int AS c FROM employment WHERE user_id=$1", [
+          req.userId,
+        ]),
+        q("SELECT COUNT(*)::int AS c FROM skills WHERE user_id=$1", [
+          req.userId,
+        ]),
+        q("SELECT COUNT(*)::int AS c FROM education WHERE user_id=$1", [
+          req.userId,
+        ]),
+        q("SELECT COUNT(*)::int AS c FROM certifications WHERE user_id=$1", [
+          req.userId,
+        ]),
+        q("SELECT COUNT(*)::int AS c FROM projects WHERE user_id=$1", [
+          req.userId,
+        ]),
+        q(
+          `SELECT 
            (full_name IS NOT NULL AND full_name <> '') AS has_name,
            (email IS NOT NULL AND email <> '')         AS has_email,
            (phone IS NOT NULL AND phone <> '')         AS has_phone,
@@ -124,9 +168,9 @@ router.get("/profile/summary", auth, async (req, res) => {
            (bio IS NOT NULL AND bio <> '')             AS has_bio,
            (picture_url IS NOT NULL AND picture_url <> '') AS has_picture
          FROM profiles WHERE user_id=$1`,
-        [req.userId]
-      )
-    ]);
+          [req.userId]
+        ),
+      ]);
 
     const counts = {
       employment_count: employment.rows[0]?.c || 0,
@@ -145,13 +189,19 @@ router.get("/profile/summary", auth, async (req, res) => {
 
     // --- Simple completeness model (tweak weights as you like)
     const weights = {
-      info: 25, employment: 25, skills: 20, education: 15, certifications: 10, projects: 5
+      info: 25,
+      employment: 25,
+      skills: 20,
+      education: 15,
+      certifications: 10,
+      projects: 5,
     };
 
     let score = 0;
     if (info_complete) score += weights.info;
     if (counts.employment_count > 0) score += weights.employment;
-    if (counts.skills_count >= 5) score += weights.skills;       // full points at >=5 skills
+    if (counts.skills_count >= 5)
+      score += weights.skills; // full points at >=5 skills
     else if (counts.skills_count > 0) score += Math.round(weights.skills / 2);
 
     if (counts.education_count > 0) score += weights.education;
@@ -160,19 +210,30 @@ router.get("/profile/summary", auth, async (req, res) => {
 
     // --- Suggestions
     const suggestions = [];
-    if (!info_complete) suggestions.push("Complete your basic profile info (name, email, phone, location).");
-    if (counts.employment_count === 0) suggestions.push("Add at least one employment entry.");
-    if (counts.skills_count < 5) suggestions.push("List 5+ skills to strengthen your profile.");
-    if (counts.education_count === 0) suggestions.push("Add an education record.");
-    if (counts.projects_count === 0) suggestions.push("Showcase a project you’re proud of.");
-    if (!infoRow.has_picture) suggestions.push("Upload a professional profile picture.");
-    if (!infoRow.has_title) suggestions.push("Add a headline (e.g., 'Software Engineer | ML Enthusiast').");
+    if (!info_complete)
+      suggestions.push(
+        "Complete your basic profile info (name, email, phone, location)."
+      );
+    if (counts.employment_count === 0)
+      suggestions.push("Add at least one employment entry.");
+    if (counts.skills_count < 5)
+      suggestions.push("List 5+ skills to strengthen your profile.");
+    if (counts.education_count === 0)
+      suggestions.push("Add an education record.");
+    if (counts.projects_count === 0)
+      suggestions.push("Showcase a project you’re proud of.");
+    if (!infoRow.has_picture)
+      suggestions.push("Upload a professional profile picture.");
+    if (!infoRow.has_title)
+      suggestions.push(
+        "Add a headline (e.g., 'Software Engineer | ML Enthusiast')."
+      );
 
     // respond
     return res.json({
       info_complete,
       ...counts,
-      completeness: { score: Math.max(0, Math.min(100, score)), suggestions }
+      completeness: { score: Math.max(0, Math.min(100, score)), suggestions },
     });
   } catch (err) {
     console.error("❌ Profile summary error:", err);
@@ -180,6 +241,4 @@ router.get("/profile/summary", auth, async (req, res) => {
   }
 });
 
-
 export default router;
-

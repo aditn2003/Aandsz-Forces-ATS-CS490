@@ -1,5 +1,5 @@
-// src/components/ResumeTemplateChooser.jsx
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { api } from "../api";
 import "./ResumeTemplateChooser.css";
 
@@ -11,6 +11,11 @@ export default function ResumeTemplateChooser({ onSelectTemplate }) {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [uploading, setUploading] = useState(false);
 
+  const navigate = useNavigate();
+
+  // ----------------------------
+  // Load static templates
+  // ----------------------------
   useEffect(() => {
     const staticTemplates = [
       {
@@ -19,7 +24,6 @@ export default function ResumeTemplateChooser({ onSelectTemplate }) {
         layout_type: "ats",
         color_scheme: "#000000ff",
         preview_url: "/assets/templates/ats.png",
-        pdf_url: "/assets/pdfs/Resume Template - ATS.pdf",
       },
       {
         id: 2,
@@ -27,7 +31,6 @@ export default function ResumeTemplateChooser({ onSelectTemplate }) {
         layout_type: "creative",
         color_scheme: "#000000ff",
         preview_url: "/assets/templates/creative.png",
-        pdf_url: "/assets/pdfs/Resume Template - Creative.pdf",
       },
       {
         id: 3,
@@ -35,7 +38,6 @@ export default function ResumeTemplateChooser({ onSelectTemplate }) {
         layout_type: "two-column",
         color_scheme: "#246bdeff",
         preview_url: "/assets/templates/two-column.png",
-        pdf_url: "/assets/pdfs/Resume Template - Two Column.pdf",
       },
       {
         id: 4,
@@ -43,50 +45,90 @@ export default function ResumeTemplateChooser({ onSelectTemplate }) {
         layout_type: "professional",
         color_scheme: "#000000ff",
         preview_url: "/assets/templates/professional.png",
-        pdf_url: "/assets/pdfs/Resume Template - Professional.pdf",
       },
     ];
 
     setTemplates(staticTemplates);
   }, []);
 
-  // ✅ Handle resume import
+  // ----------------------------
+  // Helpers
+  // ----------------------------
+  function getActiveTemplate() {
+    if (selected) return selected;
+    if (templates.length) return templates[0];
+    return { id: 1, name: "ATS Optimized", layout_type: "ats" };
+  }
+
+  // ----------------------------
+  // Import Resume (works via modal only)
+  // ----------------------------
   async function handleFileUpload(e) {
     const file = e.target.files[0];
     if (!file) return;
 
+    console.log("📁 File selected:", file);
     const formData = new FormData();
     formData.append("resume", file);
 
     try {
       setUploading(true);
-      const res = await api.post("/api/resumes/import", formData, {
-        headers: { "Content-Type": "multipart/form-data" },
+
+      const { data } = await api.post("/api/resumes/import", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
       });
-      alert("✅ Resume imported successfully!");
-      console.log("Imported data:", res.data);
+
+      console.log("✅ Imported resume sections:", data.sections);
+
+      navigate("/resume/editor", {
+        state: {
+          sections: data.sections || {},
+          title: data.title || "Imported Resume",
+          template: getActiveTemplate(),
+        },
+      });
+
       setShowCreateModal(false);
     } catch (err) {
-      console.error("Error uploading resume:", err);
-      alert("❌ Failed to import resume.");
+      console.error("❌ Error uploading resume:", err);
+      alert(err?.response?.data?.error || "❌ Failed to import resume.");
     } finally {
       setUploading(false);
+      e.target.value = ""; // allow reselect
     }
   }
 
-  // ✅ Fetch data from existing user info
+  // ----------------------------
+  // Use existing profile info
+  // ----------------------------
   async function handleUseExistingInfo() {
     try {
-      const res = await api.get("/api/resumes/from-profile");
-      alert("✅ Resume created using existing information!");
-      console.log("Created:", res.data);
+      const { data } = await api.get("/api/resumes/from-profile");
+
+      console.log("✅ Using profile data:", data);
+
+      navigate("/resume/editor", {
+        state: {
+          sections: data.sections || {},
+          title: data.title || "Profile-based Resume",
+          template: getActiveTemplate(),
+        },
+      });
+
       setShowCreateModal(false);
     } catch (err) {
-      console.error("Error creating from profile:", err);
-      alert("❌ Failed to create resume from profile.");
+      console.error("❌ Error creating from profile:", err);
+      alert(
+        err?.response?.data?.error || "❌ Failed to create resume from profile."
+      );
     }
   }
 
+  // ----------------------------
+  // Filter templates
+  // ----------------------------
   const categories = [
     "All",
     "ATS",
@@ -100,22 +142,18 @@ export default function ResumeTemplateChooser({ onSelectTemplate }) {
     (t) => filter === "All" || t.layout_type === filter.toLowerCase()
   );
 
+  // ----------------------------
+  // UI
+  // ----------------------------
   return (
     <div className="resume-template-page">
-      {/* ===== HEADER ===== */}
+      {/* HEADER */}
       <header className="template-header">
         <h1>Resume Templates</h1>
         <p>
-          Each resume template is designed to follow the exact rules you need to
-          get hired faster. Choose one and start building your tailored resume!
+          Each resume template is designed to follow ATS rules and help you get
+          noticed. Choose one to start building your tailored resume.
         </p>
-
-        <button
-          className="create-resume-btn"
-          onClick={() => setShowCreateModal(true)}
-        >
-          Create My Resume
-        </button>
 
         <div className="category-filters">
           {categories.map((cat) => (
@@ -130,7 +168,7 @@ export default function ResumeTemplateChooser({ onSelectTemplate }) {
         </div>
       </header>
 
-      {/* ===== TEMPLATE GRID ===== */}
+      {/* TEMPLATE GRID */}
       <section className="template-grid">
         {filtered.map((t) => (
           <div
@@ -175,7 +213,7 @@ export default function ResumeTemplateChooser({ onSelectTemplate }) {
         ))}
       </section>
 
-      {/* ===== CREATE RESUME MODAL ===== */}
+      {/* CREATE RESUME MODAL */}
       {showCreateModal && (
         <div
           className="preview-overlay"
@@ -188,6 +226,7 @@ export default function ResumeTemplateChooser({ onSelectTemplate }) {
             >
               ✕
             </button>
+
             <h2>Create Resume</h2>
             <p>Choose how you’d like to start building your resume:</p>
 
@@ -196,25 +235,26 @@ export default function ResumeTemplateChooser({ onSelectTemplate }) {
                 Use Existing Information
               </button>
 
-              <label
-                htmlFor="resume-upload"
-                className="btn-secondary upload-btn"
-              >
+              <label className="btn-secondary upload-btn">
                 {uploading ? "Uploading..." : "Import Resume"}
                 <input
                   type="file"
-                  id="resume-upload"
                   accept=".pdf,.doc,.docx"
                   onChange={handleFileUpload}
-                  hidden
+                  style={{ display: "none" }}
                 />
               </label>
             </div>
+
+            <p className="helper-text">
+              Upload an existing resume (PDF/DOCX) or pull your data from your
+              saved profile to start editing immediately.
+            </p>
           </div>
         </div>
       )}
 
-      {/* ===== POPUP PREVIEW MODAL ===== */}
+      {/* TEMPLATE PREVIEW MODAL */}
       {preview && (
         <div className="preview-overlay" onClick={() => setPreview(null)}>
           <div className="preview-modal" onClick={(e) => e.stopPropagation()}>

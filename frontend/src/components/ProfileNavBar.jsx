@@ -1,5 +1,6 @@
 import React from "react";
 import { NavLink } from "react-router-dom";
+import "./ProfileNavBar.css";
 
 export default function ProfileNavBar() {
   const tabs = [
@@ -11,12 +12,11 @@ export default function ProfileNavBar() {
     { key: "projects", label: "Projects" },
     { key: "dashboard", label: "Dashboard" },
     { key: "jobs", label: "Jobs" },
-    { key: "resume", label: "Resume Builder" },
     { key: "danger", label: "Danger Zone" },
   ];
 
   return (
-    <nav className="profile-nav">
+    <nav className="profile-navbar">
       {tabs.map((tab) => (
         <NavLink
           key={tab.key}
@@ -28,6 +28,29 @@ export default function ProfileNavBar() {
           {tab.label}
         </NavLink>
       ))}
+
+      {/* 🔽 Dropdown for Resume */}
+      <div className="profile-tab dropdown">
+        <span className="dropdown-toggle">Resume Builder ▾</span>
+        <div className="dropdown-menu">
+          <NavLink
+            to="/profile/resume"
+            className={({ isActive }) =>
+              `dropdown-item ${isActive ? "active" : ""}`
+            }
+          >
+            Resume Builder
+          </NavLink>
+          <NavLink
+            to="/profile/resume/saved"
+            className={({ isActive }) =>
+              `dropdown-item ${isActive ? "active" : ""}`
+            }
+          >
+            Saved Resumes
+          </NavLink>
+        </div>
+      </div>
     </nav>
   );
 }
