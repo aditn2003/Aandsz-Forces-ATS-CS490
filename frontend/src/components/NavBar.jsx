@@ -8,6 +8,8 @@ import {
   FaSignInAlt,
   FaUserPlus,
   FaSignOutAlt,
+  FaFileAlt,
+  FaBriefcase,
 } from "react-icons/fa";
 import { NavLink, useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
@@ -18,12 +20,14 @@ export default function NavBar() {
 
   return (
     <header className="navbar">
+      {/* Logo */}
       <div className="navbar-logo" onClick={() => navigate("/")}>
         <Logo size={80} />
       </div>
 
       <h1 className="navbar-title">ATS for Candidates</h1>
 
+      {/* Nav Links */}
       <nav className="navbar-right">
         <NavLink to="/" end>
           <FaHome /> Home
@@ -31,6 +35,12 @@ export default function NavBar() {
 
         {authed ? (
           <>
+            <NavLink to="/resume">
+              <FaFileAlt /> Resume
+            </NavLink>
+            <NavLink to="/jobs">
+              <FaBriefcase /> Jobs
+            </NavLink>
             <NavLink to="/profile/info">
               <FaUser /> Profile
             </NavLink>
