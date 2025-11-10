@@ -11,3 +11,7 @@ frontend/.vite-temp/
 .DS_Store
 frontend/.DS_Store
 frontend/public/.DS_Store
+
+.env
+frontend/.env
+backend/.env
