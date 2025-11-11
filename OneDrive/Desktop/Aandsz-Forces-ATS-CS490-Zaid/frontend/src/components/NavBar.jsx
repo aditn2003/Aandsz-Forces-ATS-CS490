@@ -11,6 +11,7 @@ import {
   FaFileAlt,
   FaBriefcase,
   FaChartBar,
+  FaArchive,
 } from "react-icons/fa";
 import { NavLink, useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
@@ -45,6 +46,11 @@ export default function NavBar() {
             {/* --- ADD THIS NEW LINK --- */}
             <NavLink to="/statistics">
               <FaChartBar /> Statistics
+            </NavLink>
+            {/* --------------------------- */}
+            {/* --- ADD THIS NEW LINK --- */}
+            <NavLink to="/archived">
+              <FaArchive /> Archived
             </NavLink>
             {/* --------------------------- */}
             <NavLink to="/profile/info">

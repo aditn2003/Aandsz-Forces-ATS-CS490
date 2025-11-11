@@ -13,7 +13,6 @@ const JWT_SECRET = process.env.JWT_SECRET || "dev_secret_change_me";
 const STAGES = ["Interested", "Applied", "Phone Screen", "Interview", "Offer", "Rejected"];
 
 // ---------- AUTH MIDDLEWARE ----------
-// (This is the auth middleware from your old file)
 function auth(req, res, next) {
   const h = req.headers.authorization;
   if (!h) return res.status(401).json({ error: "Unauthorized" });
@@ -40,7 +39,7 @@ router.post("/", auth, async (req, res) => {
     description,
     industry,
     type,
-    applicationDate, // <-- ADDED
+    applicationDate,
   } = req.body;
 
   if (!title?.trim() || !company?.trim()) {
@@ -67,7 +66,7 @@ router.post("/", auth, async (req, res) => {
         description || "",
         industry || "",
         type || "",
-        applicationDate || null, // <-- ADDED
+        applicationDate || null,
       ]
     );
     res.json({ message: "Job saved successfully", job: result.rows[0] });
@@ -77,7 +76,7 @@ router.post("/", auth, async (req, res) => {
   }
 });
 
-// ---------- LIST ALL JOBS ----------
+// ---------- LIST ALL JOBS (Filters out archived) ----------
 router.get("/", auth, async (req, res) => {
   try {
     const {
@@ -93,7 +92,8 @@ router.get("/", auth, async (req, res) => {
     } = req.query;
 
     const params = [req.userId];
-    const whereClauses = ["user_id = $1"];
+    // This line correctly filters out archived jobs
+    const whereClauses = ["user_id = $1", `"isArchived" = false`]; 
     let i = 2;
 
     if (search) {
@@ -106,7 +106,7 @@ router.get("/", auth, async (req, res) => {
       params.push(status.trim());
       i++;
     }
-    if (industry) {
+     if (industry) {
       whereClauses.push(`industry ILIKE $${i}`);
       params.push(`%${industry}%`);
       i++;
@@ -172,14 +172,15 @@ router.get("/", auth, async (req, res) => {
 
 //
 // ==================================================================
-//               NEW STATISTICS ROUTE (UC-044)
+//               STATISTICS ROUTE (UC-044)
 // ==================================================================
 //
 router.get("/stats", auth, async (req, res) => {
   try {
     const query = `
       WITH user_jobs AS (
-        SELECT * FROM jobs WHERE user_id = $1
+        -- Filter out archived jobs from stats
+        SELECT * FROM jobs WHERE user_id = $1 AND "isArchived" = false 
       ),
       
       -- AC-1: Total jobs by status
@@ -268,7 +269,30 @@ router.get("/stats", auth, async (req, res) => {
 });
 
 
+//
+// ==================================================================
+//               ARCHIVE ROUTES (UC-045)
+// ==================================================================
+//
+// ---------- GET ARCHIVED JOBS (AC-2) ----------
+// ***** THIS ROUTE WAS MOVED HERE - BEFORE /:id *****
+router.get("/archived", auth, async (req, res) => {
+  try {
+    const result = await pool.query(
+      `SELECT * FROM jobs WHERE user_id = $1 AND "isArchived" = true
+       ORDER BY status_updated_at DESC`,
+      [req.userId]
+    );
+    res.json({ jobs: result.rows });
+  } catch (err) {
+    console.error("❌ Fetch archived jobs error:", err.message);
+    res.status(500).json({ error: "Database error" });
+  }
+});
+
+
 // ---------- GET JOB BY ID ----------
+// This route MUST come AFTER specific routes like /stats and /archived
 router.get("/:id", auth, async (req, res) => {
   const { id } = req.params;
   try {
@@ -291,7 +315,7 @@ router.put("/:id", auth, async (req, res) => {
     "title", "company", "location", "status", "salary_min", "salary_max",
     "deadline", "description", "industry", "type", "notes", "contact_name",
     "contact_email", "contact_phone", "salary_notes", "interview_feedback",
-    "applicationDate", "offerDate" // <-- ADDED
+    "applicationDate", "offerDate"
   ];
 
   const updates = {};
@@ -302,13 +326,12 @@ router.put("/:id", auth, async (req, res) => {
   if (Object.keys(updates).length === 0)
     return res.status(400).json({ error: "No valid fields to update" });
 
-  // If status is updated to 'Offer', set offerDate
   if (updates.status === 'Offer') {
     updates["offerDate"] = new Date();
   }
 
   const setClause = Object.keys(updates)
-    .map((k, i) => `"${k}" = $${i + 1}`) // Added quotes for "applicationDate"
+    .map((k, i) => `"${k}" = $${i + 1}`)
     .join(", ");
   const values = Object.values(updates);
 
@@ -339,6 +362,25 @@ router.put("/:id", auth, async (req, res) => {
   }
 });
 
+// ---------- DELETE JOB (For AC-5) ----------
+router.delete("/:id", auth, async (req, res) => {
+  const { id } = req.params;
+  try {
+    const result = await pool.query(
+      `DELETE FROM jobs WHERE id = $1 AND user_id = $2`,
+      [id, req.userId]
+    );
+    if (result.rowCount === 0) {
+      return res.status(404).json({ error: "Job not found" });
+    }
+    res.status(200).json({ message: "Job permanently deleted" });
+  } catch (err) {
+    console.error("❌ Delete job error:", err.message);
+    res.status(500).json({ error: "Database error" });
+  }
+});
+
+
 // ---------- UPDATE ONLY STATUS ----------
 router.put("/:id/status", auth, async (req, res) => {
   const { id } = req.params;
@@ -346,8 +388,6 @@ router.put("/:id/status", auth, async (req, res) => {
 
   if (!status) return res.status(400).json({ error: "Missing status" });
 
-  // --- LOGIC ADDED ---
-  // If status is 'Offer', update offerDate as well
   let query;
   let params;
   if (status === 'Offer') {
@@ -363,10 +403,9 @@ router.put("/:id/status", auth, async (req, res) => {
              RETURNING *`;
     params = [status, id, req.userId];
   }
-  // --- END ADDED LOGIC ---
 
   try {
-    const result = await pool.query(query, params); // <-- Use new query and params
+    const result = await pool.query(query, params);
 
     if (result.rows.length === 0)
       return res.status(404).json({ error: "Job not found or unauthorized" });
@@ -405,6 +444,51 @@ router.put("/bulk/deadline", auth, async (req, res) => {
       res.status(500).json({ error: "Database error" });
     }
   });
+
+
+//
+// ==================================================================
+//               ARCHIVE ROUTES (UC-045)
+// ==================================================================
+//
+
+// ---------- ARCHIVE A JOB (AC-1) ----------
+router.put("/:id/archive", auth, async (req, res) => {
+  const { id } = req.params;
+  try {
+    const result = await pool.query(
+      `UPDATE jobs SET "isArchived" = true, status_updated_at = NOW()
+       WHERE id = $1 AND user_id = $2 RETURNING *`,
+      [id, req.userId]
+    );
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: "Job not found" });
+    }
+    res.json(result.rows[0]);
+  } catch (err) {
+    console.error("❌ Archive job error:", err.message);
+    res.status(500).json({ error: "Database error" });
+  }
+});
+
+// ---------- RESTORE A JOB (AC-3) ----------
+router.put("/:id/restore", auth, async (req, res) => {
+  const { id } = req.params;
+  try {
+    const result = await pool.query(
+      `UPDATE jobs SET "isArchived" = false, status_updated_at = NOW()
+       WHERE id = $1 AND user_id = $2 RETURNING *`,
+      [id, req.userId]
+    );
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: "Job not found" });
+    }
+    res.json(result.rows[0]);
+  } catch (err) {
+    console.error("❌ Restore job error:", err.message);
+    res.status(500).json({ error: "Database error" });
+  }
+});
 
 
 export default router;

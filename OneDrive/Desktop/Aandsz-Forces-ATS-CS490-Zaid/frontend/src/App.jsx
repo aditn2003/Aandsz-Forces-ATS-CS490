@@ -19,6 +19,7 @@ import ResetPassword from "./pages/ResetPassword";
 import ProfileLayout from "./pages/Profile/ProfileLayout";
 import Jobs from "./pages/Jobs";
 import StatisticsPage from "./pages/StatisticsPage";
+import ArchivedJobs from "./pages/ArchivedJobs";
 
 // ---------- Resume Flow ----------
 import ResumeBuilder from "./pages/Profile/ResumeBuilder";
@@ -79,6 +80,8 @@ function MainLayout() {
           {/* --- ADD THIS NEW ROUTE --- */}
           <Route path="/statistics" element={<StatisticsPage />} />
           {/* --------------------------- */}
+          {/* --- ADD THIS NEW ROUTE --- */}
+          <Route path="/archived" element={<ArchivedJobs />} />
 
           {/* --- Legacy /alias (optional) --- */}
           <Route
