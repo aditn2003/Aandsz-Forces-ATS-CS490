@@ -18,6 +18,7 @@ import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
 import ProfileLayout from "./pages/Profile/ProfileLayout";
 import Jobs from "./pages/Jobs";
+import CompanyResearch from "./pages/CompanyResearch"; // ✅ NEW UC-063 PAGE
 
 // ---------- Resume Flow ----------
 import ResumeBuilder from "./pages/Profile/ResumeBuilder";
@@ -74,6 +75,9 @@ function MainLayout() {
 
           {/* --- Jobs Dashboard --- */}
           <Route path="/jobs" element={<Jobs />} />
+
+          {/* --- Company Research (UC-063) --- */}
+          <Route path="/company-research" element={<CompanyResearch />} />
 
           {/* --- Legacy /alias (optional) --- */}
           <Route
