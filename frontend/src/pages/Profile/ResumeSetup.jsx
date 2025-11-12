@@ -167,10 +167,10 @@ export default function ResumeSetup() {
   return (
     <div className="resume-setup-container">
       <h1>Build Your Resume</h1>
-      <p>Paste a job description or use existing data to get started.</p>
+      <p>Import resume or use existing data to get started.</p>
 
       {/* 🟣 Paste Job Description */}
-      <div className="job-desc-section">
+      {/* <div className="job-desc-section">
         <h3>Paste Job Description</h3>
         <textarea
           className="job-desc-textarea"
@@ -179,7 +179,7 @@ export default function ResumeSetup() {
           onChange={(e) => setJobDescription(e.target.value)}
         />
         {saving && <p className="saving-note">💾 Auto-saving...</p>}
-      </div>
+      </div> */}
 
       {/* 🟢 Resume Options */}
       <div className="resume-options">

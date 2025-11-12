@@ -447,13 +447,13 @@ export default function ResumeEditor() {
             {saving ? "Saving..." : "💾 Save as PDF"}
           </button>
 
-          <button
+          {/* <button
             onClick={handleAICustomization}
             disabled={optimizing}
             className="btn-ai"
           >
             {optimizing ? "Optimizing..." : "✨ AI Optimize"}
-          </button>
+          </button> */}
         </div>
       </div>
     </div>
