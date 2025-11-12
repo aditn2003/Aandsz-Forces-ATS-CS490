@@ -23,75 +23,72 @@ export default function ResumeSetup() {
       <div className="resume-setup-container">
         <h2>⚠️ No template selected</h2>
         <p>Please return to the Resume Builder and pick one first.</p>
-        <button
-          className="btn-primary"
-          onClick={() => navigate("/profile/resume")}
-        >
+        <button className="btn-primary" onClick={() => navigate("/resume")}>
           ← Back to Templates
         </button>
       </div>
     );
   }
 
-  // // ✅ Load last saved job description (if any)
-  // useEffect(() => {
-  //   const fetchLastDescription = async () => {
-  //     try {
-  //       const token = localStorage.getItem("token");
-  //       if (!token) return;
+  // ✅ Load last saved job description (if any)
+  useEffect(() => {
+    const fetchLastDescription = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        if (!token) return;
 
-  //       const res = await api.get("/api/job-descriptions", {
-  //         headers: { Authorization: `Bearer ${token}` },
-  //       });
+        const res = await api.get("/api/job-descriptions", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
 
-  //       if (res.data.jobDescriptions?.length > 0) {
-  //         setJobDescription(res.data.jobDescriptions[0].content);
-  //       }
-  //     } catch (err) {
-  //       console.warn("⚠️ Could not load previous job descriptions:", err);
-  //     }
-  //   };
-  //   fetchLastDescription();
-  // }, []);
+        if (res.data.jobDescriptions?.length > 0) {
+          setJobDescription(res.data.jobDescriptions[0].content);
+        }
+      } catch (err) {
+        console.warn("⚠️ Could not load previous job descriptions:", err);
+      }
+    };
+    fetchLastDescription();
+  }, []);
 
-  // // ✅ Auto-save job description with debounce
-  // useEffect(() => {
-  //   const delay = setTimeout(() => {
-  //     if (jobDescription.trim() !== "") ensureJobDescriptionSaved();
-  //   }, 1500);
-  //   return () => clearTimeout(delay);
-  // }, [jobDescription]);
+  // ✅ Auto-save job description with debounce
+  useEffect(() => {
+    const delay = setTimeout(() => {
+      if (jobDescription.trim() !== "") ensureJobDescriptionSaved();
+    }, 1500);
+    return () => clearTimeout(delay);
+  }, [jobDescription]);
 
-  // // 🧠 Save job description to backend
-  // async function ensureJobDescriptionSaved() {
-  //   if (!jobDescription.trim()) return;
+  // 🧠 Save job description to backend
+  async function ensureJobDescriptionSaved() {
+    if (!jobDescription.trim()) return;
 
-  //   const token = localStorage.getItem("token");
-  //   if (!token) {
-  //     alert("⚠️ Please log in to continue.");
-  //     navigate("/login");
-  //     return;
-  //   }
+    const token = localStorage.getItem("token");
+    if (!token) {
+      alert("⚠️ Please log in to continue.");
+      navigate("/login");
+      return;
+    }
 
-  //   try {
-  //     setSaving(true);
-  //     const res = await api.post(
-  //       "/api/job-descriptions",
-  //       { content: jobDescription },
-  //       { headers: { Authorization: `Bearer ${token}` } }
-  //     );
-  //     console.log("✅ Auto-saved job description:", res.data);
-  //   } catch (err) {
-  //     console.error("❌ Failed to save job description:", err);
-  //     if (err.response?.status === 401) {
-  //       alert("Session expired. Please log in again.");
-  //       localStorage.removeItem("token");
-  //       navigate("/login");
-  //     }
-  //   } finally {
-  //     setSaving(false);
-  //   }
-  // }
+    try {
+      setSaving(true);
+      const res = await api.post(
+        "/api/job-descriptions",
+        { content: jobDescription },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      console.log("✅ Auto-saved job description:", res.data);
+    } catch (err) {
+      console.error("❌ Failed to save job description:", err);
+      if (err.response?.status === 401) {
+        alert("Session expired. Please log in again.");
+        localStorage.removeItem("token");
+        navigate("/login");
+      }
+    } finally {
+      setSaving(false);
+    }
+  }
 
   // 🧠 Generate resume draft from existing profile data
   async function handleUseExistingInfo() {
@@ -104,11 +101,12 @@ export default function ResumeSetup() {
         headers: { Authorization: `Bearer ${token}` },
       });
 
-      navigate("/profile/resume/editor", {
+      navigate("/resume/editor", {
         state: {
           sections: res.data.sections || {},
           selectedTemplate,
           resumeTitle,
+          jobDescription,
         },
       });
     } catch (err) {
@@ -144,13 +142,14 @@ export default function ResumeSetup() {
 
       console.log("✅ Imported Resume:", res.data);
 
-      // ✅ FIX: send structured sections JSON, not text_snippet
-      navigate("/profile/resume/editor", {
+      // ✅ Navigate to editor with structured sections
+      navigate("/resume/editor", {
         state: {
           sections: res.data.sections || {},
           selectedTemplate,
           resumeTitle,
           preview: res.data.preview || "",
+          jobDescription,
         },
       });
     } catch (err) {
@@ -168,10 +167,10 @@ export default function ResumeSetup() {
   return (
     <div className="resume-setup-container">
       <h1>Build Your Resume</h1>
-      <p>How would you like to start?</p>
+      <p>Import resume or use existing data to get started.</p>
 
-      {/* Job Description Box
-      <div className="job-desc-section">
+      {/* 🟣 Paste Job Description */}
+      {/* <div className="job-desc-section">
         <h3>Paste Job Description</h3>
         <textarea
           className="job-desc-textarea"
@@ -182,7 +181,7 @@ export default function ResumeSetup() {
         {saving && <p className="saving-note">💾 Auto-saving...</p>}
       </div> */}
 
-      {/* Resume Options */}
+      {/* 🟢 Resume Options */}
       <div className="resume-options">
         <button
           type="button"
@@ -204,13 +203,14 @@ export default function ResumeSetup() {
         </label>
       </div>
 
-      {/* Status messages */}
+      {/* 🟡 Status messages */}
       {uploading && (
         <p className="status-message">⏳ Uploading and parsing resume...</p>
       )}
       {message && <p className="status-message">{message}</p>}
 
-      <button className="btn-back" onClick={() => navigate("/profile/resume")}>
+      {/* 🔙 Back Button */}
+      <button className="btn-back" onClick={() => navigate("/resume")}>
         ← Back to Resume Builder
       </button>
     </div>

@@ -1,3 +1,4 @@
+// src/components/ProfileNavBar.jsx
 import React from "react";
 import { NavLink } from "react-router-dom";
 import "./ProfileNavBar.css";
@@ -11,7 +12,6 @@ export default function ProfileNavBar() {
     { key: "certifications", label: "Certifications" },
     { key: "projects", label: "Projects" },
     { key: "dashboard", label: "Dashboard" },
-    { key: "jobs", label: "Jobs" },
     { key: "danger", label: "Danger Zone" },
   ];
 
@@ -29,28 +29,13 @@ export default function ProfileNavBar() {
         </NavLink>
       ))}
 
-      {/* 🔽 Dropdown for Resume */}
-      <div className="profile-tab dropdown">
-        <span className="dropdown-toggle">Resume Builder ▾</span>
-        <div className="dropdown-menu">
-          <NavLink
-            to="/profile/resume"
-            className={({ isActive }) =>
-              `dropdown-item ${isActive ? "active" : ""}`
-            }
-          >
-            Resume Builder
-          </NavLink>
-          <NavLink
-            to="/profile/resume/saved"
-            className={({ isActive }) =>
-              `dropdown-item ${isActive ? "active" : ""}`
-            }
-          >
-            Saved Resumes
-          </NavLink>
-        </div>
-      </div>
+      {/* 🟣 Add Saved Resumes Button */}
+      <NavLink
+        to="/profile/saved-resumes"
+        className={({ isActive }) => `profile-tab ${isActive ? "active" : ""}`}
+      >
+        Saved Resumes
+      </NavLink>
     </nav>
   );
 }

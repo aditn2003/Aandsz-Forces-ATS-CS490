@@ -3,25 +3,28 @@ import { api } from "../../api";
 import ResumeTemplateChooser from "../../components/ResumeTemplateChooser";
 import "./ResumeBuilder.css";
 import { useNavigate } from "react-router-dom";
+
 export default function ResumeBuilder() {
   const [selectedTemplate, setSelectedTemplate] = useState(null);
   const [resumeTitle, setResumeTitle] = useState("Untitled Resume");
   const [message, setMessage] = useState("");
-  const [showOptions, setShowOptions] = useState(false);
   const [uploading, setUploading] = useState(false);
   const navigate = useNavigate();
 
+  // ✅ Go to the full Resume Setup page (Paste JD + Use Existing Info + Import)
   async function handleCreateResume() {
     if (!selectedTemplate) {
       setMessage("⚠️ Please select a template first.");
       return;
     }
 
-    navigate("/profile/resume/setup", {
+    // Navigate to /resume/setup (not /profile/resume/setup)
+    navigate("/resume/setup", {
       state: { selectedTemplate, resumeTitle },
     });
   }
 
+  // ✅ Optional: handle direct use of existing info (if needed)
   async function handleUseExistingInfo() {
     try {
       const res = await api.post("/api/resumes", {
@@ -33,11 +36,10 @@ export default function ResumeBuilder() {
     } catch (err) {
       console.error("Error creating resume:", err);
       setMessage("❌ Failed to create resume from existing data.");
-    } finally {
-      setShowOptions(false);
     }
   }
 
+  // ✅ Optional: handle direct import (if needed)
   async function handleImportResume(e) {
     const file = e.target.files[0];
     if (!file) return;
@@ -58,12 +60,12 @@ export default function ResumeBuilder() {
       setMessage("❌ Failed to import resume.");
     } finally {
       setUploading(false);
-      setShowOptions(false);
     }
   }
 
   return (
     <div className="resume-builder-container">
+      {/* ===== Template Chooser ===== */}
       <ResumeTemplateChooser onSelectTemplate={setSelectedTemplate} />
 
       {selectedTemplate && (
@@ -72,9 +74,14 @@ export default function ResumeBuilder() {
             <strong>Selected Template:</strong>{" "}
             <span className="highlight">{selectedTemplate.name}</span>
           </p>
+          <p className="subtext">
+            Next, you’ll be able to paste a job description or import your
+            existing resume.
+          </p>
         </div>
       )}
 
+      {/* ===== Resume Title ===== */}
       <div className="resume-title-section">
         <label htmlFor="resume-title">Resume Title</label>
         <input
@@ -87,6 +94,7 @@ export default function ResumeBuilder() {
         />
       </div>
 
+      {/* ===== Action Buttons ===== */}
       <div className="resume-actions">
         <button
           className="btn-primary"
@@ -106,37 +114,11 @@ export default function ResumeBuilder() {
         </button>
       </div>
 
+      {/* ===== Status Message ===== */}
       {message && <p className="status-message">{message}</p>}
 
-      {/* ===== Option Modal ===== */}
-      {showOptions && (
-        <div className="modal-overlay">
-          <div className="modal">
-            <h3>How would you like to build your resume?</h3>
-            <div className="modal-buttons">
-              <button className="btn-primary" onClick={handleUseExistingInfo}>
-                Use Existing Information
-              </button>
-              <label className="btn-secondary upload-btn">
-                Import Resume
-                <input
-                  type="file"
-                  accept=".pdf,.doc,.docx"
-                  onChange={handleImportResume}
-                  style={{ display: "none" }}
-                />
-              </label>
-            </div>
-            <button
-              className="close-modal"
-              onClick={() => setShowOptions(false)}
-            >
-              ✕
-            </button>
-            {uploading && <p>⏳ Uploading and parsing file...</p>}
-          </div>
-        </div>
-      )}
+      {/* ===== Optional Upload Loading Message ===== */}
+      {uploading && <p className="status-message">⏳ Uploading file...</p>}
     </div>
   );
 }
