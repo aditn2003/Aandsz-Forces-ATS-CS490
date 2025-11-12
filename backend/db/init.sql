@@ -223,7 +223,7 @@ CREATE TABLE resume_presets (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE TABLE section_presets (
+CREATE TABLE IF NOT EXISTS section_presets (
     id SERIAL PRIMARY KEY,
     user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     section_name VARCHAR(100) NOT NULL,         -- e.g. "education", "skills"
@@ -232,9 +232,28 @@ CREATE TABLE section_presets (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE TABLE job_descriptions (
+CREATE TABLE IF NOT EXISTS job_descriptions (
   id SERIAL PRIMARY KEY,
   user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   content TEXT NOT NULL,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
+CREATE TABLE IF NOT EXISTS company_research (
+  id SERIAL PRIMARY KEY,
+  company VARCHAR(255) UNIQUE NOT NULL,
+  basics JSONB,
+  mission_values_culture JSONB,
+  executives JSONB,
+  products_services JSONB,
+  competitive_landscape JSONB,
+  summary TEXT,
+  news JSONB,
+  created_at TIMESTAMP DEFAULT NOW()
+);
+
+ALTER TABLE resumes
+ADD COLUMN IF NOT EXISTS preview_url TEXT,
+ADD COLUMN IF NOT EXISTS format TEXT DEFAULT 'pdf',
+ADD COLUMN IF NOT EXISTS template_name TEXT,
+ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP DEFAULT NOW();

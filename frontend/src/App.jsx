@@ -20,6 +20,7 @@ import ProfileLayout from "./pages/Profile/ProfileLayout";
 import Jobs from "./pages/Jobs";
 import StatisticsPage from "./pages/StatisticsPage";
 import ArchivedJobs from "./pages/ArchivedJobs";
+import CompanyResearch from "./pages/CompanyResearch"; // ✅ NEW UC-063 PAGE
 
 // ---------- Resume Flow ----------
 import ResumeBuilder from "./pages/Profile/ResumeBuilder";
@@ -82,6 +83,9 @@ function MainLayout() {
           {/* --------------------------- */}
           {/* --- ADD THIS NEW ROUTE --- */}
           <Route path="/archived" element={<ArchivedJobs />} />
+
+          {/* --- Company Research (UC-063) --- */}
+          <Route path="/company-research" element={<CompanyResearch />} />
 
           {/* --- Legacy /alias (optional) --- */}
           <Route

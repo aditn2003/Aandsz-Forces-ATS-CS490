@@ -1,0 +1,39 @@
+<div class="resume">
+  <header>
+    <h1>{{sections.summary.full_name}}</h1>
+    <h2>{{sections.summary.title}}</h2>
+    <p>{{sections.summary.contact.email}} | {{sections.summary.contact.phone}} | {{sections.summary.contact.location}}</p>
+  </header>
+
+  <section>
+    <h3>Summary</h3>
+    <p>{{sections.summary.bio}}</p>
+  </section>
+
+  <section>
+    <h3>Experience</h3>
+    {{#each sections.experience}}
+      <div class="exp-item">
+        <strong>{{title}}</strong> — {{company}}<br />
+        <em>{{start_date}} – {{end_date}}</em>
+        <ul>
+          {{#each (split description)}}
+            <li>{{this}}</li>
+          {{/each}}
+        </ul>
+      </div>
+    {{/each}}
+  </section>
+
+  <section>
+    <h3>Education</h3>
+    {{#each sections.education}}
+      <p><b>{{degree}}</b> — {{institution}} ({{graduation_date}})</p>
+    {{/each}}
+  </section>
+
+  <section>
+    <h3>Skills</h3>
+    <p>{{#each sections.skills}}{{#if this.name}}{{this.name}}, {{else}}{{this}}, {{/if}}{{/each}}</p>
+  </section>
+</div>

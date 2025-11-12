@@ -1,0 +1,226 @@
+/* ---------- Base ---------- */
+html,
+body {
+  font-family: "Inter", Arial, sans-serif;
+  color: #111;
+  line-height: 1.35;
+  font-size: 10.8pt;
+  margin: 0;
+  padding: 0;
+  background: #fff;
+}
+
+body {
+  width: 8.5in;
+  padding: 0.35in 0.45in 0.45in 0.35in; /* tighter top & left margins */
+}
+
+/* ---------- Header ---------- */
+/* ---------- Header ---------- */
+.header {
+  text-align: center;
+  margin-bottom: 0.45em;
+}
+
+.name {
+  font-size: 17pt;
+  font-weight: 700;
+  margin: 0;
+}
+
+.headline {
+  font-size: 10.8pt;
+  font-weight: 500;
+  color: #333;
+  margin-top: 0.15em;
+  line-height: 1.4;
+}
+
+.headline a {
+  color: #004aad;
+  text-decoration: none;
+}
+.headline a:hover {
+  text-decoration: underline;
+}
+
+/* ---------- Sections ---------- */
+.section {
+  margin-bottom: 0.7em;
+}
+
+.section-title {
+  font-size: 10.8pt;
+  font-weight: 700;
+  text-transform: uppercase;
+  border-bottom: 1px solid #aaa;
+  margin-bottom: 0.25em;
+  padding-bottom: 2px;
+  letter-spacing: 0.3px;
+}
+
+/* ---------- Experience ---------- */
+/* ---------- Experience ---------- */
+.exp-item {
+  margin-bottom: 0.55em;
+}
+
+.exp-header {
+  display: flex;
+  justify-content: space-between;
+  font-weight: 600;
+}
+
+.exp-left {
+  font-weight: 600;
+}
+
+.exp-left em {
+  font-style: italic;
+  font-weight: 400;
+}
+
+.exp-right {
+  font-size: 9.8pt;
+  color: #444;
+  white-space: nowrap;
+}
+
+.exp-location {
+  font-size: 9.8pt;
+  color: #444;
+  margin-top: 0.05em;
+  margin-bottom: 0.15em;
+}
+
+.exp-item a {
+  color: #004aad;
+  text-decoration: none;
+}
+
+.exp-item a:hover {
+  text-decoration: underline;
+}
+
+.exp-item ul {
+  margin: 0.15em 0 0.3em 1em;
+  padding: 0;
+}
+
+/* ---------- Education ---------- */
+.education-item {
+  margin-bottom: 0.5em;
+}
+
+.edu-header {
+  display: flex;
+  justify-content: space-between;
+  font-weight: 600;
+}
+
+.edu-right {
+  font-size: 10pt;
+  color: #444;
+}
+
+.edu-details {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 0.05em;
+}
+
+.edu-degree {
+  font-style: italic;
+}
+
+.edu-gpa {
+  color: #333;
+}
+
+.edu-honors {
+  margin-top: 0.15em;
+  font-size: 9.8pt;
+}
+/* ---------- Projects ---------- */
+/* ---------- Projects ---------- */
+.project-item {
+  margin-bottom: 0.6em;
+}
+
+.project-header {
+  font-weight: 600;
+  font-size: 10.8pt;
+}
+
+.project-header a {
+  color: #004aad;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.project-header a:hover {
+  text-decoration: underline;
+}
+
+.project-tech {
+  font-style: italic;
+  color: #333;
+  margin-top: 0.05em;
+  margin-bottom: 0.2em;
+}
+
+.project-item ul {
+  margin: 0.15em 0 0.3em 1em;
+  padding: 0;
+}
+
+/* ---------- Skills ---------- */
+/* ---------- Skills ---------- */
+.section p {
+  margin: 0.15em 0;
+  line-height: 1.4;
+}
+.section strong {
+  font-weight: 600;
+}
+/* ---------- Certifications ---------- */
+.cert-item {
+  margin-bottom: 0.5em;
+}
+
+.cert-header {
+  font-weight: 500;
+  margin-bottom: 0.1em;
+}
+
+.cert-header em {
+  font-style: italic;
+  color: #333;
+}
+
+.cert-header .right {
+  float: right;
+  font-weight: 600;
+}
+
+.cert-number {
+  font-size: 10pt;
+  color: #444;
+  margin-left: 0.2em;
+}
+
+/* ---------- Print ---------- */
+@page {
+  margin: 0;
+}
+
+@media print {
+  html,
+  body {
+    margin: 0;
+    padding: 0.35in 0.45in 0.45in 0.35in;
+  }
+  .section {
+    page-break-inside: avoid;
+  }
+}
