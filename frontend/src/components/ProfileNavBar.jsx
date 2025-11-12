@@ -12,7 +12,6 @@ export default function ProfileNavBar() {
     { key: "certifications", label: "Certifications" },
     { key: "projects", label: "Projects" },
     { key: "dashboard", label: "Dashboard" },
-    // 🔹 Removed “jobs” and dropdown entirely
     { key: "danger", label: "Danger Zone" },
   ];
 
@@ -32,7 +31,7 @@ export default function ProfileNavBar() {
 
       {/* 🟣 Add Saved Resumes Button */}
       <NavLink
-        to="/profile/resume/saved"
+        to="/profile/saved-resumes"
         className={({ isActive }) => `profile-tab ${isActive ? "active" : ""}`}
       >
         Saved Resumes
