@@ -64,8 +64,6 @@ pool
   .then(() => console.log("✅ Connected to PostgreSQL"))
   .catch((err) => console.error("❌ DB connection error:", err.message));
 
-
-
 // ===== Helpers =====
 const JWT_SECRET = process.env.JWT_SECRET || "dev_secret_change_me";
 const PASSWORD_RULE = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;

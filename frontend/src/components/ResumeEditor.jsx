@@ -7,14 +7,12 @@ export default function ResumeEditor() {
   const location = useLocation();
   const navigate = useNavigate();
 
-  // --- State from navigation ---
   const {
     sections = {},
     resumeTitle: passedTitle = "Untitled Resume",
     selectedTemplate: template = {},
   } = location.state || {};
 
-  // --- Default blank structure ---
   const [draft, setDraft] = useState({
     summary: {
       full_name: "",
@@ -34,46 +32,85 @@ export default function ResumeEditor() {
   const [resumeTitle, setResumeTitle] = useState(passedTitle);
   const [visibleSections, setVisibleSections] = useState({});
   const [sectionOrder, setSectionOrder] = useState([]);
-  const [refreshSidebar, setRefreshSidebar] = useState(0); // 🔄 sidebar refresh trigger
+  const [refreshSidebar, setRefreshSidebar] = useState(0);
 
-  // --- Populate from imported resume JSON ---
+  /* --------------------------------------------------------------------------
+    🧠 Normalize Imported Resume Sections
+  -------------------------------------------------------------------------- */
   useEffect(() => {
-    if (sections && Object.keys(sections).length > 0) {
-      console.log("📄 Loading imported resume sections:", sections);
+    if (!sections || Object.keys(sections).length === 0) return;
+    console.log("📄 Loading imported resume sections:", sections);
 
-      const normalized = { ...sections };
+    const normalized = {};
 
-      // ✅ Normalize skills
-      if (Array.isArray(normalized.skills)) {
-        normalized.skills = normalized.skills
-          .map((s) => {
-            if (typeof s === "string") return s.trim();
-            if (typeof s === "object" && s !== null) {
-              if (s.name) return s.name.trim();
-              if (s.category && s.proficiency)
-                return `${s.category} (${s.proficiency})`.trim();
-              return Object.values(s)
-                .filter((v) => typeof v === "string" && v.trim() !== "")
-                .join(" ")
-                .trim();
-            }
-            return "";
-          })
-          .filter(Boolean);
+    for (const [key, value] of Object.entries(sections)) {
+      if (Array.isArray(value)) {
+        normalized[key] = value;
+      } else if (typeof value === "string") {
+        normalized[key] = { bio: value };
+      } else if (value && typeof value === "object") {
+        // 🧩 handle Gemini bug: object with numeric keys
+        const keys = Object.keys(value);
+        const isNumericObj = keys.every((k) => !isNaN(Number(k)));
+        if (isNumericObj) {
+          normalized[key] = Object.values(value);
+        } else {
+          normalized[key] = value;
+        }
+      } else {
+        normalized[key] = [];
       }
-
-      setDraft(normalized);
-      setVisibleSections(
-        Object.keys(normalized).reduce((acc, key) => {
-          acc[key] = true;
-          return acc;
-        }, {})
-      );
-      setSectionOrder(Object.keys(normalized));
     }
+
+    // ✅ normalize skills
+    // ✅ Normalize skills (handles any format: string, object, array, nested)
+    if (Array.isArray(normalized.skills)) {
+      // already a list
+      normalized.skills = normalized.skills
+        .map((s) => {
+          if (typeof s === "string") return s.trim();
+          if (s && typeof s === "object") {
+            if (s.name) return s.name.trim();
+            if (s.category && s.proficiency)
+              return `${s.category} (${s.proficiency})`.trim();
+            return Object.values(s)
+              .flat()
+              .filter((v) => typeof v === "string" && v.trim() !== "")
+              .join(", ")
+              .trim();
+          }
+          return "";
+        })
+        .filter(Boolean);
+    } else if (normalized.skills && typeof normalized.skills === "object") {
+      // flatten objects like { Programming: ['Python', 'SQL'], Tools: ['Excel'] }
+      normalized.skills = Object.values(normalized.skills)
+        .flat(Infinity)
+        .filter((v) => typeof v === "string" && v.trim() !== "")
+        .map((v) => v.trim());
+    } else if (typeof normalized.skills === "string") {
+      // split comma-separated strings
+      normalized.skills = normalized.skills
+        .split(",")
+        .map((s) => s.trim())
+        .filter(Boolean);
+    } else {
+      normalized.skills = [];
+    }
+
+    setDraft((prev) => ({ ...prev, ...normalized }));
+    setVisibleSections(
+      Object.keys(normalized).reduce((acc, key) => {
+        acc[key] = true;
+        return acc;
+      }, {})
+    );
+    setSectionOrder(Object.keys(normalized));
   }, [sections]);
 
-  // ---------- Helpers ----------
+  /* --------------------------------------------------------------------------
+    ⚙️ Helpers
+  -------------------------------------------------------------------------- */
   const toLabel = (field) =>
     field
       .replace(/_/g, " ")
@@ -111,7 +148,9 @@ export default function ResumeEditor() {
       field.toLowerCase().includes(t)
     );
 
-  // ---------- Nested update helper ----------
+  /* --------------------------------------------------------------------------
+    ✏️ Update Nested Values
+  -------------------------------------------------------------------------- */
   function updateValue(sectionKey, fieldPath, value) {
     setDraft((prev) => {
       const copy = structuredClone(prev);
@@ -127,7 +166,9 @@ export default function ResumeEditor() {
     });
   }
 
-  // ---------- Skills tag handlers ----------
+  /* --------------------------------------------------------------------------
+    🧩 Skills Tag Handlers
+  -------------------------------------------------------------------------- */
   const addSkill = (skillName) => {
     const newSkill = skillName.trim();
     if (!newSkill) return;
@@ -144,7 +185,9 @@ export default function ResumeEditor() {
     }));
   };
 
-  // ---------- Entry controls ----------
+  /* --------------------------------------------------------------------------
+    ➕ Add / Remove Entry
+  -------------------------------------------------------------------------- */
   function addEntry(sectionKey) {
     setDraft((prev) => {
       const existing = Array.isArray(prev[sectionKey]) ? prev[sectionKey] : [];
@@ -160,7 +203,9 @@ export default function ResumeEditor() {
     });
   }
 
-  // ---------- Reorder via arrows ----------
+  /* --------------------------------------------------------------------------
+    ⬆️⬇️ Reorder Sections
+  -------------------------------------------------------------------------- */
   function moveSection(key, direction) {
     setSectionOrder((prev) => {
       const newOrder = [...prev];
@@ -180,7 +225,9 @@ export default function ResumeEditor() {
     });
   }
 
-  // ---------- Save Resume ----------
+  /* --------------------------------------------------------------------------
+    💾 Save Resume
+  -------------------------------------------------------------------------- */
   async function handleSave(format = "pdf") {
     try {
       setSaving(true);
@@ -193,12 +240,13 @@ export default function ResumeEditor() {
       await api.post("/api/resumes", {
         title: resumeTitle,
         template_id: template?.id || 1,
+        template_name: template?.name || "ATS Optimized", // ✅ send chosen template name
         sections: filteredDraft,
-        format, // ✅ added export format
+        format,
       });
 
       alert(`✅ Resume saved as ${format.toUpperCase()}!`);
-      setRefreshSidebar((prev) => prev + 1); // 🔄 refresh sidebar
+      setRefreshSidebar((prev) => prev + 1);
     } catch (err) {
       console.error("Save failed:", err);
       alert("❌ Failed to save resume.");
@@ -207,7 +255,9 @@ export default function ResumeEditor() {
     }
   }
 
-  // ---------- AI Customization ----------
+  /* --------------------------------------------------------------------------
+    ✨ AI Optimization
+  -------------------------------------------------------------------------- */
   async function handleAICustomization() {
     try {
       setOptimizing(true);
@@ -231,7 +281,9 @@ export default function ResumeEditor() {
     }
   }
 
-  // ---------- Render ----------
+  /* --------------------------------------------------------------------------
+    🧱 Render
+  -------------------------------------------------------------------------- */
   return (
     <div className="resume-editor-layout">
       <div className="editor-main resume-editor-container">
@@ -287,6 +339,7 @@ export default function ResumeEditor() {
                 </div>
               </div>
 
+              {/* SECTION CONTENT */}
               {visibleSections[sectionKey] && (
                 <div className="section-content">
                   {sectionKey === "skills" ? (
@@ -322,7 +375,7 @@ export default function ResumeEditor() {
                     <div className="section-list">
                       {sectionValue.map((item, idx) => (
                         <div key={idx} className="entry-card">
-                          {Object.entries(item).map(([field, val]) => (
+                          {Object.entries(item || {}).map(([field, val]) => (
                             <div key={field} className="field-group">
                               <label>{toLabel(field)}</label>
                               {isBoolean(val) ? (
@@ -351,9 +404,16 @@ export default function ResumeEditor() {
                                 />
                               ) : (
                                 <input
-                                  type={isDateField(field) ? "date" : "text"}
+                                  type={
+                                    isDateField(field) &&
+                                    val &&
+                                    /^\d{4}-\d{2}-\d{2}$/.test(val)
+                                      ? "date"
+                                      : "text"
+                                  }
                                   value={
-                                    isDateField(field)
+                                    isDateField(field) &&
+                                    /^\d{4}-\d{2}-\d{2}$/.test(val)
                                       ? formatDate(val)
                                       : val || ""
                                   }
@@ -383,7 +443,7 @@ export default function ResumeEditor() {
                         ➕ Add Entry
                       </button>
                     </div>
-                  ) : (
+                  ) : typeof sectionValue === "object" ? (
                     <div className="section-object">
                       {Object.entries(sectionValue || {}).map(
                         ([field, val]) => (
@@ -426,6 +486,17 @@ export default function ResumeEditor() {
                         )
                       )}
                     </div>
+                  ) : (
+                    <textarea
+                      rows={4}
+                      value={sectionValue || ""}
+                      onChange={(e) =>
+                        setDraft((p) => ({
+                          ...p,
+                          [sectionKey]: e.target.value,
+                        }))
+                      }
+                    />
                   )}
                 </div>
               )}
