@@ -1,9 +1,13 @@
+// frontend/src/components/JobPipeLine.jsx
+
 import React, { useEffect, useState } from "react";
 import "./JobPipeline.css";
 import JobDetailsModal from "./JobsDetailsModal";
 import JobSearchFilter from "./JobSearchFilter";
 import UpcomingDeadlinesWidget from "./UpcomingDeadlinesWidget";
 import CompanyDetailsModal from "./CompanyDetailsModal";
+import { FaArchive } from "react-icons/fa"; // <-- ADDED
+import { api } from "../api"; // <-- ADDED
 
 // 🟡 highlight helper
 function highlight(text, term) {
@@ -43,14 +47,11 @@ export default function JobPipeline({ token }) {
     for (const job of jobs) {
       if (!job.company) continue;
       try {
-        const res = await fetch(
-          `http://localhost:4000/api/companies/${job.company}`,
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
-        if (res.ok) {
-          const data = await res.json();
-          if (data.logo_url) {
-            logos[job.company] = `http://localhost:4000${data.logo_url}`;
+        // Use the 'api' helper here for consistency
+        const res = await api.get(`/api/companies/${job.company}`);
+        if (res.status === 200) {
+          if (res.data.logo_url) {
+            logos[job.company] = `http://localhost:4000${res.data.logo_url}`;
           }
         }
       } catch (err) {
@@ -70,11 +71,9 @@ export default function JobPipeline({ token }) {
         )
       );
       const query = new URLSearchParams(clean).toString();
-      const res = await fetch(`http://localhost:4000/api/jobs?${query}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      const data = await res.json();
-      setJobs(data.jobs || []);
+      // Use the 'api' helper
+      const res = await api.get(`/api/jobs?${query}`); 
+      setJobs(res.data.jobs || []);
     } catch (err) {
       console.error("❌ Failed to load jobs", err);
     } finally {
@@ -100,38 +99,49 @@ export default function JobPipeline({ token }) {
     if (!bulkDays || selectedJobs.length === 0)
       return alert("Select jobs and a duration");
     try {
-      const res = await fetch("http://localhost:4000/api/jobs/bulk/deadline", {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ jobIds: selectedJobs, daysToAdd: bulkDays }),
+      // Use the 'api' helper
+      const res = await api.put("/api/jobs/bulk/deadline", {
+        jobIds: selectedJobs, 
+        daysToAdd: bulkDays 
       });
-      const data = await res.json();
-      if (res.ok) {
-        alert(`✅ Extended deadlines for ${data.updated.length} jobs`);
+
+      if (res.status === 200) {
+        alert(`✅ Extended deadlines for ${res.data.updated.length} jobs`);
         loadJobs();
         setSelectedJobs([]);
         setBulkDays("");
       } else {
-        alert(data.error || "Failed to extend deadlines");
+        alert(res.data.error || "Failed to extend deadlines");
       }
     } catch (err) {
       console.error("❌ Bulk deadline update failed:", err);
     }
   }
 
+  // --- ADD THIS NEW FUNCTION ---
+  async function handleArchive(jobId) {
+    try {
+      // Calls PUT /api/jobs/:id/archive
+      const res = await api.put(`/api/jobs/${jobId}/archive`);
+
+      if (res.status === 200) {
+        // Success! Refresh the job list by calling loadJobs.
+        // The archived job will disappear from the pipeline.
+        loadJobs();
+      } else {
+        console.error("Failed to archive job:", res.data.error);
+      }
+    } catch (err) {
+      console.error("❌ Failed to archive job:", err);
+    }
+  }
+  // ---------------------------
+
   async function updateJobStage(jobId, newStage) {
     try {
-      await fetch(`http://localhost:4000/api/jobs/${jobId}/status`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ status: newStage }),
-      });
+      // Use the 'api' helper
+      await api.put(`/api/jobs/${jobId}/status`, { status: newStage });
+      
       setJobs((prev) =>
         prev.map((j) =>
           j.id === jobId
@@ -342,6 +352,22 @@ export default function JobPipeline({ token }) {
                         )}
                       </div>
                     </div>
+                    
+                    {/* --- ADD THIS ACTION BAR --- */}
+                    <div className="job-card-actions">
+                      <button 
+                        className="job-card-btn-archive" 
+                        title="Archive Job"
+                        onClick={(e) => {
+                          e.stopPropagation(); // Prevents the modal from opening
+                          handleArchive(job.id);
+                        }}
+                      >
+                        <FaArchive /> Archive
+                      </button>
+                    </div>
+                    {/* --------------------------- */}
+                    
                   </div>
                 ))}
                 {stageJobs.length === 0 && (
@@ -359,6 +385,8 @@ export default function JobPipeline({ token }) {
           jobId={selectedJobId}
           token={token}
           onClose={() => setSelectedJobId(null)}
+          // Pass down loadJobs to refresh the card if it's edited in the modal
+          onJobUpdated={loadJobs}
         />
       )}
 
