@@ -1,0 +1,117 @@
+.research-wrapper {
+    text-align: center;
+    padding: 2rem;
+    background-color: #fafafa;
+    min-height: 100vh;
+  }
+  
+  /* ===== Header ===== */
+  .research-header {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: #4a1fb8;
+    margin-bottom: 1.5rem;
+  }
+  
+  /* ===== Navbar Tabs ===== */
+  .company-nav {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 1.2rem;
+    margin-bottom: 1rem;
+  }
+  
+  .company-tab {
+    background: none;
+    border: none;
+    color: #5e3df7;
+    font-weight: 500;
+    font-size: 1rem;
+    padding-bottom: 0.3rem;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: all 0.25s ease;
+  }
+  
+  .company-tab:hover {
+    color: #3a1cc9;
+  }
+  
+  .company-tab.active {
+    color: #3a1cc9;
+    font-weight: 600;
+    border-bottom: 2px solid #3a1cc9;
+  }
+  
+  /* ===== Refresh Button ===== */
+  .refresh-container {
+    margin-bottom: 1.5rem;
+  }
+  
+  .refresh-btn {
+    background-color: #5e3df7;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 0.5rem 1rem;
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.3s ease;
+  }
+  
+  .refresh-btn:hover {
+    background-color: #4a2dd0;
+  }
+  
+  /* ===== Company Card ===== */
+  .company-content {
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+    padding: 1.5rem 2rem;
+    width: 90%;
+    max-width: 900px;
+    margin: 0 auto;
+    text-align: left;
+  }
+  
+  .company-title {
+    text-align: center;
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 1.2rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 0.6rem;
+  }
+  
+  .verify-badge {
+    background-color: #e5ffe6;
+    color: #267a2f;
+    font-size: 0.8rem;
+    font-weight: 500;
+    padding: 0.2rem 0.5rem;
+    border-radius: 6px;
+  }
+  
+  /* ===== Misc ===== */
+  .loading-msg {
+    margin-top: 1.5rem;
+    color: #666;
+    font-size: 0.95rem;
+  }
+  
+  .error-text {
+    color: red;
+    font-weight: 500;
+    margin-top: 2rem;
+  }
+  
+  .no-data {
+    color: #444;
+    margin-top: 2rem;
+  }
+  

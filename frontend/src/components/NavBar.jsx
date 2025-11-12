@@ -10,6 +10,7 @@ import {
   FaSignOutAlt,
   FaFileAlt,
   FaBriefcase,
+  FaBuilding, // ✅ new icon for Company Research
 } from "react-icons/fa";
 import { NavLink, useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
@@ -41,6 +42,12 @@ export default function NavBar() {
             <NavLink to="/jobs">
               <FaBriefcase /> Jobs
             </NavLink>
+
+            {/* ✅ New UC-063 NavLink */}
+            <NavLink to="/company-research">
+              <FaBuilding /> Research
+            </NavLink>
+
             <NavLink to="/profile/info">
               <FaUser /> Profile
             </NavLink>

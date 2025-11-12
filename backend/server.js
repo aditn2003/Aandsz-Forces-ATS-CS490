@@ -24,6 +24,7 @@ import resumeRoutes from "./routes/resumes.js";
 import resumePresetsRoutes from "./routes/resumePresets.js";
 import sectionPresetsRoutes from "./routes/sectionPresets.js";
 import jobDescriptionsRoutes from "./routes/jobDescriptions.js";
+import companyResearchRoutes from "./routes/companyResearch.js";
 
 // ====== 🔔 DAILY DEADLINE REMINDER CRON JOB (UC-012) ======
 import crons from "node-cron";
@@ -62,6 +63,8 @@ pool
   .connect()
   .then(() => console.log("✅ Connected to PostgreSQL"))
   .catch((err) => console.error("❌ DB connection error:", err.message));
+
+
 
 // ===== Helpers =====
 const JWT_SECRET = process.env.JWT_SECRET || "dev_secret_change_me";
@@ -500,7 +503,7 @@ app.use("/api/resumes", resumeRoutes);
 app.use("/api", resumePresetsRoutes);
 app.use("/api", sectionPresetsRoutes);
 app.use("/api", jobDescriptionsRoutes);
-
+app.use("/api/company-research", companyResearchRoutes);
 const REMINDER_DAYS =
   parseInt(process.env.REMINDER_DAYS_BEFORE || "3", 10) || 3;
 
