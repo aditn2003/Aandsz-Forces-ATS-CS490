@@ -27,6 +27,8 @@ import SkillsGapAnalysis from "./pages/SkillsGap/SkillsGapAnalysis";
 import Interviews from "./pages/Interviews/Interviews";
 import SalaryResearch from "./pages/Salary/SalaryResearch";
 
+import CompanyResearch from "./pages/CompanyResearch";
+import CoverLetter from "./pages/CoverLetter"; // ✅ ADDED (UC-55)
 
 // ---------- Resume Flow ----------
 import ResumeBuilder from "./pages/Profile/ResumeBuilder";
@@ -80,7 +82,6 @@ function MainLayout() {
           <Route path="/login" element={<Login />} />
           <Route path="/forgot" element={<ForgotPassword />} />
           <Route path="/reset" element={<ResetPassword />} />
-
           {/* --- Profile Routes (Protected) --- */}
           <Route
             path="/profile/*"
@@ -90,7 +91,6 @@ function MainLayout() {
               </ProtectedRoute>
             }
           />
-
           {/* --- Resume Builder Pipeline (Protected) --- */}
           <Route
             path="/resume"
@@ -100,7 +100,6 @@ function MainLayout() {
               </ProtectedRoute>
             }
           />
-
           <Route
             path="/resume/setup"
             element={
@@ -109,7 +108,6 @@ function MainLayout() {
               </ProtectedRoute>
             }
           />
-
           <Route
             path="/resume/editor"
             element={
@@ -118,7 +116,6 @@ function MainLayout() {
               </ProtectedRoute>
             }
           />
-
           <Route
             path="/resume/optimize"
             element={
@@ -127,7 +124,6 @@ function MainLayout() {
               </ProtectedRoute>
             }
           />
-
           <Route
             path="/resume/optimize/run"
             element={
@@ -136,7 +132,6 @@ function MainLayout() {
               </ProtectedRoute>
             }
           />
-
           <Route
             path="/resume/compare"
             element={
@@ -145,7 +140,6 @@ function MainLayout() {
               </ProtectedRoute>
             }
           />
-
           <Route
             path="/resume/final-review"
             element={
@@ -154,7 +148,6 @@ function MainLayout() {
               </ProtectedRoute>
             }
           />
-
           {/* --- Jobs Dashboard (Protected) --- */}
           <Route
             path="/jobs"
@@ -164,7 +157,6 @@ function MainLayout() {
               </ProtectedRoute>
             }
           />
-
           {/* --- Statistics (Protected) --- */}
           <Route
             path="/statistics"
@@ -174,7 +166,6 @@ function MainLayout() {
               </ProtectedRoute>
             }
           />
-
           {/* --- Archived Jobs (Protected) --- */}
           <Route
             path="/archived"
@@ -184,7 +175,6 @@ function MainLayout() {
               </ProtectedRoute>
             }
           />
-
           {/* --- Company Research (Protected) --- */}
           <Route
             path="/company-research"
@@ -195,15 +185,13 @@ function MainLayout() {
             }
           />
           <Route
-  path="/salary-research"
-  element={
-    <ProtectedRoute>
-      <SalaryResearch />
-    </ProtectedRoute>
-  }
-/>
-
-
+            path="/salary-research"
+            element={
+              <ProtectedRoute>
+                <SalaryResearch />
+              </ProtectedRoute>
+            }
+          />
           {/* --- Job Match (Protected) --- */}
           <Route
             path="/job-match"
@@ -213,7 +201,6 @@ function MainLayout() {
               </ProtectedRoute>
             }
           />
-
           {/* --- Match Compare (Protected) --- */}
           <Route
             path="/match/compare"
@@ -223,7 +210,6 @@ function MainLayout() {
               </ProtectedRoute>
             }
           />
-
           {/* --- Skills Gap (Protected) --- */}
           <Route
             path="/skills-gap/:jobId"
@@ -233,7 +219,6 @@ function MainLayout() {
               </ProtectedRoute>
             }
           />
-
           {/* --- Interviews (Protected) --- */}
           <Route
             path="/interviews"
@@ -243,8 +228,10 @@ function MainLayout() {
               </ProtectedRoute>
             }
           />
-
-          {/* --- Legacy /alias (Protected) --- */}
+          {/* --- Cover Letter (UC-055)  --- */}
+          <Route path="/cover-letter" element={<CoverLetter />} />{" "}
+          {/* ✅ NEW */}
+          {/* --- Legacy / Alias --- */}
           <Route
             path="/resume/templates"
             element={
@@ -253,7 +240,6 @@ function MainLayout() {
               </ProtectedRoute>
             }
           />
-
           {/* --- Fallback --- */}
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>

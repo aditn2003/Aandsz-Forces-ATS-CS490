@@ -30,6 +30,8 @@ import skillsGapRoutes from "./routes/skillsGap.js";
 import skillProgressRoutes from "./routes/skillProgress.js";
 import interviewInsights from "./routes/interviewInsights.js";
 import salaryResearchRouter from "./routes/salaryResearch.js";
+import coverLetterTemplatesRouter from "./routes/coverLetterTemplates.js";
+import coverLetterAIRoutes from "./routes/coverLetterAI.js";
 
 // ====== 🔔 DAILY DEADLINE REMINDER CRON JOB (UC-012) ======
 import crons from "node-cron";
@@ -344,7 +346,8 @@ app.use("/api/skills-gap", skillsGapRoutes);
 app.use("/api/skill-progress", skillProgressRoutes);
 app.use("/api/salary-research", salaryResearchRouter);
 
-
+app.use("/api/cover-letter", coverLetterTemplatesRouter);
+app.use("/api/cover-letter", coverLetterAIRoutes);
 
 // ===== Global Error Handler =====
 app.use((err, req, res, next) => {

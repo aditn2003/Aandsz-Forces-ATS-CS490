@@ -27,7 +27,9 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response && error.response.status === 401) {
-      console.warn("🔐 401 detected — token invalid or expired. Logging out...");
+      console.warn(
+        "🔐 401 detected — token invalid or expired. Logging out..."
+      );
 
       // Remove token immediately
       localStorage.removeItem("token");
