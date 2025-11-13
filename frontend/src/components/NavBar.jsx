@@ -12,7 +12,8 @@ import {
   FaBriefcase,
   FaChartBar,
   FaArchive,
-  FaBuilding, // ✅ new icon for Company Research
+  FaBuilding,
+  FaEnvelope, // ✅ Icon for Cover Letter
 } from "react-icons/fa";
 import { NavLink, useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
@@ -41,21 +42,24 @@ export default function NavBar() {
             <NavLink to="/resume">
               <FaFileAlt /> Resume
             </NavLink>
+
+            {/* ✅ NEW Cover Letter TAB */}
+            <NavLink to="/cover-letter">
+              <FaEnvelope /> Cover Letter
+            </NavLink>
+
             <NavLink to="/jobs">
               <FaBriefcase /> Jobs
             </NavLink>
-            {/* --- ADD THIS NEW LINK --- */}
+
             <NavLink to="/statistics">
               <FaChartBar /> Statistics
             </NavLink>
-            {/* --------------------------- */}
-            {/* --- ADD THIS NEW LINK --- */}
+
             <NavLink to="/archived">
               <FaArchive /> Archived
             </NavLink>
-            {/* --------------------------- */}
 
-            {/* ✅ New UC-063 NavLink */}
             <NavLink to="/company-research">
               <FaBuilding /> Research
             </NavLink>
@@ -63,6 +67,7 @@ export default function NavBar() {
             <NavLink to="/profile/info">
               <FaUser /> Profile
             </NavLink>
+
             <button onClick={logout} className="logout-btn">
               <FaSignOutAlt /> Logout
             </button>

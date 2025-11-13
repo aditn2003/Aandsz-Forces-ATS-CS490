@@ -20,7 +20,8 @@ import ProfileLayout from "./pages/Profile/ProfileLayout";
 import Jobs from "./pages/Jobs";
 import StatisticsPage from "./pages/StatisticsPage";
 import ArchivedJobs from "./pages/ArchivedJobs";
-import CompanyResearch from "./pages/CompanyResearch"; // ✅ NEW UC-063 PAGE
+import CompanyResearch from "./pages/CompanyResearch";
+import CoverLetter from "./pages/CoverLetter";   // ✅ ADDED (UC-55)
 
 // ---------- Resume Flow ----------
 import ResumeBuilder from "./pages/Profile/ResumeBuilder";
@@ -68,26 +69,26 @@ function MainLayout() {
           <Route path="/profile/*" element={<ProfileLayout />} />
 
           {/* --- Resume Builder Pipeline --- */}
-          {/* Entry from navbar */}
           <Route path="/resume" element={<ResumeBuilder />} />
-          {/* Step 2: JD + options */}
           <Route path="/resume/setup" element={<ResumeSetup />} />
-          {/* Step 3: Editor */}
           <Route path="/resume/editor" element={<ResumeEditor />} />
 
           {/* --- Jobs Dashboard --- */}
           <Route path="/jobs" element={<Jobs />} />
 
-          {/* --- ADD THIS NEW ROUTE --- */}
+          {/* --- Statistics --- */}
           <Route path="/statistics" element={<StatisticsPage />} />
-          {/* --------------------------- */}
-          {/* --- ADD THIS NEW ROUTE --- */}
+
+          {/* --- Archived Jobs --- */}
           <Route path="/archived" element={<ArchivedJobs />} />
 
           {/* --- Company Research (UC-063) --- */}
           <Route path="/company-research" element={<CompanyResearch />} />
 
-          {/* --- Legacy /alias (optional) --- */}
+          {/* --- Cover Letter (UC-055)  --- */}
+          <Route path="/cover-letter" element={<CoverLetter />} /> {/* ✅ NEW */}
+
+          {/* --- Legacy / Alias --- */}
           <Route
             path="/resume/templates"
             element={<Navigate to="/resume" replace />}

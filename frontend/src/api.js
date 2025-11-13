@@ -17,13 +17,15 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-// === Company Research ===
+/* ============================================================
+   COMPANY RESEARCH
+============================================================ */
 export async function fetchCompanyResearch(company) {
   try {
     const res = await api.get(`/api/company-research`, {
       params: { company },
     });
-    return res.data.data; // returns the research payload
+    return res.data.data;
   } catch (err) {
     console.error("❌ Error fetching company research:", err);
     throw new Error(
@@ -31,3 +33,19 @@ export async function fetchCompanyResearch(company) {
     );
   }
 }
+
+/* ============================================================
+   COVER LETTER TEMPLATES — Phase 2 Actions
+============================================================ */
+
+// ✏️ Edit template
+export const updateTemplate = (id, data) =>
+  api.put(`/api/cover-letter/templates/${id}`, data);
+
+// 🗑 Delete template
+export const deleteTemplate = (id) =>
+  api.delete(`/api/cover-letter/templates/${id}`);
+
+// 📄 Duplicate template
+export const duplicateTemplate = (id) =>
+  api.post(`/api/cover-letter/templates/${id}/duplicate`);
