@@ -49,3 +49,26 @@ export const deleteTemplate = (id) =>
 // 📄 Duplicate template
 export const duplicateTemplate = (id) =>
   api.post(`/api/cover-letter/templates/${id}/duplicate`);
+
+
+/* ============================================================
+   COVER LETTER EXPORT
+============================================================ */
+    // === Cover Letter Export ===
+    export function exportPDF(payload) {
+      return api.post("/api/cover-letter/export/pdf", payload, {
+        responseType: "blob",
+      });
+    }
+
+    export function exportDOCX(payload) {
+      return api.post("/api/cover-letter/export/docx", payload, {
+        responseType: "blob",
+      });
+    }
+
+    export function exportTXT(payload) {
+      return api.post("/api/cover-letter/export/text", payload, {
+        responseType: "blob",
+      });
+    }

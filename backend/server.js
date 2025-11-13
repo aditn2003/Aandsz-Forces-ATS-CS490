@@ -27,6 +27,8 @@ import jobDescriptionsRoutes from "./routes/jobDescriptions.js";
 import companyResearchRoutes from "./routes/companyResearch.js";
 import coverLetterTemplatesRouter from "./routes/coverLetterTemplates.js";
 import coverLetterAIRoutes from "./routes/coverLetterAI.js";
+import coverLetterExportRoutes from "./routes/coverLetterExport.js";
+
 
 
 // ====== 🔔 DAILY DEADLINE REMINDER CRON JOB (UC-012) ======
@@ -340,6 +342,8 @@ app.use("/api", projectRoutes);
 app.use("/api/jobs", jobRoutes);
 app.use("/api/cover-letter", coverLetterTemplatesRouter);
 app.use("/api/cover-letter", coverLetterAIRoutes);
+app.use("/api/cover-letter/export", coverLetterExportRoutes);
+
 
 
 // ===== Global Error Handler =====
