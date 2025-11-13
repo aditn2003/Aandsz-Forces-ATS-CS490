@@ -5,23 +5,47 @@ import "./Interviews.css";
 export default function Interviews() {
   const [companies, setCompanies] = useState([]);
   const [activeCompany, setActiveCompany] = useState("");
+
+  // 🔥 NEW — role mapping by company
+  const [roleMap, setRoleMap] = useState({});   // { Tesla: ["Software Eng", ...], Walmart: ["Cashier"] }
+
   const [insights, setInsights] = useState(null);
   const [loading, setLoading] = useState(false);
 
   // Local checklist progress
   const [checked, setChecked] = useState({});
 
-  /* ===============================
-     Load unique company names
-  =============================== */
+  /* ============================================================
+     Load JOBS → build unique company list & role list per company
+  ============================================================ */
   useEffect(() => {
     async function loadJobs() {
       try {
         const res = await api.get("/api/jobs");
-        const unique = [...new Set(res.data.jobs.map((j) => j.company))];
 
-        setCompanies(unique);
-        if (unique.length > 0) setActiveCompany(unique[0]);
+        const jobs = res.data.jobs || [];
+
+        // Unique list of companies
+        const uniqueCompanies = [...new Set(jobs.map((j) => j.company))];
+        setCompanies(uniqueCompanies);
+
+        // Build map: { Tesla: ["Software Eng", "Intern"], ... }
+        const roleMapTemp = {};
+        jobs.forEach((job) => {
+          if (!roleMapTemp[job.company]) roleMapTemp[job.company] = new Set();
+          roleMapTemp[job.company].add(job.title);
+        });
+
+        // Convert Sets → Arrays
+        const finalMap = {};
+        Object.keys(roleMapTemp).forEach((company) => {
+          finalMap[company] = [...roleMapTemp[company]];
+        });
+
+        setRoleMap(finalMap);
+
+        // Default active company
+        if (uniqueCompanies.length > 0) setActiveCompany(uniqueCompanies[0]);
       } catch (err) {
         console.error("Error loading jobs:", err);
       }
@@ -29,22 +53,34 @@ export default function Interviews() {
     loadJobs();
   }, []);
 
-  /* ===============================
-     Load insights for selected company
-  =============================== */
+  /* ============================================================
+     Load interview insights when company changes
+  ============================================================ */
   useEffect(() => {
     if (!activeCompany) return;
     fetchInsights(activeCompany);
   }, [activeCompany]);
 
+  /* ============================================================
+     Fetch insights (now with ROLE passed to backend)
+  ============================================================ */
   async function fetchInsights(company) {
     try {
       setLoading(true);
-      const res = await api.get(`/api/interview-insights?company=${company}`);
+
+      const role = roleMap[company]?.[0] || ""; // pick the first role for that company
+      console.log("🔍 Fetching interview insights for:", company, "Role:", role);
+
+      const res = await api.get(
+        `/api/interview-insights?company=${encodeURIComponent(company)}&role=${encodeURIComponent(role)}`
+      );
+
       setInsights(res.data.data);
 
-      // restore saved checklist progress
-      const saved = JSON.parse(localStorage.getItem(`checklist_${company}`) || "{}");
+      // Load checklist local storage for company+role
+      const saved = JSON.parse(
+        localStorage.getItem(`checklist_${company}_${role}`) || "{}"
+      );
       setChecked(saved);
 
     } catch (err) {
@@ -54,34 +90,42 @@ export default function Interviews() {
     }
   }
 
-  /* ===============================
-     Handle checklist updates
-  =============================== */
+  /* ============================================================
+     Checklist handler (per company & per role)
+  ============================================================ */
   function toggleChecklist(i, text) {
+    const role = roleMap[activeCompany]?.[0] || "";
+
     const updated = {
       ...checked,
       [i]: !checked[i]
     };
     setChecked(updated);
 
-    // persist per-company
-    localStorage.setItem(`checklist_${activeCompany}`, JSON.stringify(updated));
+    // Save progress per company and role
+    localStorage.setItem(
+      `checklist_${activeCompany}_${role}`,
+      JSON.stringify(updated)
+    );
   }
 
-  /* ===============================
+  /* ============================================================
      REFRESH
-  =============================== */
+  ============================================================ */
   function refresh() {
     if (activeCompany) fetchInsights(activeCompany);
   }
 
+  /* ============================================================
+     RENDER UI
+  ============================================================ */
   return (
     <div className="interviews-container">
 
       {/* === Page Header === */}
       <h1 className="interview-title">Interview Insights</h1>
 
-      {/* === Company Buttons (Matching Research UI) === */}
+      {/* === Company Buttons === */}
       <div className="company-buttons">
         {companies.map((c) => (
           <button
@@ -99,22 +143,15 @@ export default function Interviews() {
         🔄 Refresh Insights
       </button>
 
-      {/* === Main Content Card === */}
+      {/* === Main Card === */}
       <div className="insights-panel">
         {loading && <p className="loading-text">⏳ Loading interview insights…</p>}
 
         {!loading && insights && (
           <div className="interview-content">
-            {/* ============================================= */}
-            {/* Title */}
-            {/* ============================================= */}
             <h2 style={{ fontSize: "28px", fontWeight: 700, marginBottom: "20px" }}>
               {activeCompany} — Interview Overview
             </h2>
-
-            {/* ============================================= */}
-            {/* Sections */}
-            {/* ============================================= */}
 
             <section>
               <h2>Interview Process Overview</h2>
@@ -176,12 +213,8 @@ export default function Interviews() {
               </ul>
             </section>
 
-            {/* ============================================= */}
-            {/* Checklist (NOW INTERACTIVE + SAVES PROGRESS) */}
-            {/* ============================================= */}
             <section>
               <h2>Interview Preparation Checklist</h2>
-
               {insights.checklist.map((item, i) => (
                 <label key={i} className="checklist-item">
                   <input
@@ -193,6 +226,7 @@ export default function Interviews() {
                 </label>
               ))}
             </section>
+
           </div>
         )}
       </div>
