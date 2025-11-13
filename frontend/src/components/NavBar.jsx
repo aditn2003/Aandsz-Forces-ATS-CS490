@@ -55,6 +55,11 @@ export default function NavBar() {
               <FaBriefcase /> Jobs
             </NavLink>
 
+            {/* ⭐ JOB MATCH */}
+            <NavLink to="/job-match">
+              <FaStar /> Job Match
+            </NavLink>
+
             {/* 📊 Statistics */}
             <NavLink to="/statistics">
               <FaChartBar /> Statistics
@@ -80,11 +85,7 @@ export default function NavBar() {
               <FaComments /> Interviews
             </NavLink>
 
-            {/* ⭐ JOB MATCH */}
-            <NavLink to="/job-match">
-              <FaStar /> Job Match
-            </NavLink>
-
+            
             {/* 👤 Profile */}
             <NavLink to="/profile/info">
               <FaUser /> Profile
