@@ -1,226 +1,277 @@
+/* ==========================================================
+   📄 Professional ATS Resume CSS (Tightened Margins)
+   Optimized for single-page A4/Letter PDF
+   ========================================================== */
+
 /* ---------- Base ---------- */
 html,
 body {
-  font-family: "Inter", Arial, sans-serif;
-  color: #111;
-  line-height: 1.35;
-  font-size: 10.8pt;
+  font-family: "Calibri", "Arial", sans-serif;
+  color: #000;
+  line-height: 1.15;
+  font-size: 11pt;
   margin: 0;
   padding: 0;
   background: #fff;
 }
-
 body {
   width: 8.5in;
-  padding: 0.35in 0.45in 0.45in 0.35in; /* tighter top & left margins */
+  padding: 0.1in 0.2in 0.1in 0.2in; /* ultra-tight top & left */
 }
-
-/* ---------- Header ---------- */
 /* ---------- Header ---------- */
 .header {
   text-align: center;
-  margin-bottom: 0.45em;
+  margin-bottom: 0.1in;
+  border-bottom: 1px solid #000;
+  padding-bottom: 0.08in;
 }
 
 .name {
-  font-size: 17pt;
+  font-size: 13pt;
   font-weight: 700;
-  margin: 0;
+  margin: 0 0 0.03in 0;
+  text-transform: uppercase;
+  letter-spacing: 0.4pt;
 }
 
-.headline {
-  font-size: 10.8pt;
-  font-weight: 500;
-  color: #333;
-  margin-top: 0.15em;
-  line-height: 1.4;
+.job-title {
+  font-size: 10pt;
+  font-weight: 600;
+  margin: 0.02in 0;
 }
 
-.headline a {
-  color: #004aad;
-  text-decoration: none;
-}
-.headline a:hover {
-  text-decoration: underline;
+.contact-info {
+  font-size: 10pt;
+  margin-top: 0.04in;
+  color: #000;
 }
 
 /* ---------- Sections ---------- */
 .section {
-  margin-bottom: 0.7em;
+  margin-bottom: 0.1in;
+  page-break-inside: avoid;
 }
 
 .section-title {
   font-size: 10.8pt;
   font-weight: 700;
   text-transform: uppercase;
-  border-bottom: 1px solid #aaa;
-  margin-bottom: 0.25em;
-  padding-bottom: 2px;
-  letter-spacing: 0.3px;
+  border-bottom: 1.2px solid #000;
+  margin: 0 0 0.07in 0;
+  padding-bottom: 0.02in;
+  letter-spacing: 0.4pt;
 }
 
 /* ---------- Experience ---------- */
-/* ---------- Experience ---------- */
 .exp-item {
-  margin-bottom: 0.55em;
+  margin-bottom: 0.1in;
+  page-break-inside: avoid;
 }
 
 .exp-header {
   display: flex;
   justify-content: space-between;
-  font-weight: 600;
+  align-items: baseline;
+  margin-bottom: 0.02in;
 }
 
 .exp-left {
-  font-weight: 600;
-}
-
-.exp-left em {
-  font-style: italic;
-  font-weight: 400;
-}
-
-.exp-right {
-  font-size: 9.8pt;
-  color: #444;
-  white-space: nowrap;
-}
-
-.exp-location {
-  font-size: 9.8pt;
-  color: #444;
-  margin-top: 0.05em;
-  margin-bottom: 0.15em;
-}
-
-.exp-item a {
-  color: #004aad;
-  text-decoration: none;
-}
-
-.exp-item a:hover {
-  text-decoration: underline;
-}
-
-.exp-item ul {
-  margin: 0.15em 0 0.3em 1em;
-  padding: 0;
-}
-
-/* ---------- Education ---------- */
-.education-item {
-  margin-bottom: 0.5em;
-}
-
-.edu-header {
-  display: flex;
-  justify-content: space-between;
-  font-weight: 600;
-}
-
-.edu-right {
-  font-size: 10pt;
-  color: #444;
-}
-
-.edu-details {
-  display: flex;
-  justify-content: space-between;
-  margin-top: 0.05em;
-}
-
-.edu-degree {
-  font-style: italic;
-}
-
-.edu-gpa {
-  color: #333;
-}
-
-.edu-honors {
-  margin-top: 0.15em;
-  font-size: 9.8pt;
-}
-/* ---------- Projects ---------- */
-/* ---------- Projects ---------- */
-.project-item {
-  margin-bottom: 0.6em;
-}
-
-.project-header {
-  font-weight: 600;
+  font-weight: 700;
   font-size: 10.8pt;
 }
 
-.project-header a {
-  color: #004aad;
-  text-decoration: none;
+.exp-location {
+  font-weight: 400;
+  margin-left: 0.12in;
+  font-size: 10pt;
+}
+
+.exp-right {
+  font-size: 10pt;
+  font-weight: 600;
+  white-space: nowrap;
+  text-align: right;
+}
+
+.exp-title {
+  font-style: italic;
+  font-size: 10.5pt;
+  margin-bottom: 0.03in;
   font-weight: 500;
 }
 
-.project-header a:hover {
+.exp-item ul {
+  margin: 0.03in 0 0 0.18in;
+  padding: 0;
+  line-height: 1.3;
+}
+
+.exp-item li {
+  margin-bottom: 0.02in;
+}
+
+/* ---------- Education ---------- */
+/* ---------- Education (Ultra-Compact Inline) ---------- */
+.education-item {
+  margin-bottom: 0.08in;
+  font-size: 10.5pt;
+  line-height: 1.3;
+}
+
+.edu-line {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  font-weight: 500;
+  gap: 0.15em;
+}
+
+.edu-line strong {
+  font-weight: 700;
+}
+
+.edu-date {
+  margin-left: auto;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.edu-meta {
+  font-size: 10pt;
+  color: #333;
+  margin-left: 0.15in;
+  margin-top: 0.02in;
+}
+
+/* ---------- Projects ---------- */
+.project-item {
+  margin-bottom: 0.1in;
+  page-break-inside: avoid;
+}
+
+.project-header {
+  font-weight: 700;
+  font-size: 10.8pt;
+  margin-bottom: 0.02in;
+}
+
+.project-link {
+  font-weight: 400;
+  font-size: 10pt;
+  margin-left: 0.1in;
+  color: #004aad;
+  text-decoration: none;
+}
+
+.project-link:hover {
   text-decoration: underline;
 }
 
 .project-tech {
-  font-style: italic;
+  font-size: 10pt;
   color: #333;
-  margin-top: 0.05em;
-  margin-bottom: 0.2em;
+  margin-bottom: 0.03in;
+  font-style: italic;
 }
 
 .project-item ul {
-  margin: 0.15em 0 0.3em 1em;
+  margin: 0.03in 0 0 0.18in;
   padding: 0;
+  line-height: 1.3;
 }
 
-/* ---------- Skills ---------- */
-/* ---------- Skills ---------- */
+.project-item li {
+  margin-bottom: 0.02in;
+}
+
+/* ---------- Skills / Additional Info ---------- */
 .section p {
-  margin: 0.15em 0;
-  line-height: 1.4;
+  margin: 0.03in 0;
+  line-height: 1.25;
+  font-size: 10.5pt;
 }
+
 .section strong {
-  font-weight: 600;
+  font-weight: 700;
 }
+
 /* ---------- Certifications ---------- */
 .cert-item {
-  margin-bottom: 0.5em;
+  margin-bottom: 0.07in;
+  font-size: 10.5pt;
+  line-height: 1.3;
 }
 
 .cert-header {
-  font-weight: 500;
-  margin-bottom: 0.1em;
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  flex-wrap: wrap;
+  font-weight: 600;
+  margin-bottom: 0.02in;
+  gap: 0.25em;
+}
+
+.cert-header strong {
+  font-weight: 700;
 }
 
 .cert-header em {
   font-style: italic;
-  color: #333;
+  font-weight: 400;
+  margin-left: 0.1in;
 }
 
 .cert-header .right {
-  float: right;
+  font-size: 10pt;
   font-weight: 600;
+  margin-left: auto;
 }
 
 .cert-number {
   font-size: 10pt;
-  color: #444;
-  margin-left: 0.2em;
+  color: #333;
+  margin-left: 0.1in;
 }
 
-/* ---------- Print ---------- */
+/* ---------- Print Settings ---------- */
 @page {
   margin: 0;
+  size: letter;
 }
 
 @media print {
   html,
   body {
     margin: 0;
-    padding: 0.35in 0.45in 0.45in 0.35in;
+    padding: 0.1in 0.25in 0.1in 0.2in;
   }
+
   .section {
     page-break-inside: avoid;
   }
+
+  .exp-item,
+  .education-item,
+  .project-item {
+    page-break-inside: avoid;
+  }
+}
+
+/* ---------- Utility ---------- */
+ul {
+  list-style-type: disc;
+}
+
+li {
+  font-size: 10.5pt;
+}
+
+a {
+  color: #004aad;
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
 }
