@@ -26,6 +26,7 @@ function auth(req, res, next) {
   }
 }
 
+
 // ---------- CREATE JOB ----------
 router.post("/", auth, async (req, res) => {
   const {
@@ -40,6 +41,7 @@ router.post("/", auth, async (req, res) => {
     industry,
     type,
     applicationDate,
+    required_skills   // ⭐ ADDED
   } = req.body;
 
   if (!title?.trim() || !company?.trim()) {
@@ -50,9 +52,11 @@ router.post("/", auth, async (req, res) => {
     const result = await pool.query(
       `INSERT INTO jobs (
          user_id, title, company, location, salary_min, salary_max, url, deadline,
-         description, industry, type, status, status_updated_at, created_at, "applicationDate"
+         description, industry, type, status, status_updated_at, created_at,
+         "applicationDate", required_skills   -- ⭐ ADDED
        )
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,'Interested',NOW(),NOW(), $12)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,'Interested',NOW(),NOW(),
+               $12, $13)   -- ⭐ ADDED
        RETURNING *`,
       [
         req.userId,
@@ -67,15 +71,18 @@ router.post("/", auth, async (req, res) => {
         industry || "",
         type || "",
         applicationDate || null,
+        Array.isArray(required_skills) ? required_skills : []  // ⭐ ADDED
       ]
     );
     // Return 200 OK with the job object
+
     res.status(200).json({ job: result.rows[0] }); 
   } catch (err) {
     console.error("❌ Job insert error:", err);
     res.status(500).json({ error: "Database error" });
   }
 });
+
 
 // ---------- LIST ALL JOBS (Filters out archived) ----------
 router.get("/", auth, async (req, res) => {

@@ -1,0 +1,80 @@
+{
+    "Python": [
+      {
+        "title": "Python for Everybody (free)",
+        "platform": "freeCodeCamp",
+        "url": "https://www.freecodecamp.org/learn/scientific-computing-with-python/"
+      },
+      {
+        "title": "Complete Python Bootcamp",
+        "platform": "Udemy",
+        "url": "https://www.udemy.com/course/complete-python-bootcamp/"
+      },
+      {
+        "title": "Python Basics",
+        "platform": "Coursera",
+        "url": "https://www.coursera.org/specializations/python"
+      }
+      ],
+    "JavaScript": [
+      {
+        "title": "JavaScript Algorithms (free)",
+        "platform": "freeCodeCamp",
+        "url": "https://www.freecodecamp.org/learn/javascript-algorithms-and-data-structures/"
+      },
+      {
+        "title": "Modern JavaScript",
+        "platform": "Udemy",
+        "url": "https://www.udemy.com/course/the-complete-javascript-course/"
+      }
+    ],
+    "React": [
+      {
+        "title": "React Official Tutorial",
+        "platform": "React Docs",
+        "url": "https://react.dev/learn"
+      },
+      {
+        "title": "React for Beginners",
+        "platform": "Scrimba",
+        "url": "https://scrimba.com/learn/react"
+      }
+    ],
+    "SQL": [
+      {
+        "title": "SQL Tutorial (free)",
+        "platform": "W3Schools",
+        "url": "https://www.w3schools.com/sql/"
+      },
+      {
+        "title": "SQL for Data Science",
+        "platform": "Coursera",
+        "url": "https://www.coursera.org/learn/sql-for-data-science"
+      }
+    ],
+    "AWS": [
+      {
+        "title": "AWS Cloud Practitioner Essentials",
+        "platform": "AWS",
+        "url": "https://www.aws.training/Details/eLearning?id=60697"
+      },
+      {
+        "title": "AWS for Beginners",
+        "platform": "freeCodeCamp",
+        "url": "https://www.freecodecamp.org/news/tag/aws/"
+      }
+    ],
+    "default": [
+      {
+        "title": "Search Skill Courses",
+        "platform": "LinkedIn Learning",
+        "url": "https://www.linkedin.com/learning/"
+      },
+      {
+        "title": "Search Tutorials",
+        "platform": "YouTube",
+        "url": "https://www.youtube.com/results?search_query=learn+SKILL_NAME"
+      }
+    ]
+  }
+  
