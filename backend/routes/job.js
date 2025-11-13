@@ -27,6 +27,7 @@ function auth(req, res, next) {
 }
 
 
+
 // ---------- CREATE JOB ----------
 router.post("/", auth, async (req, res) => {
   const {
@@ -76,6 +77,7 @@ router.post("/", auth, async (req, res) => {
     );
 
     // Return 200 OK with the job object
+
 
     res.status(200).json({ job: result.rows[0] }); 
   } catch (err) {
