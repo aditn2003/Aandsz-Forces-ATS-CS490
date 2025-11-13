@@ -26,8 +26,6 @@ function auth(req, res, next) {
   }
 }
 
-
-
 // ---------- CREATE JOB ----------
 router.post("/", auth, async (req, res) => {
   const {
@@ -42,7 +40,6 @@ router.post("/", auth, async (req, res) => {
     industry,
     type,
     applicationDate,
-    required_skills   // ⭐ ADDED
   } = req.body;
 
   if (!title?.trim() || !company?.trim()) {
@@ -50,14 +47,13 @@ router.post("/", auth, async (req, res) => {
   }
 
   try {
+    // FIX: Removed non-existent columns from the INSERT query
     const result = await pool.query(
       `INSERT INTO jobs (
          user_id, title, company, location, salary_min, salary_max, url, deadline,
-         description, industry, type, status, status_updated_at, created_at,
-         "applicationDate", required_skills   -- ⭐ ADDED
+         description, industry, type, status, status_updated_at, created_at, "applicationDate"
        )
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,'Interested',NOW(),NOW(),
-               $12, $13)   -- ⭐ ADDED
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,'Interested',NOW(),NOW(), $12)
        RETURNING *`,
       [
         req.userId,
@@ -72,20 +68,14 @@ router.post("/", auth, async (req, res) => {
         industry || "",
         type || "",
         applicationDate || null,
-        Array.isArray(required_skills) ? required_skills : []  // ⭐ ADDED
       ]
     );
-
-    // Return 200 OK with the job object
-
-
-    res.status(200).json({ job: result.rows[0] }); 
+    res.status(200).json({ job: result.rows[0] });
   } catch (err) {
     console.error("❌ Job insert error:", err);
     res.status(500).json({ error: "Database error" });
   }
 });
-
 
 // ---------- LIST ALL JOBS (Filters out archived) ----------
 router.get("/", auth, async (req, res) => {
@@ -103,7 +93,6 @@ router.get("/", auth, async (req, res) => {
     } = req.query;
 
     const params = [req.userId];
-    // This line correctly filters out archived jobs
     const whereClauses = ["user_id = $1", `"isArchived" = false`]; 
     let i = 2;
 
@@ -274,7 +263,7 @@ router.get("/stats", auth, async (req, res) => {
     res.json(stats);
 
   } catch (err) {
-    console.error("❌ Statistics query error:", err.message);
+    console.error("❌ Statistics query error:", err);
     res.status(500).json({ error: "Database error" });
   }
 });
@@ -286,7 +275,6 @@ router.get("/stats", auth, async (req, res) => {
 // ==================================================================
 //
 // ---------- GET ARCHIVED JOBS (AC-2) ----------
-// ***** THIS ROUTE IS CORRECTLY PLACED - BEFORE /:id *****
 router.get("/archived", auth, async (req, res) => {
   try {
     const result = await pool.query(
@@ -303,7 +291,6 @@ router.get("/archived", auth, async (req, res) => {
 
 
 // ---------- GET JOB BY ID ----------
-// This route MUST come AFTER specific routes like /stats and /archived
 router.get("/:id", auth, async (req, res) => {
   const { id } = req.params;
   try {
@@ -475,10 +462,10 @@ router.put("/:id/archive", auth, async (req, res) => {
     if (result.rows.length === 0) {
       return res.status(404).json({ error: "Job not found" });
     }
-    res.status(200).json({ job: result.rows[0] }); // <-- Send 200 OK
+    res.status(200).json({ job: result.rows[0] });
   } catch (err) {
     console.error("❌ Archive job error:", err.message);
-    res.status(500).json({ error: "Database error" }); // <-- FIX: Added catch block
+    res.status(500).json({ error: "Database error" });
   }
 });
 
@@ -494,10 +481,10 @@ router.put("/:id/restore", auth, async (req, res) => {
     if (result.rows.length === 0) {
       return res.status(404).json({ error: "Job not found" });
     }
-    res.status(200).json({ job: result.rows[0] }); // <-- Send 200 OK
+    res.status(200).json({ job: result.rows[0] });
   } catch (err) {
     console.error("❌ Restore job error:", err.message);
-    res.status(500).json({ error: "Database error" }); // <-- FIX: Added catch block
+    res.status(500).json({ error: "Database error" });
   }
 });
 
