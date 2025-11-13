@@ -1,104 +1,406 @@
-/* ========== CONTAINER ========== */
-.resume-editor-container {
-  padding: 2rem;
-  max-width: 900px;
-  margin: auto;
-  background: #fff;
-  border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+/* ============================================================
+   RESUME EDITOR - COMPLETE STYLES
+   Includes editor controls + live preview styling
+============================================================ */
+
+/* Main Layout - Split Screen */
+.resume-editor-layout {
+  display: flex;
+  min-height: 100vh;
+  background: #f5f5f5;
+  gap: 0;
 }
 
-/* ========== TITLE ========== */
+/* Left Side - Editor Controls */
+.editor-main {
+  flex: 1;
+  max-width: 50%;
+  padding: 40px;
+  overflow-y: auto;
+  background: white;
+  border-right: 1px solid #e0e0e0;
+}
+
+/* Right Side - Live Preview */
+.editor-preview {
+  flex: 1;
+  max-width: 50%;
+  padding: 40px;
+  overflow-y: auto;
+  background: #fafafa;
+}
+
+.preview-header {
+  font-size: 20px;
+  font-weight: 600;
+  margin: 0 0 24px 0;
+  color: #333;
+  position: sticky;
+  top: 0;
+  background: #fafafa;
+  padding: 12px 0;
+  z-index: 10;
+  border-bottom: 2px solid #2196f3;
+}
+
+/* Resume Preview Container */
+.resume-preview {
+  max-width: 800px;
+  margin: 0 auto;
+  background: white;
+  padding: 40px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+/* ============================================================
+   PREVIEW SECTION STYLES
+============================================================ */
+
+/* Summary Section */
+.preview-summary {
+  margin-bottom: 32px;
+  padding-bottom: 24px;
+  border-bottom: 2px solid #e0e0e0;
+}
+
+.preview-name {
+  font-size: 32px;
+  font-weight: 700;
+  margin: 0 0 8px 0;
+  line-height: 1.2;
+  color: #1a1a1a;
+}
+
+.preview-title {
+  font-size: 18px;
+  font-weight: 400;
+  color: #666;
+  margin: 0 0 16px 0;
+}
+
+.preview-contact {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 16px;
+  font-size: 14px;
+  color: #444;
+}
+
+.preview-bio {
+  font-size: 15px;
+  line-height: 1.6;
+  color: #333;
+  margin: 16px 0 0 0;
+}
+
+/* Section Titles */
+.preview-section {
+  margin-bottom: 32px;
+}
+
+.preview-section-title {
+  font-size: 22px;
+  font-weight: 700;
+  margin: 0 0 16px 0;
+  padding-bottom: 8px;
+  border-bottom: 2px solid #2196f3;
+  color: #1a1a1a;
+}
+
+/* Experience Cards */
+.preview-experience-card {
+  margin-bottom: 24px;
+  padding: 16px;
+  border-left: 3px solid #2196f3;
+  background: #f9f9f9;
+}
+
+.preview-exp-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.preview-experience-card h3 {
+  font-size: 18px;
+  font-weight: 600;
+  margin: 0 0 4px 0;
+  color: #1a1a1a;
+}
+
+.preview-company {
+  font-size: 16px;
+  color: #444;
+  margin: 0;
+}
+
+.preview-dates {
+  font-size: 14px;
+  color: #666;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.preview-location {
+  font-size: 14px;
+  color: #666;
+  margin: 4px 0 12px 0;
+}
+
+/* Bullet Lists */
+.bullet-list {
+  list-style-type: disc;
+  padding-left: 20px;
+  margin: 12px 0;
+}
+
+.bullet-list li {
+  margin: 6px 0;
+  line-height: 1.6;
+  color: #333;
+  font-size: 15px;
+}
+
+.preview-description {
+  margin-top: 12px;
+}
+
+/* Education Cards */
+.preview-education-card {
+  margin-bottom: 24px;
+  padding: 16px;
+  background: #f9f9f9;
+  border-radius: 8px;
+}
+
+.preview-education-card h3 {
+  font-size: 18px;
+  font-weight: 600;
+  margin: 0 0 8px 0;
+}
+
+.preview-degree {
+  font-size: 16px;
+  color: #444;
+  margin: 0 0 12px 0;
+}
+
+.preview-enrollment {
+  display: inline-block;
+  font-size: 14px;
+  padding: 4px 12px;
+  background: #e3f2fd;
+  color: #1976d2;
+  border-radius: 12px;
+  margin: 8px 0;
+  font-weight: 500;
+}
+
+.preview-grad-date {
+  font-size: 14px;
+  color: #666;
+  margin: 8px 0;
+}
+
+.preview-gpa {
+  font-size: 14px;
+  font-weight: 600;
+  color: #2196f3;
+  margin: 4px 0;
+}
+
+.preview-honors {
+  margin-top: 12px;
+  font-size: 14px;
+  color: #333;
+}
+
+.preview-honors strong {
+  color: #2196f3;
+}
+
+/* Project Cards */
+.preview-project-card {
+  margin-bottom: 24px;
+  padding: 16px;
+  background: #f9f9f9;
+  border-radius: 8px;
+}
+
+.preview-project-card h3 {
+  font-size: 18px;
+  font-weight: 600;
+  margin: 0 0 12px 0;
+}
+
+.preview-project-tech {
+  margin: 12px 0;
+}
+
+.preview-project-tech strong {
+  display: block;
+  font-size: 14px;
+  margin-bottom: 8px;
+  color: #444;
+}
+
+/* Technology Tags */
+.tech-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.tech-tag {
+  background: #e3f2fd;
+  color: #1976d2;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.no-tech {
+  color: #999;
+  font-style: italic;
+  font-size: 14px;
+}
+
+/* Project Links */
+.preview-project-links {
+  display: flex;
+  gap: 16px;
+  margin-top: 12px;
+}
+
+.preview-project-links a {
+  color: #2196f3;
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.preview-project-links a:hover {
+  text-decoration: underline;
+}
+
+/* Skills Grid */
+.preview-skills-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.preview-skill-tag {
+  background: #f5f5f5;
+  border: 1px solid #ddd;
+  color: #333;
+  padding: 6px 14px;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+/* Certifications */
+.preview-cert-card {
+  margin-bottom: 16px;
+  padding: 12px;
+  background: #f9f9f9;
+  border-radius: 6px;
+}
+
+.preview-cert-card h3 {
+  font-size: 16px;
+  font-weight: 600;
+  margin: 0 0 4px 0;
+}
+
+.preview-cert-card p {
+  font-size: 14px;
+  color: #666;
+  margin: 4px 0;
+}
+
+.preview-cert-date {
+  font-size: 13px;
+  color: #888;
+}
+
+/* ============================================================
+   EDITOR CONTROLS STYLES
+============================================================ */
+
+.resume-editor-container {
+  max-width: 100%;
+}
+
+.resume-editor-container h1 {
+  font-size: 28px;
+  font-weight: 700;
+  margin: 0 0 24px 0;
+  color: #1a1a1a;
+}
+
+/* Resume Title Input */
 .resume-title-label {
-  font-weight: bold;
-  margin-top: 1rem;
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: #333;
 }
 
 .resume-title-input {
   width: 100%;
-  margin-bottom: 2rem;
-  padding: 0.6rem;
-  border: 1px solid #ccc;
-  border-radius: 8px;
-}
-
-/* ========== SECTION WRAPPER ========== */
-.resume-section {
-  background: #fff;
-  border-radius: 12px;
-  margin-bottom: 20px;
-  padding: 16px;
+  padding: 12px;
+  font-size: 16px;
   border: 1px solid #ddd;
-  transition: box-shadow 0.25s ease, transform 0.25s ease;
+  border-radius: 6px;
+  margin-bottom: 24px;
 }
 
-.resume-section:hover {
-  box-shadow: 0 0 6px rgba(0, 0, 0, 0.08);
+/* Resume Sections */
+.resume-section {
+  margin-bottom: 24px;
+  padding: 20px;
+  background: #f9f9f9;
+  border-radius: 8px;
+  border: 1px solid #e0e0e0;
 }
 
-/* ========== SECTION HEADER ========== */
 .section-header {
   display: flex;
-  align-items: center;
   justify-content: space-between;
-  margin-bottom: 8px;
+  align-items: center;
+  margin-bottom: 16px;
 }
 
 .section-title-group {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 16px;
 }
 
-.section-header h2 {
-  margin: 0;
-  font-size: 1.2rem;
+.section-title-group h2 {
+  font-size: 20px;
   font-weight: 600;
+  margin: 0;
+  color: #1a1a1a;
 }
 
-/* ========== SECTION CONTROLS ========== */
-.section-controls {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-/* ========== FIELD GROUPS ========== */
-.field-group {
-  display: flex;
-  flex-direction: column;
-  margin-bottom: 0.8rem;
-}
-
-.field-group input,
-.field-group textarea,
-.field-group select {
-  padding: 0.5rem;
-  border-radius: 6px;
-  border: 1px solid #bbb;
-  font-family: inherit;
-  font-size: 0.95rem;
-}
-
-.field-group textarea {
-  resize: vertical;
-  min-height: 90px;
-}
-
-/* ========== ENTRY CARDS ========== */
-.entry-card {
-  background: white;
-  border: 1px solid #ddd;
-  padding: 1rem;
-  border-radius: 8px;
-  margin-bottom: 1rem;
-}
-
-/* ========== TOGGLE SWITCH ========== */
+/* Toggle Switch */
 .switch {
   position: relative;
   display: inline-block;
-  width: 44px;
+  width: 48px;
   height: 24px;
 }
 
@@ -116,7 +418,7 @@
   right: 0;
   bottom: 0;
   background-color: #ccc;
-  transition: 0.4s;
+  transition: 0.3s;
   border-radius: 24px;
 }
 
@@ -128,238 +430,324 @@
   left: 3px;
   bottom: 3px;
   background-color: white;
-  transition: 0.4s;
+  transition: 0.3s;
   border-radius: 50%;
 }
 
-.switch input:checked + .slider {
-  background-color: #8b5cf6;
-  box-shadow: 0 0 8px rgba(139, 92, 246, 0.5);
+input:checked + .slider {
+  background-color: #2196f3;
 }
 
-.switch input:checked + .slider:before {
-  transform: translateX(20px);
+input:checked + .slider:before {
+  transform: translateX(24px);
 }
 
-/* ========== BUTTONS (GENERAL) ========== */
-.btn-add,
-.btn-delete,
-.btn-small,
-.btn-primary,
-.btn-secondary {
-  margin-top: 0.5rem;
-  padding: 0.5rem 0.8rem;
-  border: none;
-  border-radius: 6px;
+/* Section Controls */
+.section-controls {
+  display: flex;
+  gap: 8px;
+}
+
+.arrow-btn {
+  background: white;
+  border: 1px solid #ddd;
+  padding: 6px 12px;
   cursor: pointer;
-  font-weight: 600;
-}
-
-/* Small red delete button */
-.btn-small {
-  background: #ef4444;
-  color: white;
-  font-size: 0.8rem;
-}
-
-/* Add entry */
-.btn-add {
-  background: #34d399;
-  color: white;
-}
-
-/* Delete section */
-.btn-delete {
-  background: #f87171;
-  color: white;
-}
-
-/* ========== ARROWS AND PRESET BUTTONS ========== */
-.arrow-btn,
-.preset-btn {
-  border: none;
-  background: #f3f4f6;
-  color: #444;
+  border-radius: 4px;
   font-size: 16px;
-  cursor: pointer;
-  border-radius: 6px;
-  padding: 4px 8px;
-  transition: all 0.2s ease;
 }
 
-.arrow-btn:hover:not(:disabled),
-.preset-btn:hover {
-  background: #8b5cf6;
-  color: #fff;
-  transform: translateY(-1px);
+.arrow-btn:hover:not(:disabled) {
+  background: #f0f0f0;
 }
 
 .arrow-btn:disabled {
-  opacity: 0.4;
+  opacity: 0.3;
   cursor: not-allowed;
 }
 
-/* ========== SKILLS TAGS — CLEAN WHITE THEME ========== */
+/* Section Content */
+.section-content {
+  margin-top: 16px;
+}
+
+/* Skills Tag Input */
 .skills-tags-container {
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  padding: 1rem;
-  border: 1px solid #e0e0e0;
-  border-radius: 10px;
-  background-color: #fff !important;
+  gap: 12px;
 }
 
 .skills-tags {
   display: flex;
   flex-wrap: wrap;
-  gap: 10px;
+  gap: 8px;
 }
 
 .skill-tag {
-  display: inline-flex;
+  display: flex;
   align-items: center;
   gap: 6px;
+  background: #e3f2fd;
+  color: #1976d2;
   padding: 6px 12px;
-  background-color: #fff !important;
-  border: 1px solid #ccc !important;
-  border-radius: 20px !important;
+  border-radius: 16px;
   font-size: 14px;
   font-weight: 500;
-  color: #222 !important;
-  transition: all 0.25s ease !important;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05) !important;
 }
 
-.skill-tag:hover {
-  border-color: #000 !important;
-  background-color: #f7f7f7 !important;
-  transform: translateY(-1px) !important;
-}
-
-/* Skill "×" remove icon */
 .skill-remove {
-  all: unset !important;
-  background: none !important;
-  border: none !important;
-  outline: none !important;
-  box-shadow: none !important;
-  cursor: pointer !important;
-  font-size: 16px !important;
-  font-weight: 500 !important;
-  color: #666 !important;
-  line-height: 1 !important;
-  margin-left: 4px !important;
-  transition: color 0.2s ease, transform 0.15s ease !important;
+  background: none;
+  border: none;
+  color: #1976d2;
+  cursor: pointer;
+  font-size: 18px;
+  padding: 0;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .skill-remove:hover {
-  color: #d11 !important;
-  transform: scale(1.2) !important;
+  color: #d32f2f;
 }
 
-/* Input for adding new skills */
 .skill-input {
-  border: 1px solid #ccc !important;
-  border-radius: 8px !important;
-  padding: 10px !important;
-  font-size: 14px !important;
-  width: 100% !important;
-  background-color: #fafafa !important;
-  color: #333 !important;
-  transition: border-color 0.2s ease, box-shadow 0.2s ease !important;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 14px;
 }
 
-.skill-input:focus {
-  border-color: #000 !important;
-  background-color: #fff !important;
-  outline: none !important;
-  box-shadow: 0 0 3px rgba(0, 0, 0, 0.1) !important;
+/* Entry Cards (Experience, Education, etc.) */
+.entry-card {
+  background: white;
+  padding: 16px;
+  border-radius: 6px;
+  margin-bottom: 16px;
+  border: 1px solid #e0e0e0;
 }
 
-/* Checkbox styling */
+.field-group {
+  margin-bottom: 16px;
+}
+
+.field-group label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  margin-bottom: 6px;
+  color: #444;
+}
+
+.field-group input[type="text"],
+.field-group input[type="date"],
+.field-group textarea {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+  font-family: inherit;
+}
+
 .field-group input[type="checkbox"] {
-  width: 18px;
-  height: 18px;
-  accent-color: #7c3aed;
+  width: 20px;
+  height: 20px;
   cursor: pointer;
 }
 
-/* ========== UNIFIED BOTTOM BUTTONS ========== */
-/* ========== UNIFIED BOTTOM BUTTONS ========== */
+.field-group textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+/* Contact Subfields */
+.contact-subfields {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 12px;
+  background: #f9f9f9;
+  border-radius: 6px;
+}
+
+.subfield label {
+  font-size: 12px;
+  color: #666;
+}
+
+/* Buttons */
+.btn-small {
+  background: #f44336;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  margin-top: 8px;
+}
+
+.btn-small:hover {
+  background: #d32f2f;
+}
+
+.btn-add {
+  background: #4caf50;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  margin-top: 12px;
+}
+
+.btn-add:hover {
+  background: #45a049;
+}
+
+/* Footer Actions */
 .resume-editor-actions {
   display: flex;
-  justify-content: center;
-  align-items: center;
   gap: 12px;
-  flex-wrap: nowrap;
-  margin-top: 30px;
+  margin-top: 32px;
+  padding-top: 24px;
+  border-top: 2px solid #e0e0e0;
+  flex-wrap: wrap;
 }
 
-/* Unified button base style */
-.resume-editor-actions button,
-.btn-primary,
-.btn-secondary,
-.btn-ai {
-  display: inline-flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  gap: 8px !important;
-  min-width: 180px !important;
-  height: 46px !important;
-  border: none !important;
-  border-radius: 10px !important;
-  font-size: 15px !important;
-  font-weight: 600 !important;
-  color: #fff !important;
-  cursor: pointer !important;
-  transition: all 0.25s ease !important;
-  background: linear-gradient(135deg, #8b5cf6, #7c3aed) !important;
-  box-shadow: 0 4px 10px rgba(139, 92, 246, 0.3) !important;
-}
-
-/* Equal hover animation */
-.resume-editor-actions button:hover {
-  transform: translateY(-2px) !important;
-  filter: brightness(1.1) !important;
-}
-
-/* All three share the same purple gradient */
-.btn-secondary {
-  background: linear-gradient(135deg, #a78bfa, #8b5cf6) !important;
-}
 .btn-primary {
-  background: linear-gradient(135deg, #8b5cf6, #7c3aed) !important;
-}
-.btn-ai {
-  background: linear-gradient(135deg, #8b5cf6, #7c3aed) !important;
-}
-
-/* Hover States */
-.btn-secondary:hover,
-.btn-primary:hover,
-.btn-ai:hover {
-  background: linear-gradient(135deg, #7c3aed, #6d28d9) !important;
+  background: #2196f3;
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: 500;
+  transition: background 0.2s;
 }
 
-/* Disabled State */
-button:disabled,
-.btn-ai:disabled {
-  opacity: 0.6 !important;
-  cursor: not-allowed !important;
-  transform: none !important;
+.btn-primary:hover:not(:disabled) {
+  background: #1976d2;
 }
 
-/* Mobile layout */
+.btn-primary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.btn-secondary {
+  background: white;
+  color: #333;
+  border: 1px solid #ddd;
+  padding: 12px 24px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: all 0.2s;
+}
+
+.btn-secondary:hover {
+  background: #f5f5f5;
+  border-color: #999;
+}
+
+/* ============================================================
+   RESPONSIVE DESIGN
+============================================================ */
+
+@media (max-width: 1200px) {
+  .resume-editor-layout {
+    flex-direction: column;
+  }
+
+  .editor-main,
+  .editor-preview {
+    max-width: 100%;
+  }
+
+  .editor-preview {
+    border-top: 1px solid #e0e0e0;
+    border-right: none;
+  }
+}
+
 @media (max-width: 768px) {
-  .resume-editor-actions {
-    flex-wrap: wrap !important;
-    gap: 10px !important;
+  .editor-main,
+  .editor-preview {
+    padding: 20px;
   }
 
-  .resume-editor-actions button {
-    min-width: 150px !important;
-    height: 42px !important;
-    font-size: 14px !important;
+  .resume-preview {
+    padding: 20px;
   }
+
+  .preview-name {
+    font-size: 24px;
+  }
+
+  .preview-title {
+    font-size: 16px;
+  }
+
+  .preview-exp-header {
+    flex-direction: column;
+  }
+
+  .preview-dates {
+    white-space: normal;
+  }
+
+  .section-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .resume-editor-actions {
+    flex-direction: column;
+  }
+
+  .btn-primary,
+  .btn-secondary {
+    width: 100%;
+  }
+}
+
+/* ============================================================
+   UTILITY CLASSES
+============================================================ */
+
+.text-center {
+  text-align: center;
+}
+
+.mt-1 {
+  margin-top: 8px;
+}
+
+.mt-2 {
+  margin-top: 16px;
+}
+
+.mb-1 {
+  margin-bottom: 8px;
+}
+
+.mb-2 {
+  margin-bottom: 16px;
+}
+
+.p-1 {
+  padding: 8px;
+}
+
+.p-2 {
+  padding: 16px;
 }
