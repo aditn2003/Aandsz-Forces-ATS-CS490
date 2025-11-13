@@ -5,61 +5,45 @@ import JobPipeline from "../components/JobPipeLine";
 import UpcomingDeadlinesWidget from "../components/UpcomingDeadlinesWidget";
 import JobsCalendar from "../components/JobsCalendar";
 import { useAuth } from "../contexts/AuthContext";
-import { useNavigate } from "react-router-dom";   // <-- NEW
 import "./Jobs.css";
 
 export default function Jobs() {
   const { token } = useAuth();
-  const navigate = useNavigate();                 // <-- NEW
+  const [showForm, setShowForm] = useState(false);
   const [refreshKey, setRefreshKey] = useState(Date.now());
-  const [showJobForm, setShowJobForm] = useState(false);
 
-  // 🔥 NEW — when user clicks “Analyze Skills”
-  const handleAnalyzeSkills = (jobId) => {
-    navigate(`/skills-gap/${jobId}`);
+  const handleSaved = () => {
+    setShowForm(false);
+    setRefreshKey(Date.now());
   };
 
   return (
     <div className="jobs-layout">
-      {/* ===== Left/Main Content ===== */}
+      {/* ---------- MAIN SECTION ---------- */}
       <div className="jobs-main">
-        {/* 🔹 Job Form Section */}
         <div className="profile-box">
           <h2>💼 Job Tracker</h2>
-          {!showJobForm && (
-            <button
-              className="btn-success"
-              onClick={() => setShowJobForm(true)}
-            >
+          {!showForm ? (
+            <button className="btn-success" onClick={() => setShowForm(true)}>
               ➕ Add New Job
             </button>
-          )}
-          {showJobForm && (
-            <JobEntryForm
-              token={token}
-              onSaved={() => {
-                setShowJobForm(false);
-                setRefreshKey(Date.now());
-              }}
-              onCancel={() => setShowJobForm(false)}
-            />
+          ) : (
+            <JobEntryForm token={token} onSaved={handleSaved} onCancel={() => setShowForm(false)} />
           )}
         </div>
 
-        {/* 🔹 Job Pipeline */}
         <div className="profile-box">
           <h3>📊 Job Pipeline</h3>
+          <JobPipeline key={refreshKey} token={token} />
+        </div>
 
-          {/* 🔥 PASS ANALYZE HANDLER INTO PIPELINE */}
-          <JobPipeline
-            key={refreshKey}
-            token={token}
-            onAnalyzeSkills={handleAnalyzeSkills}   // <-- NEW
-          />
+        <div className="profile-box">
+          <h3>🗓️ Jobs Calendar</h3>
+          <JobsCalendar token={token} />
         </div>
       </div>
 
-      {/* ===== Sidebar ===== */}
+      {/* ---------- SIDEBAR ---------- */}
       <aside className="sidebar-widget">
         <UpcomingDeadlinesWidget token={token} />
       </aside>

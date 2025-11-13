@@ -17,27 +17,24 @@ import certifications from "./routes/certification.js";
 import projectRoutes from "./routes/projects.js";
 import path from "path";
 import { fileURLToPath } from "url";
-import jobRoutes from "./routes/job.js";
+//import jobRoutes from "./routes/job.js";
 import { auth } from "./auth.js";
 import companyRoutes from "./routes/company.js";
 import resumeRoutes from "./routes/resumes.js";
 import resumePresetsRoutes from "./routes/resumePresets.js";
 import sectionPresetsRoutes from "./routes/sectionPresets.js";
 import jobDescriptionsRoutes from "./routes/jobDescriptions.js";
-import companyResearchRoutes from "./routes/companyResearch.js";
-import matchRoutes from "./routes/match.js";
-import skillsGapRoutes from "./routes/skillsGap.js";
-import skillProgressRoutes from "./routes/skillProgress.js";
-import interviewInsights from "./routes/interviewInsights.js";
-import salaryResearchRouter from "./routes/salaryResearch.js";
-import coverLetterTemplatesRouter from "./routes/coverLetterTemplates.js";
-import coverLetterAIRoutes from "./routes/coverLetterAI.js";
-
+import jobRoutes from "./routes/job.js";
+import jobImportRoutes from "./routes/jobRoutes.js"; 
 // ====== 🔔 DAILY DEADLINE REMINDER CRON JOB (UC-012) ======
 import crons from "node-cron";
+import puppeteer from "puppeteer";
+import coverLetterRoutes from "./routes/cover_letter.js";
 
 // ===== Initialize =====
 dotenv.config();
+console.log("🔑 GOOGLE_API_KEY loaded:", process.env.GOOGLE_API_KEY ? "✅ yes" : "❌ no");
+
 const { Pool } = pkg;
 const app = express();
 
@@ -58,6 +55,8 @@ const transporter = nodemailer.createTransport({
 app.use(cors({ origin: "http://localhost:5173", credentials: true }));
 app.use(express.json());
 
+import linkedinRoutes from "./routes/linkdein.js";
+app.use("/api/linkedin", linkedinRoutes);
 // ✅ Serve uploaded images so React can access them
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
@@ -269,6 +268,25 @@ app.put("/me", auth, async (req, res) => {
     res.status(500).json({ error: "Server error" });
   }
 });
+app.get('/api/test-token', (req, res) => {
+  const h = req.headers.authorization || "";
+  const token = h.startsWith("Bearer ") ? h.split(" ")[1] : null;
+  
+  console.log("Raw header:", h);
+  console.log("Extracted token:", token);
+  console.log("JWT_SECRET:", process.env.JWT_SECRET);
+  
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    res.json({ success: true, decoded });
+  } catch (err) {
+    res.status(401).json({ 
+      error: err.name, 
+      message: err.message,
+      token: token?.substring(0, 20) + '...' 
+    });
+  }
+});
 
 // ========== UC-009: Account Deletion ==========
 app.post("/delete", auth, async (req, res) => {
@@ -334,6 +352,9 @@ app.post("/google", async (req, res) => {
 });
 
 // ===== Routes =====
+app.use("/api/resumes", resumeRoutes);
+app.use("/api/cover-letters", coverLetterRoutes);
+app.use("/api/jobs", jobRoutes);
 app.use("/api", profileRoutes);
 app.use("/api", uploadRoutes);
 app.use("/api", auth, employmentRoutes);
@@ -341,13 +362,8 @@ app.use("/skills", skillsRouter);
 app.use("/api", educationRoutes);
 app.use("/api", certifications);
 app.use("/api", projectRoutes);
-app.use("/api/jobs", jobRoutes);
-app.use("/api/skills-gap", skillsGapRoutes);
-app.use("/api/skill-progress", skillProgressRoutes);
-app.use("/api/salary-research", salaryResearchRouter);
+app.use("/api", jobImportRoutes);
 
-app.use("/api/cover-letter", coverLetterTemplatesRouter);
-app.use("/api/cover-letter", coverLetterAIRoutes);
 
 // ===== Global Error Handler =====
 app.use((err, req, res, next) => {
@@ -510,14 +526,9 @@ async function sendDeadlineReminders() {
   }
 }
 app.use("/api/companies", companyRoutes);
-app.use("/api/resumes", resumeRoutes);
 app.use("/api", resumePresetsRoutes);
 app.use("/api", sectionPresetsRoutes);
 app.use("/api", jobDescriptionsRoutes);
-app.use("/api/company-research", companyResearchRoutes);
-app.use("/api/match", matchRoutes);
-app.use("/api/skill-progress", skillProgressRoutes);
-app.use("/api/interview-insights", interviewInsights);
 
 const REMINDER_DAYS =
   parseInt(process.env.REMINDER_DAYS_BEFORE || "3", 10) || 3;
@@ -535,5 +546,6 @@ app.post("/test-reminders", async (req, res) => {
     res.status(500).json({ error: "Failed to run reminder job" });
   }
 });
+
 // ===== Start Server =====
 app.listen(4000, () => console.log("✅ API running at http://localhost:4000"));

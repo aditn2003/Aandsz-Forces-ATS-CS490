@@ -7,7 +7,7 @@ export default function ResumeSetup() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Props passed from template selection page
+  // Props passed from previous screen
   const { selectedTemplate, resumeTitle } = location.state || {};
 
   // Local state
@@ -30,21 +30,7 @@ export default function ResumeSetup() {
     );
   }
 
-  // ✅ Ensure selectedTemplate includes filename
-  const templateMap = {
-    ats: { id: 1, name: "ATS Optimized", file: "ats-optimized" },
-    creative: { id: 2, name: "Creative", file: "professional" },
-  };
-
-  const currentTemplate =
-    selectedTemplate?.file === "professional" ||
-    selectedTemplate?.name?.toLowerCase().includes("creative")
-      ? templateMap.creative
-      : templateMap.ats;
-
-  console.log("🎨 Using template:", currentTemplate);
-
-  // ✅ Load last saved job description
+  // ✅ Load last saved job description (if any)
   useEffect(() => {
     const fetchLastDescription = async () => {
       try {
@@ -73,7 +59,7 @@ export default function ResumeSetup() {
     return () => clearTimeout(delay);
   }, [jobDescription]);
 
-  // 🧠 Save job description
+  // 🧠 Save job description to backend
   async function ensureJobDescriptionSaved() {
     if (!jobDescription.trim()) return;
 
@@ -104,7 +90,7 @@ export default function ResumeSetup() {
     }
   }
 
-  // 🧠 Generate resume from existing profile
+  // 🧠 Generate resume draft from existing profile data
   async function handleUseExistingInfo() {
     try {
       setLoadingDraft(true);
@@ -118,7 +104,7 @@ export default function ResumeSetup() {
       navigate("/resume/editor", {
         state: {
           sections: res.data.sections || {},
-          selectedTemplate: currentTemplate, // ✅ sends correct file + name
+          selectedTemplate,
           resumeTitle,
           jobDescription,
         },
@@ -131,7 +117,7 @@ export default function ResumeSetup() {
     }
   }
 
-  // 📤 Upload & parse existing resume
+  // 📤 Upload and parse an existing resume (PDF/DOCX)
   async function handleImportResume(e) {
     const file = e.target.files[0];
     if (!file) return;
@@ -140,9 +126,9 @@ export default function ResumeSetup() {
       await ensureJobDescriptionSaved();
 
       const formData = new FormData();
-      formData.append("file", file); // ✅ Fixed: Changed from "resume" to "file"
+      formData.append("resume", file);
       formData.append("title", resumeTitle);
-      formData.append("template_id", currentTemplate.id);
+      formData.append("template_id", selectedTemplate.id);
 
       setUploading(true);
       setMessage("");
@@ -156,10 +142,11 @@ export default function ResumeSetup() {
 
       console.log("✅ Imported Resume:", res.data);
 
+      // ✅ Navigate to editor with structured sections
       navigate("/resume/editor", {
         state: {
           sections: res.data.sections || {},
-          selectedTemplate: currentTemplate, // ✅ consistent
+          selectedTemplate,
           resumeTitle,
           preview: res.data.preview || "",
           jobDescription,
@@ -180,7 +167,19 @@ export default function ResumeSetup() {
   return (
     <div className="resume-setup-container">
       <h1>Build Your Resume</h1>
-      <p>Import a resume or use your saved profile to get started.</p>
+      <p>Paste a job description or use existing data to get started.</p>
+
+      {/* 🟣 Paste Job Description */}
+      <div className="job-desc-section">
+        <h3>Paste Job Description</h3>
+        <textarea
+          className="job-desc-textarea"
+          placeholder="Paste the job description here..."
+          value={jobDescription}
+          onChange={(e) => setJobDescription(e.target.value)}
+        />
+        {saving && <p className="saving-note">💾 Auto-saving...</p>}
+      </div>
 
       {/* 🟢 Resume Options */}
       <div className="resume-options">

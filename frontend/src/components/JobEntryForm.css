@@ -179,6 +179,31 @@
   font-weight: 600;
   color: #7c4dff;
 }
+.import-row {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.import-btn {
+  padding: 0.5rem 1rem;
+  background: #6a5acd;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.import-btn:hover {
+  background: #5a4abc;
+}
+
+.import-status {
+  font-size: 0.9rem;
+  margin-top: 0.25rem;
+  color: #666;
+}
+
 
   
   

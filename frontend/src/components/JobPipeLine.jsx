@@ -1,13 +1,9 @@
-// frontend/src/components/JobPipeLine.jsx
-
 import React, { useEffect, useState } from "react";
 import "./JobPipeline.css";
 import JobDetailsModal from "./JobsDetailsModal";
 import JobSearchFilter from "./JobSearchFilter";
 import UpcomingDeadlinesWidget from "./UpcomingDeadlinesWidget";
 import CompanyDetailsModal from "./CompanyDetailsModal";
-import { FaArchive } from "react-icons/fa"; // <-- ADDED
-import { api } from "../api"; // <-- ADDED
 
 // 🟡 highlight helper
 function highlight(text, term) {
@@ -25,8 +21,7 @@ const STAGES = [
   { name: "Rejected", color: "#f87171" },
 ];
 
-// ⭐ ONLY ADDITION #1 — add onAnalyzeSkills support
-export default function JobPipeline({ token, onAnalyzeSkills }) {
+export default function JobPipeline({ token }) {
   const [jobs, setJobs] = useState([]);
   const [dragged, setDragged] = useState(null);
   const [filter, setFilter] = useState("All");
@@ -48,11 +43,14 @@ export default function JobPipeline({ token, onAnalyzeSkills }) {
     for (const job of jobs) {
       if (!job.company) continue;
       try {
-        // Use the 'api' helper here for consistency
-        const res = await api.get(`/api/companies/${job.company}`);
-        if (res.status === 200) {
-          if (res.data.logo_url) {
-            logos[job.company] = `http://localhost:4000${res.data.logo_url}`;
+        const res = await fetch(
+          `http://localhost:4000/api/companies/${job.company}`,
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        if (res.ok) {
+          const data = await res.json();
+          if (data.logo_url) {
+            logos[job.company] = `http://localhost:4000${data.logo_url}`;
           }
         }
       } catch (err) {
@@ -72,9 +70,11 @@ export default function JobPipeline({ token, onAnalyzeSkills }) {
         )
       );
       const query = new URLSearchParams(clean).toString();
-      // Use the 'api' helper
-      const res = await api.get(`/api/jobs?${query}`); 
-      setJobs(res.data.jobs || []);
+      const res = await fetch(`http://localhost:4000/api/jobs?${query}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const data = await res.json();
+      setJobs(data.jobs || []);
     } catch (err) {
       console.error("❌ Failed to load jobs", err);
     } finally {
@@ -100,49 +100,38 @@ export default function JobPipeline({ token, onAnalyzeSkills }) {
     if (!bulkDays || selectedJobs.length === 0)
       return alert("Select jobs and a duration");
     try {
-      // Use the 'api' helper
-      const res = await api.put("/api/jobs/bulk/deadline", {
-        jobIds: selectedJobs, 
-        daysToAdd: bulkDays 
+      const res = await fetch("http://localhost:4000/api/jobs/bulk/deadline", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ jobIds: selectedJobs, daysToAdd: bulkDays }),
       });
-
-      if (res.status === 200) {
-        alert(`✅ Extended deadlines for ${res.data.updated.length} jobs`);
+      const data = await res.json();
+      if (res.ok) {
+        alert(`✅ Extended deadlines for ${data.updated.length} jobs`);
         loadJobs();
         setSelectedJobs([]);
         setBulkDays("");
       } else {
-        alert(res.data.error || "Failed to extend deadlines");
+        alert(data.error || "Failed to extend deadlines");
       }
     } catch (err) {
       console.error("❌ Bulk deadline update failed:", err);
     }
   }
 
-  // --- ADD THIS NEW FUNCTION ---
-  async function handleArchive(jobId) {
-    try {
-      // Calls PUT /api/jobs/:id/archive
-      const res = await api.put(`/api/jobs/${jobId}/archive`);
-
-      if (res.status === 200) {
-        // Success! Refresh the job list by calling loadJobs.
-        // The archived job will disappear from the pipeline.
-        loadJobs();
-      } else {
-        console.error("Failed to archive job:", res.data.error);
-      }
-    } catch (err) {
-      console.error("❌ Failed to archive job:", err);
-    }
-  }
-  // ---------------------------
-
   async function updateJobStage(jobId, newStage) {
     try {
-      // Use the 'api' helper
-      await api.put(`/api/jobs/${jobId}/status`, { status: newStage });
-      
+      await fetch(`http://localhost:4000/api/jobs/${jobId}/status`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ status: newStage }),
+      });
       setJobs((prev) =>
         prev.map((j) =>
           j.id === jobId
@@ -254,143 +243,107 @@ export default function JobPipeline({ token, onAnalyzeSkills }) {
               </h3>
 
               <div className="column-content">
-              {stageJobs.map((job) => (
-  <div key={job.id} className="job-wrapper">
+                {stageJobs.map((job) => (
+                  <div
+                    key={job.id}
+                    className={`job-card ${
+                      selectedJobs.includes(job.id) ? "selected" : ""
+                    }`}
+                    draggable
+                    onDragStart={() => setDragged(job)}
+                    onClick={(e) => {
+                      if (e.shiftKey) {
+                        e.stopPropagation();
+                        setSelectedJobs((prev) =>
+                          prev.includes(job.id)
+                            ? prev.filter((id) => id !== job.id)
+                            : [...prev, job.id]
+                        );
+                      } else {
+                        setSelectedJobId(job.id);
+                      }
+                    }}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={selectedJobs.includes(job.id)}
+                      onClick={(e) => e.stopPropagation()}
+                      onChange={(e) => {
+                        e.stopPropagation();
+                        setSelectedJobs((prev) =>
+                          prev.includes(job.id)
+                            ? prev.filter((id) => id !== job.id)
+                            : [...prev, job.id]
+                        );
+                      }}
+                    />
 
-    {/* ✔ Checkbox OUTSIDE card, so it works */}
-    <input
-      type="checkbox"
-      className="job-select-checkbox"
-      checked={selectedJobs.includes(job.id)}
-      onClick={(e) => e.stopPropagation()}
-      onChange={(e) => {
-        e.stopPropagation();
-        setSelectedJobs((prev) =>
-          prev.includes(job.id)
-            ? prev.filter((id) => id !== job.id)
-            : [...prev, job.id]
-        );
-      }}
-    />
+                    {/* 🧩 Job Info + Logo aligned right */}
+                    <div className="job-info-with-logo">
+                      <div className="job-info">
+                        <strong
+                          dangerouslySetInnerHTML={{
+                            __html: highlight(job.title, filters.search),
+                          }}
+                        />
+                        <p
+                          dangerouslySetInnerHTML={{
+                            __html: highlight(job.company, filters.search),
+                          }}
+                        />
+                        {job.deadline && (
+                          <small
+                            style={{
+                              color: deadlineColor(job.deadline),
+                              fontWeight: 500,
+                              display: "block",
+                            }}
+                          >
+                            {daysUntilDeadline(job.deadline) < 0
+                              ? `Overdue (${Math.abs(
+                                  daysUntilDeadline(job.deadline)
+                                )} days ago)`
+                              : `${daysUntilDeadline(
+                                  job.deadline
+                                )} days remaining`}
+                          </small>
+                        )}
+                        <small>
+                          {formatDaysInStage(
+                            job.status_updated_at || job.created_at
+                          )}
+                        </small>
+                      </div>
 
-    {/* ============================
-        CLICKABLE JOB CARD
-    ============================ */}
-    <div
-      className={`job-card ${
-        selectedJobs.includes(job.id) ? "selected" : ""
-      }`}
-      draggable
-      onDragStart={() => setDragged(job)}
-      onClick={(e) => {
-        if (e.shiftKey) {
-          e.stopPropagation();
-          setSelectedJobs((prev) =>
-            prev.includes(job.id)
-              ? prev.filter((id) => id !== job.id)
-              : [...prev, job.id]
-          );
-        } else {
-          setSelectedJobId(job.id);
-        }
-      }}
-    >
-      <div className="job-info-with-logo">
-        <div className="job-info">
-          <strong
-            dangerouslySetInnerHTML={{
-              __html: highlight(job.title, filters.search),
-            }}
-          />
-          <p
-            dangerouslySetInnerHTML={{
-              __html: highlight(job.company, filters.search),
-            }}
-          />
-
-          {job.deadline && (
-            <small
-              style={{
-                color: deadlineColor(job.deadline),
-                fontWeight: 500,
-                display: "block",
-              }}
-            >
-              {daysUntilDeadline(job.deadline) < 0
-                ? `Overdue (${Math.abs(
-                    daysUntilDeadline(job.deadline)
-                  )} days ago)`
-                : `${daysUntilDeadline(
-                    job.deadline
-                  )} days remaining`}
-            </small>
-          )}
-
-          <small>
-            {formatDaysInStage(
-              job.status_updated_at || job.created_at
-            )}
-          </small>
-        </div>
-
-        {/* 🏢 Logo */}
-        <div
-          className="logo-wrapper"
-          onMouseEnter={() => setHoveredLogo(job.id)}
-          onMouseLeave={() => setHoveredLogo(null)}
-        >
-          <img
-            src={
-              companyLogos[job.company] ||
-              job.company_logo_url ||
-              "/company-placeholder.png"
-            }
-            alt={`${job.company} Logo`}
-            className="company-logo-right"
-            onClick={(e) => {
-              e.stopPropagation();
-              setSelectedCompany(job.company);
-            }}
-            onError={(e) =>
-              (e.currentTarget.src = "/company-placeholder.png")
-            }
-          />
-          {hoveredLogo === job.id && (
-            <div className="react-tooltip">View Company Info</div>
-          )}
-        </div>
-      </div>
-    </div>
-
-    {/* ============================
-        ACTION BAR BELOW CARD
-    ============================ */}
-    <div className="job-card-actions-bar">
-      {onAnalyzeSkills && (
-        <button
-          className="job-card-btn-analyze"
-          onClick={(e) => {
-            e.stopPropagation();
-            onAnalyzeSkills(job.id);
-          }}
-        >
-          🔍 Analyze Skills
-        </button>
-      )}
-
-      <button
-        className="job-card-btn-archive"
-        onClick={(e) => {
-          e.stopPropagation();
-          handleArchive(job.id);
-        }}
-      >
-        <FaArchive /> Archive
-      </button>
-    </div>
-  </div>
-))}
-
+                      {/* 🏢 Logo on right */}
+                      <div
+                        className="logo-wrapper"
+                        onMouseEnter={() => setHoveredLogo(job.id)}
+                        onMouseLeave={() => setHoveredLogo(null)}
+                      >
+                        <img
+                          src={
+                            companyLogos[job.company] ||
+                            job.company_logo_url ||
+                            "/company-placeholder.png"
+                          }
+                          alt={`${job.company} Logo`}
+                          className="company-logo-right"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setSelectedCompany(job.company);
+                          }}
+                          onError={(e) =>
+                            (e.currentTarget.src = "/company-placeholder.png")
+                          }
+                        />
+                        {hoveredLogo === job.id && (
+                          <div className="react-tooltip">View Company Info</div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                ))}
                 {stageJobs.length === 0 && (
                   <p className="empty-column">No jobs match filters.</p>
                 )}
@@ -406,8 +359,6 @@ export default function JobPipeline({ token, onAnalyzeSkills }) {
           jobId={selectedJobId}
           token={token}
           onClose={() => setSelectedJobId(null)}
-          // Pass down loadJobs to refresh the card if it's edited in the modal
-          onJobUpdated={loadJobs}
         />
       )}
 

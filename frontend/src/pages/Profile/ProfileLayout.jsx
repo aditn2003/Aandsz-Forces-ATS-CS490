@@ -11,7 +11,10 @@ import ProjectsTab from "./ProjectsTab";
 import JobsTab from "./JobsTab";
 import DashboardTab from "./DashboardTab";
 import DangerTab from "./DangerTab";
-import SavedResumes from "./SavedResumes";
+import ResumeBuilder from "./ResumeBuilder";
+import ResumeSetup from "./ResumeSetup";
+import ResumeEditor from "../../components/ResumeEditor"; // 🆕 added
+import SavedResumes from "../Resume/SavedResumes";
 import { useAuth } from "../../contexts/AuthContext";
 
 export default function ProfileLayout() {
@@ -34,11 +37,11 @@ export default function ProfileLayout() {
 
       {/* Nested tab routes */}
       <Routes>
-        {/* Default → Info tab */}
+        {/* /profile → Info by default */}
         <Route index element={<InfoTab />} />
+        {/* /profile/info → Info tab */}
         <Route path="info" element={<InfoTab />} />
-
-        {/* Core Profile Tabs */}
+        {/* Other tabs */}
         <Route path="dashboard" element={<DashboardTab />} />
         <Route path="employment" element={<EmploymentTab />} />
         <Route path="skills" element={<SkillsTab />} />
@@ -46,13 +49,12 @@ export default function ProfileLayout() {
         <Route path="certifications" element={<CertificationsTab />} />
         <Route path="projects" element={<ProjectsTab />} />
         <Route path="jobs" element={<JobsTab />} />
-
-        {/* ✅ Saved Resumes lives under profile */}
-        <Route path="saved-resumes" element={<SavedResumes />} />
-
+        <Route path="resume" element={<ResumeBuilder />} />
+        <Route path="resume/setup" element={<ResumeSetup />} />
+        <Route path="resume/editor" element={<ResumeEditor />} /> {/* ✅ new */}
+        <Route path="resume/saved" element={<SavedResumes />} />
         <Route path="danger" element={<DangerTab />} />
-
-        {/* Fallback */}
+        {/* Fallback: any unknown /profile/... → /profile/info */}
         <Route path="*" element={<Navigate to="/profile/info" replace />} />
       </Routes>
     </section>
