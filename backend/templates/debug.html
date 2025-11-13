@@ -1,394 +1,465 @@
-<style>/* ---------- Base ---------- */
+<style>/* ==========================================================
+   📄 Professional ATS Resume CSS (Tightened Margins)
+   Optimized for single-page A4/Letter PDF
+   ========================================================== */
+
+/* ---------- Base ---------- */
 html,
 body {
-  font-family: "Inter", Arial, sans-serif;
-  color: #111;
-  line-height: 1.35;
-  font-size: 10.8pt;
+  font-family: "Calibri", "Arial", sans-serif;
+  color: #000;
+  line-height: 1.15;
+  font-size: 11pt;
   margin: 0;
   padding: 0;
   background: #fff;
 }
-
 body {
   width: 8.5in;
-  padding: 0.35in 0.45in 0.45in 0.35in; /* tighter top & left margins */
+  padding: 0.1in 0.2in 0.1in 0.2in; /* ultra-tight top & left */
 }
-
-/* ---------- Header ---------- */
 /* ---------- Header ---------- */
 .header {
   text-align: center;
-  margin-bottom: 0.45em;
+  margin-bottom: 0.1in;
+  border-bottom: 1px solid #000;
+  padding-bottom: 0.08in;
 }
 
 .name {
-  font-size: 17pt;
+  font-size: 13pt;
   font-weight: 700;
-  margin: 0;
+  margin: 0 0 0.03in 0;
+  text-transform: uppercase;
+  letter-spacing: 0.4pt;
 }
 
-.headline {
-  font-size: 10.8pt;
-  font-weight: 500;
-  color: #333;
-  margin-top: 0.15em;
-  line-height: 1.4;
+.job-title {
+  font-size: 10pt;
+  font-weight: 600;
+  margin: 0.02in 0;
 }
 
-.headline a {
-  color: #004aad;
-  text-decoration: none;
-}
-.headline a:hover {
-  text-decoration: underline;
+.contact-info {
+  font-size: 10pt;
+  margin-top: 0.04in;
+  color: #000;
 }
 
 /* ---------- Sections ---------- */
 .section {
-  margin-bottom: 0.7em;
+  margin-bottom: 0.1in;
+  page-break-inside: avoid;
 }
 
 .section-title {
   font-size: 10.8pt;
   font-weight: 700;
   text-transform: uppercase;
-  border-bottom: 1px solid #aaa;
-  margin-bottom: 0.25em;
-  padding-bottom: 2px;
-  letter-spacing: 0.3px;
+  border-bottom: 1.2px solid #000;
+  margin: 0 0 0.07in 0;
+  padding-bottom: 0.02in;
+  letter-spacing: 0.4pt;
 }
 
 /* ---------- Experience ---------- */
-/* ---------- Experience ---------- */
 .exp-item {
-  margin-bottom: 0.55em;
+  margin-bottom: 0.1in;
+  page-break-inside: avoid;
 }
 
 .exp-header {
   display: flex;
   justify-content: space-between;
-  font-weight: 600;
+  align-items: baseline;
+  margin-bottom: 0.02in;
 }
 
 .exp-left {
-  font-weight: 600;
-}
-
-.exp-left em {
-  font-style: italic;
-  font-weight: 400;
-}
-
-.exp-right {
-  font-size: 9.8pt;
-  color: #444;
-  white-space: nowrap;
-}
-
-.exp-location {
-  font-size: 9.8pt;
-  color: #444;
-  margin-top: 0.05em;
-  margin-bottom: 0.15em;
-}
-
-.exp-item a {
-  color: #004aad;
-  text-decoration: none;
-}
-
-.exp-item a:hover {
-  text-decoration: underline;
-}
-
-.exp-item ul {
-  margin: 0.15em 0 0.3em 1em;
-  padding: 0;
-}
-
-/* ---------- Education ---------- */
-.education-item {
-  margin-bottom: 0.5em;
-}
-
-.edu-header {
-  display: flex;
-  justify-content: space-between;
-  font-weight: 600;
-}
-
-.edu-right {
-  font-size: 10pt;
-  color: #444;
-}
-
-.edu-details {
-  display: flex;
-  justify-content: space-between;
-  margin-top: 0.05em;
-}
-
-.edu-degree {
-  font-style: italic;
-}
-
-.edu-gpa {
-  color: #333;
-}
-
-.edu-honors {
-  margin-top: 0.15em;
-  font-size: 9.8pt;
-}
-/* ---------- Projects ---------- */
-/* ---------- Projects ---------- */
-.project-item {
-  margin-bottom: 0.6em;
-}
-
-.project-header {
-  font-weight: 600;
+  font-weight: 700;
   font-size: 10.8pt;
 }
 
-.project-header a {
-  color: #004aad;
-  text-decoration: none;
+.exp-location {
+  font-weight: 400;
+  margin-left: 0.12in;
+  font-size: 10pt;
+}
+
+.exp-right {
+  font-size: 10pt;
+  font-weight: 600;
+  white-space: nowrap;
+  text-align: right;
+}
+
+.exp-title {
+  font-style: italic;
+  font-size: 10.5pt;
+  margin-bottom: 0.03in;
   font-weight: 500;
 }
 
-.project-header a:hover {
+.exp-item ul {
+  margin: 0.03in 0 0 0.18in;
+  padding: 0;
+  line-height: 1.3;
+}
+
+.exp-item li {
+  margin-bottom: 0.02in;
+}
+
+/* ---------- Education ---------- */
+/* ---------- Education (Ultra-Compact Inline) ---------- */
+.education-item {
+  margin-bottom: 0.08in;
+  font-size: 10.5pt;
+  line-height: 1.3;
+}
+
+.edu-line {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  font-weight: 500;
+  gap: 0.15em;
+}
+
+.edu-line strong {
+  font-weight: 700;
+}
+
+.edu-date {
+  margin-left: auto;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.edu-meta {
+  font-size: 10pt;
+  color: #333;
+  margin-left: 0.15in;
+  margin-top: 0.02in;
+}
+
+/* ---------- Projects ---------- */
+.project-item {
+  margin-bottom: 0.1in;
+  page-break-inside: avoid;
+}
+
+.project-header {
+  font-weight: 700;
+  font-size: 10.8pt;
+  margin-bottom: 0.02in;
+}
+
+.project-link {
+  font-weight: 400;
+  font-size: 10pt;
+  margin-left: 0.1in;
+  color: #004aad;
+  text-decoration: none;
+}
+
+.project-link:hover {
   text-decoration: underline;
 }
 
 .project-tech {
-  font-style: italic;
+  font-size: 10pt;
   color: #333;
-  margin-top: 0.05em;
-  margin-bottom: 0.2em;
+  margin-bottom: 0.03in;
+  font-style: italic;
 }
 
 .project-item ul {
-  margin: 0.15em 0 0.3em 1em;
+  margin: 0.03in 0 0 0.18in;
   padding: 0;
+  line-height: 1.3;
 }
 
-/* ---------- Skills ---------- */
-/* ---------- Skills ---------- */
+.project-item li {
+  margin-bottom: 0.02in;
+}
+
+/* ---------- Skills / Additional Info ---------- */
 .section p {
-  margin: 0.15em 0;
-  line-height: 1.4;
+  margin: 0.03in 0;
+  line-height: 1.25;
+  font-size: 10.5pt;
 }
+
 .section strong {
-  font-weight: 600;
+  font-weight: 700;
 }
+
 /* ---------- Certifications ---------- */
 .cert-item {
-  margin-bottom: 0.5em;
+  margin-bottom: 0.07in;
+  font-size: 10.5pt;
+  line-height: 1.3;
 }
 
 .cert-header {
-  font-weight: 500;
-  margin-bottom: 0.1em;
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  flex-wrap: wrap;
+  font-weight: 600;
+  margin-bottom: 0.02in;
+  gap: 0.25em;
+}
+
+.cert-header strong {
+  font-weight: 700;
 }
 
 .cert-header em {
   font-style: italic;
-  color: #333;
+  font-weight: 400;
+  margin-left: 0.1in;
 }
 
 .cert-header .right {
-  float: right;
+  font-size: 10pt;
   font-weight: 600;
+  margin-left: auto;
 }
 
 .cert-number {
   font-size: 10pt;
-  color: #444;
-  margin-left: 0.2em;
+  color: #333;
+  margin-left: 0.1in;
 }
 
-/* ---------- Print ---------- */
+/* ---------- Print Settings ---------- */
 @page {
   margin: 0;
+  size: letter;
 }
 
 @media print {
   html,
   body {
     margin: 0;
-    padding: 0.35in 0.45in 0.45in 0.35in;
+    padding: 0.1in 0.25in 0.1in 0.2in;
   }
+
   .section {
     page-break-inside: avoid;
   }
+
+  .exp-item,
+  .education-item,
+  .project-item {
+    page-break-inside: avoid;
+  }
+}
+
+/* ---------- Utility ---------- */
+ul {
+  list-style-type: disc;
+}
+
+li {
+  font-size: 10.5pt;
+}
+
+a {
+  color: #004aad;
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
 }
 </style><!DOCTYPE html>
 <html>
   <head>
     <meta charset="UTF-8" />
-    <title>Adit Nuwal — Data Analyst</title>
+    <title>Adit Nuwal – Undergraduate Survey Research Data Analyst</title>
     <link rel="stylesheet" href="resume.css" />
   </head>
   <body>
     <!-- ================= HEADER ================= -->
     <header class="header">
       <h1 class="name">Adit Nuwal</h1>
-
-      <h2 class="headline">
-        Data Analyst
-
-          | an238@njit.edu
-          | 9297889500
-          | NJ
-      </h2>
-    </header>
-
-    <!-- ================= EDUCATION ================= -->
-    <section class="section education-section">
-      <h3 class="section-title">Education</h3>
-      <div class="education-item">
-        <div class="edu-header">
-          <div class="edu-left">
-            <strong>NJIT</strong>
-          </div>
-          <div class="edu-right">
-              <span>Expected Graduation: May 2026</span>
-          </div>
-        </div>
-
-        <div class="edu-details">
-          <div class="edu-degree">
-            Bachelor&#x27;s in CS
-          </div>
-          <div class="edu-gpa">Current GPA: <strong>3.79</strong></div>
-        </div>
-
-        <div class="edu-honors">
-          Honors: dEAN
-        </div>
+      <div class="job-title">Undergraduate Survey Research Data Analyst</div>
+      
+      <div class="contact-info">
+        Jersey City , NJ
+         • an238@njit.edu
+         • (929) 788 - 9500
       </div>
-    </section>
+    </header>
 
     <!-- ================= SUMMARY ================= -->
     <section class="section">
-      <h3 class="section-title">Professional Summary</h3>
-      <p>Data and AI driven individual with strong analytical skills and hands-on experience in exploratory data analysis, optimizing SQL queries and creating dashboards to drive data driven decisions. </p>
+      <h3 class="section-title">PROFESSIONAL SUMMARY</h3>
+      <p>Data-driven software engineer with 1+ years of experience in designing, developing, and scaling distributed applications using Python, SQL, and big data tools. Proven ability to build ETL pipelines, optimize SQL queries, and deliver high-quality code in fast-paced environments. Passionate about leveraging cloud platforms (AWS, Hadoop, Spark) and AI/ML to transform complex information into actionable insights, driving improvements in engineering productivity and system performance.</p>
     </section>
 
     <!-- ================= EXPERIENCE ================= -->
+<section class="section">
+  <h3 class="section-title">PROFESSIONAL EXPERIENCE</h3>
+  <div class="exp-item">
+    <div class="exp-header">
+      <div class="exp-left">
+        <strong>Bonzai Digital</strong>
+      </div>
+
+      <div class="exp-right">
+        May 2024 – Jun 2024
+      </div>
+    </div>
+
+    <div class="exp-title">Backend Development Intern</div>
+
+    <ul>
+      <li>Implemented REST APIs with Kotlin and Spring Boot for direct file uploads to AWS S3 using presigned URLs, creating scalable data ingestion pipelines and improving backend throughput by 25% while reducing response times by 15%. Debugged Kotlin code by analyzing API response calls and network traffic using Postman and browser developer tools, resolving a critical backend issue and achieving a 100% reduction in error rate in collaboration with the products team, improving system stability by 20%. Optimized AWS Lambda functions using Serverless to extract S3 object metadata and replicate data from S3 to PostgreSQL, strengthening data availability for downstream analytics under Agile and CI/CD practices, reducing data replication time by 30%.</li>
+    </ul>
+  </div>
+  <div class="exp-item">
+    <div class="exp-header">
+      <div class="exp-left">
+        <strong>Office of Institutional Effectiveness, NJIT</strong>
+      </div>
+
+      <div class="exp-right">
+        Aug 2025
+      </div>
+    </div>
+
+    <div class="exp-title">Undergraduate Survey Research Data Analyst</div>
+
+    <ul>
+      <li>Engineered an ETL pipeline using Apache Spark and Hadoop to enhance data integrity and accuracy for over 10,000 survey records, resulting in a 15% improvement in data quality. Designed interactive dashboards using Power BI to monitor 10+ critical metrics, delivering strategic insights to NJIT offices and informing data-driven decisions that improved resource allocation by 10%. Optimized SQL queries across large-scale relational datasets, improving processing efficiency by 33% and reducing query execution time by 20%.</li>
+    </ul>
+  </div>
+  <div class="exp-item">
+    <div class="exp-header">
+      <div class="exp-left">
+        <strong>Department of Chemicals and Material Engineering, NJIT</strong>
+      </div>
+
+      <div class="exp-right">
+        May 2025 – Aug 2025
+      </div>
+    </div>
+
+    <div class="exp-title">Research Assistant</div>
+
+    <ul>
+      <li>Developed ETL pipelines with Pandas and RDKit to clean, standardize, and merge 100K+ chemical compounds, resolving 100% of missing and inconsistent entries and ensuring high-integrity datasets for PBPK model simulations, improving model accuracy by 12%. Engineered a Flask backend with 8 REST APIs returning JSON objects to retrieve and analyze 1M+ compounds, reducing data retrieval time by 25%. Deployed a full-stack chemical analysis web app with React, TypeScript, Node.js, and Plotly for interactive visualizations, serving 50+ users daily.</li>
+    </ul>
+  </div>
+  <div class="exp-item">
+    <div class="exp-header">
+      <div class="exp-left">
+        <strong>Ying Wu College of Computing, NJI T</strong>
+      </div>
+
+      <div class="exp-right">
+        Aug 2024 – Apr 2025
+      </div>
+    </div>
+
+    <div class="exp-title">Teaching Assistant</div>
+
+    <ul>
+      <li>Resolved and debugged 99% of coding issues for 70+ students in Python and Operating Systems courses within 24 hours, improving student understanding by 20%. Graded 140+ assignments weekly and provided constructive feedback to improve programming and problem-solving skills, contributing to a 10% improvement in student grades.</li>
+    </ul>
+  </div>
+</section>
+
+    <!-- ================= EDUCATION ================= -->
+   <section class="section education-section">
+  <h3 class="section-title">EDUCATION</h3>
+  <div class="education-item">
+    <div class="edu-line">
+      <strong>Bachelor&#x27;s in Computer Science</strong>
+       | New Jersey Institute of Technology, Newark, NJ
+      
+       | GPA: 3. 8
+        <span class="edu-date"> | Apr 2026</span>
+    </div>
+
+      <div class="edu-meta">NJIT Academic Merit Scholarship, Dean’s List: Fall ‘22, Spring ‘23, Fall ‘23, Spring ’24, Spring ‘25</div>
+  </div>
+</section>
+
+
+
+
+    <!-- ================= PROJECTS ================= -->
     <section class="section">
-      <h3 class="section-title">Work Experience</h3>
-      <div class="exp-item">
-        <div class="exp-header">
-          <div class="exp-left">
-            <strong>NJIT</strong>
-             | <em>Data Analyst</em>
-            
-          </div>
-          <div class="exp-right">
-            Sep 2025 – Present
-          </div>
+      <h3 class="section-title">PROJECTS</h3>
+      <div class="project-item">
+        <div class="project-header">
+          <strong>Data Analysis and Prediction App</strong>
         </div>
 
+        <div class="project-tech">Technologies Used: Python,Dash,Plotly,Pandas,NumPy,Scikit - learn,Tableau</div>
 
         <ul>
-          <li>Built a Python &amp; Azure SQL data pipeline to ingest, clean and perform SQL transformation for 800K+ survey records</li>
-          <li>Optimized complex SQL queries and data models (joins, filtering, indexing) to reduce query latency and improve ETL efficiency across 5+ large datasets</li>
-          <li>Gathered business needs from stakeholders &amp; collaborated with team members to design Power BI dashboards that track 10+ KPIs to present to NJIT leadership and support strategic decision</li>
-          <li>making</li>
+          <li>Built multiple predictive models (Linear Regression, KNN, Random Forest) to boost accuracy by 16% and increase in R² of 0.758 to 0.8792 for reliable insurance cost predictions Engineered an end - to - end data pipeline using Python, Pandas, Scikit - learn and Dash to clean, preprocess and model records and deploy ed an interactive app to enabl e prediction of insurance charges that reduced manual analysis time by 50%</li>
         </ul>
       </div>
-      <div class="exp-item">
-        <div class="exp-header">
-          <div class="exp-left">
-            <strong>NJIT</strong>
-             | <em>Research Assistant</em>
-            
-          </div>
-          <div class="exp-right">
-            Jul 2025 – Aug 2025
-          </div>
+      <div class="project-item">
+        <div class="project-header">
+          <strong>Data Breach Analysis Machine Learning Tool</strong>
         </div>
 
+        <div class="project-tech">Technologies Used: MongoDB,Express.js,React,Node.js,Python,Pandas,NumPy,Scikit - learn,TensorFlow,Keras,Matplotlib,Seaborn,REST API</div>
 
         <ul>
-          <li>Built ETL pipelines using Pandas and SQL to clean, standardize and resolve data inconsistencies for 1M+ chemical records</li>
-          <li>Tested and implemented new scalable data access systems using 8+ APIs, ensuring functionality aligned with requirements</li>
-          <li>Documented system functionality, data flows, reproducibility steps and changes made to present weekly progress reports</li>
+          <li>Created a full stack data breach analysis tool with MERN stack and Python, analyzing 13 M + records from 300+ breaches via secure REST APIs and a frontend dashboard that reveal trends, distributions and top impacted organizations Trained and deployed Deep Neural Network and Random Forest Regressor machine learning models to predict breach severity using Scikit - learn, TensorFlow , Keras with 85% accuracy and results visualized with Matplotlib and Seaborn</li>
         </ul>
       </div>
     </section>
-<!-- ================= PROJECTS ================= -->
-<section class="section">
-  <h3 class="section-title">Projects</h3>
-  <div class="project-item">
-    <div class="project-header">
-      <strong>Data Analysis and Prediction App </strong>
-        <a href="https://github.com/aditn2003/CS301-Data-Analysis-and-Prediction-App" target="_blank"> | GitHub</a>
-    </div>
 
-    <div class="project-tech">
-      <em>Python,Dash,Plotly,Pandas,NumPy,Scikit-learn,Tableau</em>
-    </div>
+    <!-- ================= TECHNICAL SKILLS ================= -->
+    <section class="section">
+      <h3 class="section-title">ADDITIONAL INFORMATION</h3>
 
-    <ul>
-      <li>Built multiple predictive models (Linear Regression, KNN, Random Forest) to boost accuracy by 16% and increase in R² of 0.758 to 0.8792 for reliable insurance cost predictions</li>
-      <li>Engineered an end</li>
-      <li>to</li>
-      <li>end data pipeline using Python, Pandas, Scikit</li>
-      <li>learn and Dash to clean, preprocess and model records and deployed an interactive app to enable prediction of insurance charges that reduced manual analysis time by 50%</li>
-    </ul>
-  </div>
-  <div class="project-item">
-    <div class="project-header">
-      <strong>Data Breach Analysis Machine Learning Tool – Cybersecurity </strong>
-        <a href="https://github.com/aditn2003/data-breach-analysis-tool" target="_blank"> | GitHub</a>
-    </div>
+      <p><strong>Programming Languages:</strong>
+        Python, SQL, Java, REST APIs, Apache Spark, React, Kotlin, TypeScript, Bash, Scikit - Learn, TensorFlow, Keras, Seaborn, Power BI, MongoDB, PostgreSQL
+      </p>
 
-    <div class="project-tech">
-      <em>MongoDB,Express.js,React,Node.js,Python,Pandas,NumPy,Scikit-learn,TensorFlow,Keras,Matplotlib,Seaborn,REST API</em>
-    </div>
+      <p><strong>Libraries & Frameworks:</strong>
+        Pandas, NumPy, Matplotlib, Dash, Flask
+      </p>
 
-    <ul>
-      <li>Created a full stack data breach analysis tool with MERN stack and Python, analyzing 13M+ records from 300+ breaches via secure REST APIs with predictive Deep Neural Network model having 85% accuracy</li>
-      <li>Built frontend dashboards to visualize results with Matplotlib and Seaborn that reveal trends, distributions and top impacted organizations to assess risk severity and support data</li>
-      <li>driven security decisions</li>
-    </ul>
-  </div>
-</section>
-
-    <!-- ================= SKILLS ================= -->
-   <!-- ================= TECHNICAL SKILLS ================= -->
-<section class="section">
-  <h3 class="section-title">Technical Skills</h3>
-
-  <p><strong>Programming Languages:</strong>
-    Communication, C++, Python, Sql
-  </p>
+      <p><strong>Tools & Technologies:</strong>
+        AWS, Hadoop, Tableau, Git
+      </p>
 
 
 
+    </section>
 
+    <!-- ================= CERTIFICATIONS ================= -->
+    <section class="section">
+      <h3 class="section-title">CERTIFICATIONS</h3>
+      <div class="cert-item">
+        <div class="cert-header">
+          <strong>Oracle Cloud Infrastructure AI Foundations Associate</strong>
+           | <em>Oracle</em>
+          
+        </div>
 
-  <p><strong>Languages:</strong>
-    English
-  </p>
-</section>
-<!-- ================= CERTIFICATIONS ================= -->
-<section class="section">
-  <h3 class="section-title">Certifications</h3>
-  <div class="cert-item">
-    <div class="cert-header">
-      <strong>AI </strong>
-       | <em>OCI</em>
-       | Technical
-        <span class="right">Sep 2025</span>
-    </div>
+      </div>
+      <div class="cert-item">
+        <div class="cert-header">
+          <strong>Microsoft: Power BI Data Analyst Associate</strong>
+           | <em>Microsoft</em>
+          
+        </div>
 
-  </div>
-</section>
+      </div>
+    </section>
 
   </body>
 </html>
