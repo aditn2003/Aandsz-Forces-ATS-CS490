@@ -25,7 +25,8 @@ const STAGES = [
   { name: "Rejected", color: "#f87171" },
 ];
 
-export default function JobPipeline({ token }) {
+// ⭐ ONLY ADDITION #1 — add onAnalyzeSkills support
+export default function JobPipeline({ token, onAnalyzeSkills }) {
   const [jobs, setJobs] = useState([]);
   const [dragged, setDragged] = useState(null);
   const [filter, setFilter] = useState("All");
@@ -353,13 +354,26 @@ export default function JobPipeline({ token }) {
                       </div>
                     </div>
                     
-                    {/* --- ADD THIS ACTION BAR --- */}
+                    {/* ⭐ ONLY ADDITION #2 — Add Analyze Skills button here */}
                     <div className="job-card-actions">
+
+                      {onAnalyzeSkills && (
+                        <button
+                          className="job-card-btn-analyze"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onAnalyzeSkills(job.id);
+                          }}
+                        >
+                          🔍 Analyze Skills
+                        </button>
+                      )}
+
                       <button 
                         className="job-card-btn-archive" 
                         title="Archive Job"
                         onClick={(e) => {
-                          e.stopPropagation(); // Prevents the modal from opening
+                          e.stopPropagation();
                           handleArchive(job.id);
                         }}
                       >

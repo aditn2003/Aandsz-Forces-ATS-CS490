@@ -21,11 +21,21 @@ import Jobs from "./pages/Jobs";
 import StatisticsPage from "./pages/StatisticsPage";
 import ArchivedJobs from "./pages/ArchivedJobs";
 import CompanyResearch from "./pages/CompanyResearch"; // ✅ NEW UC-063 PAGE
+import JobMatch from "./pages/Match/JobMatch";
+import MatchCompare from "./pages/Match/MatchCompare.jsx";
+import SkillsGapAnalysis from "./pages/SkillsGap/SkillsGapAnalysis";
+import Interviews from "./pages/Interviews/Interviews";
+
+
 
 // ---------- Resume Flow ----------
 import ResumeBuilder from "./pages/Profile/ResumeBuilder";
 import ResumeSetup from "./pages/Profile/ResumeSetup";
 import ResumeEditor from "./components/ResumeEditor";
+import ResumeOptimize from "./components/ResumeOptimize";
+import ResumeOptimizeRun from "./components/ResumeOptimizeRun";
+import ResumeCompare from "./components/ResumeCompare";
+import ResumeFinalReview from "./components/ResumeFinalReview";
 
 // ---------- Context Providers ----------
 import { AuthProvider } from "./contexts/AuthContext";
@@ -74,6 +84,11 @@ function MainLayout() {
           <Route path="/resume/setup" element={<ResumeSetup />} />
           {/* Step 3: Editor */}
           <Route path="/resume/editor" element={<ResumeEditor />} />
+          <Route path="/resume/optimize" element={<ResumeOptimize />} />
+
+          <Route path="/resume/optimize/run" element={<ResumeOptimizeRun />} />
+          <Route path="/resume/compare" element={<ResumeCompare />} />
+          <Route path="/resume/final-review" element={<ResumeFinalReview />} />
 
           {/* --- Jobs Dashboard --- */}
           <Route path="/jobs" element={<Jobs />} />
@@ -84,8 +99,23 @@ function MainLayout() {
           {/* --- ADD THIS NEW ROUTE --- */}
           <Route path="/archived" element={<ArchivedJobs />} />
 
-          {/* --- Company Research (UC-063) --- */}
+          {/* --- Company Research (UC-063 and UC-64) --- */}
           <Route path="/company-research" element={<CompanyResearch />} />
+
+          {/* --- Company Research (UC-065) --- */}
+          <Route path="/job-match" element={<JobMatch />} />
+
+<Route path="/match">
+  <Route path="compare" element={<MatchCompare />} />
+</Route>
+
+
+<Route path="/skills-gap/:jobId" element={<SkillsGapAnalysis />} />
+
+<Route path="/interviews" element={<Interviews />} />
+
+          
+          
 
           {/* --- Legacy /alias (optional) --- */}
           <Route
