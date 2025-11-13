@@ -74,6 +74,7 @@ router.post("/", auth, async (req, res) => {
         Array.isArray(required_skills) ? required_skills : []  // ⭐ ADDED
       ]
     );
+
     // Return 200 OK with the job object
 
     res.status(200).json({ job: result.rows[0] }); 
