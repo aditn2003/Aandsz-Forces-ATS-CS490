@@ -12,7 +12,9 @@ import {
   FaBriefcase,
   FaChartBar,
   FaArchive,
-  FaBuilding, // ✅ new icon for Company Research
+  FaBuilding, 
+  FaStar,
+  FaComments   // 🗨️ NEW ICON FOR INTERVIEWS
 } from "react-icons/fa";
 import { NavLink, useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
@@ -41,28 +43,42 @@ export default function NavBar() {
             <NavLink to="/resume">
               <FaFileAlt /> Resume
             </NavLink>
+
             <NavLink to="/jobs">
               <FaBriefcase /> Jobs
             </NavLink>
-            {/* --- ADD THIS NEW LINK --- */}
+
+            {/* 📊 Statistics */}
             <NavLink to="/statistics">
               <FaChartBar /> Statistics
             </NavLink>
-            {/* --------------------------- */}
-            {/* --- ADD THIS NEW LINK --- */}
+
+            {/* 🗄️ Archived */}
             <NavLink to="/archived">
               <FaArchive /> Archived
             </NavLink>
-            {/* --------------------------- */}
 
-            {/* ✅ New UC-063 NavLink */}
+            {/* 🏢 Company Research */}
             <NavLink to="/company-research">
               <FaBuilding /> Research
             </NavLink>
 
+            {/* 🗨️ INTERVIEW INSIGHTS */}
+            <NavLink to="/interviews">
+              <FaComments /> Interviews
+            </NavLink>
+
+            {/* ⭐ JOB MATCH */}
+            <NavLink to="/job-match">
+              <FaStar /> Job Match
+            </NavLink>
+
+            {/* 👤 Profile */}
             <NavLink to="/profile/info">
               <FaUser /> Profile
             </NavLink>
+
+            {/* 🚪 Logout */}
             <button onClick={logout} className="logout-btn">
               <FaSignOutAlt /> Logout
             </button>
@@ -72,6 +88,7 @@ export default function NavBar() {
             <NavLink to="/login">
               <FaSignInAlt /> Login
             </NavLink>
+
             <NavLink to="/register">
               <FaUserPlus /> Register
             </NavLink>

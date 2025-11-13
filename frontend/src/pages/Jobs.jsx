@@ -5,12 +5,19 @@ import JobPipeline from "../components/JobPipeLine";
 import UpcomingDeadlinesWidget from "../components/UpcomingDeadlinesWidget";
 import JobsCalendar from "../components/JobsCalendar";
 import { useAuth } from "../contexts/AuthContext";
+import { useNavigate } from "react-router-dom";   // <-- NEW
 import "./Jobs.css";
 
 export default function Jobs() {
   const { token } = useAuth();
+  const navigate = useNavigate();                 // <-- NEW
   const [refreshKey, setRefreshKey] = useState(Date.now());
   const [showJobForm, setShowJobForm] = useState(false);
+
+  // 🔥 NEW — when user clicks “Analyze Skills”
+  const handleAnalyzeSkills = (jobId) => {
+    navigate(`/skills-gap/${jobId}`);
+  };
 
   return (
     <div className="jobs-layout">
@@ -42,7 +49,13 @@ export default function Jobs() {
         {/* 🔹 Job Pipeline */}
         <div className="profile-box">
           <h3>📊 Job Pipeline</h3>
-          <JobPipeline key={refreshKey} token={token} />
+
+          {/* 🔥 PASS ANALYZE HANDLER INTO PIPELINE */}
+          <JobPipeline
+            key={refreshKey}
+            token={token}
+            onAnalyzeSkills={handleAnalyzeSkills}   // <-- NEW
+          />
         </div>
       </div>
 
