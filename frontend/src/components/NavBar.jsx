@@ -10,6 +10,13 @@ import {
   FaSignOutAlt,
   FaFileAlt,
   FaBriefcase,
+  FaChartBar,
+  FaArchive,
+  FaStar,
+  FaComments,
+  FaDollarSign, // 💰 NEW ICON
+  FaBuilding,
+  FaEnvelope, // ✅ Icon for Cover Letter
 } from "react-icons/fa";
 import { NavLink, useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";

@@ -18,6 +18,15 @@ import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
 import ProfileLayout from "./pages/Profile/ProfileLayout";
 import Jobs from "./pages/Jobs";
+import StatisticsPage from "./pages/StatisticsPage";
+import ArchivedJobs from "./pages/ArchivedJobs";
+import CompanyResearch from "./pages/CompanyResearch";
+import JobMatch from "./pages/Match/JobMatch";
+import MatchCompare from "./pages/Match/MatchCompare.jsx";
+import SkillsGapAnalysis from "./pages/SkillsGap/SkillsGapAnalysis";
+import Interviews from "./pages/Interviews/Interviews";
+import SalaryResearch from "./pages/Salary/SalaryResearch";
+import CoverLetter from "./pages/CoverLetter"; // ✅ ADDED (UC-55)
 
 // ---------- Resume Flow ----------
 import ResumeBuilder from "./pages/Profile/ResumeBuilder";
