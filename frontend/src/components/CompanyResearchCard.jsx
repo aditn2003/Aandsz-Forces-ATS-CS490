@@ -78,19 +78,7 @@ export default function CompanyResearchCard({ data, loading, error }) {
         <p>{summary || "—"}</p>
       </section>
 
-      <section>
-        <h3>Recent News</h3>
-        {news?.length ? (
-          <ul>
-            {news.map((n, i) => (
-              <li key={i}>
-                <a href={n.url} target="_blank" rel="noreferrer">{n.title}</a>
-                <p>{n.source} — {new Date(n.publishedAt).toLocaleDateString()}</p>
-              </li>
-            ))}
-          </ul>
-        ) : <p>No news found.</p>}
-      </section>
+      
     </div>
   );
 }
