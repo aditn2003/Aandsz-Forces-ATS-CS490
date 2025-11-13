@@ -29,6 +29,8 @@ import matchRoutes from "./routes/match.js";
 import skillsGapRoutes from "./routes/skillsGap.js";
 import skillProgressRoutes from "./routes/skillProgress.js";
 import interviewInsights from "./routes/interviewInsights.js";
+import salaryResearchRouter from "./routes/salaryResearch.js";
+
 // ====== 🔔 DAILY DEADLINE REMINDER CRON JOB (UC-012) ======
 import crons from "node-cron";
 
@@ -340,6 +342,8 @@ app.use("/api", projectRoutes);
 app.use("/api/jobs", jobRoutes);
 app.use("/api/skills-gap", skillsGapRoutes);
 app.use("/api/skill-progress", skillProgressRoutes);
+app.use("/api/salary-research", salaryResearchRouter);
+
 
 
 // ===== Global Error Handler =====

@@ -20,12 +20,12 @@ import ProfileLayout from "./pages/Profile/ProfileLayout";
 import Jobs from "./pages/Jobs";
 import StatisticsPage from "./pages/StatisticsPage";
 import ArchivedJobs from "./pages/ArchivedJobs";
-import CompanyResearch from "./pages/CompanyResearch"; // ✅ NEW UC-063 PAGE
+import CompanyResearch from "./pages/CompanyResearch";
 import JobMatch from "./pages/Match/JobMatch";
 import MatchCompare from "./pages/Match/MatchCompare.jsx";
 import SkillsGapAnalysis from "./pages/SkillsGap/SkillsGapAnalysis";
 import Interviews from "./pages/Interviews/Interviews";
-
+import SalaryResearch from "./pages/Salary/SalaryResearch";
 
 
 // ---------- Resume Flow ----------
@@ -40,6 +40,13 @@ import ResumeFinalReview from "./components/ResumeFinalReview";
 // ---------- Context Providers ----------
 import { AuthProvider } from "./contexts/AuthContext";
 import { ProfileProvider } from "./contexts/ProfileContext";
+
+// 🔐 Protected Route Wrapper
+function ProtectedRoute({ children }) {
+  const authed = !!localStorage.getItem("token");
+
+  return authed ? children : <Navigate to="/login" replace />;
+}
 
 // ---------- Root App ----------
 export default function App() {
@@ -74,53 +81,177 @@ function MainLayout() {
           <Route path="/forgot" element={<ForgotPassword />} />
           <Route path="/reset" element={<ResetPassword />} />
 
-          {/* --- Profile Routes --- */}
-          <Route path="/profile/*" element={<ProfileLayout />} />
+          {/* --- Profile Routes (Protected) --- */}
+          <Route
+            path="/profile/*"
+            element={
+              <ProtectedRoute>
+                <ProfileLayout />
+              </ProtectedRoute>
+            }
+          />
 
-          {/* --- Resume Builder Pipeline --- */}
-          {/* Entry from navbar */}
-          <Route path="/resume" element={<ResumeBuilder />} />
-          {/* Step 2: JD + options */}
-          <Route path="/resume/setup" element={<ResumeSetup />} />
-          {/* Step 3: Editor */}
-          <Route path="/resume/editor" element={<ResumeEditor />} />
-          <Route path="/resume/optimize" element={<ResumeOptimize />} />
+          {/* --- Resume Builder Pipeline (Protected) --- */}
+          <Route
+            path="/resume"
+            element={
+              <ProtectedRoute>
+                <ResumeBuilder />
+              </ProtectedRoute>
+            }
+          />
 
-          <Route path="/resume/optimize/run" element={<ResumeOptimizeRun />} />
-          <Route path="/resume/compare" element={<ResumeCompare />} />
-          <Route path="/resume/final-review" element={<ResumeFinalReview />} />
+          <Route
+            path="/resume/setup"
+            element={
+              <ProtectedRoute>
+                <ResumeSetup />
+              </ProtectedRoute>
+            }
+          />
 
-          {/* --- Jobs Dashboard --- */}
-          <Route path="/jobs" element={<Jobs />} />
+          <Route
+            path="/resume/editor"
+            element={
+              <ProtectedRoute>
+                <ResumeEditor />
+              </ProtectedRoute>
+            }
+          />
 
-          {/* --- ADD THIS NEW ROUTE --- */}
-          <Route path="/statistics" element={<StatisticsPage />} />
-          {/* --------------------------- */}
-          {/* --- ADD THIS NEW ROUTE --- */}
-          <Route path="/archived" element={<ArchivedJobs />} />
+          <Route
+            path="/resume/optimize"
+            element={
+              <ProtectedRoute>
+                <ResumeOptimize />
+              </ProtectedRoute>
+            }
+          />
 
-          {/* --- Company Research (UC-063 and UC-64) --- */}
-          <Route path="/company-research" element={<CompanyResearch />} />
+          <Route
+            path="/resume/optimize/run"
+            element={
+              <ProtectedRoute>
+                <ResumeOptimizeRun />
+              </ProtectedRoute>
+            }
+          />
 
-          {/* --- Company Research (UC-065) --- */}
-          <Route path="/job-match" element={<JobMatch />} />
+          <Route
+            path="/resume/compare"
+            element={
+              <ProtectedRoute>
+                <ResumeCompare />
+              </ProtectedRoute>
+            }
+          />
 
-<Route path="/match">
-  <Route path="compare" element={<MatchCompare />} />
-</Route>
+          <Route
+            path="/resume/final-review"
+            element={
+              <ProtectedRoute>
+                <ResumeFinalReview />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* --- Jobs Dashboard (Protected) --- */}
+          <Route
+            path="/jobs"
+            element={
+              <ProtectedRoute>
+                <Jobs />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* --- Statistics (Protected) --- */}
+          <Route
+            path="/statistics"
+            element={
+              <ProtectedRoute>
+                <StatisticsPage />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* --- Archived Jobs (Protected) --- */}
+          <Route
+            path="/archived"
+            element={
+              <ProtectedRoute>
+                <ArchivedJobs />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* --- Company Research (Protected) --- */}
+          <Route
+            path="/company-research"
+            element={
+              <ProtectedRoute>
+                <CompanyResearch />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+  path="/salary-research"
+  element={
+    <ProtectedRoute>
+      <SalaryResearch />
+    </ProtectedRoute>
+  }
+/>
 
 
-<Route path="/skills-gap/:jobId" element={<SkillsGapAnalysis />} />
+          {/* --- Job Match (Protected) --- */}
+          <Route
+            path="/job-match"
+            element={
+              <ProtectedRoute>
+                <JobMatch />
+              </ProtectedRoute>
+            }
+          />
 
-<Route path="/interviews" element={<Interviews />} />
+          {/* --- Match Compare (Protected) --- */}
+          <Route
+            path="/match/compare"
+            element={
+              <ProtectedRoute>
+                <MatchCompare />
+              </ProtectedRoute>
+            }
+          />
 
-          
-          
+          {/* --- Skills Gap (Protected) --- */}
+          <Route
+            path="/skills-gap/:jobId"
+            element={
+              <ProtectedRoute>
+                <SkillsGapAnalysis />
+              </ProtectedRoute>
+            }
+          />
 
-          {/* --- Legacy /alias (optional) --- */}
+          {/* --- Interviews (Protected) --- */}
+          <Route
+            path="/interviews"
+            element={
+              <ProtectedRoute>
+                <Interviews />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* --- Legacy /alias (Protected) --- */}
           <Route
             path="/resume/templates"
-            element={<Navigate to="/resume" replace />}
+            element={
+              <ProtectedRoute>
+                <Navigate to="/resume" replace />
+              </ProtectedRoute>
+            }
           />
 
           {/* --- Fallback --- */}
