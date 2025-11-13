@@ -46,6 +46,16 @@ async function getWikipedia(company) {
     const fullText = pageData?.extract || "";
     const fullUrl = pageData?.fullurl || "";
 
+    // employee / size extraction 
+    let employees = null;
+    const empMatch =
+      fullText.match(/(\d[\d,\.]+)\s+employees/i) ||
+      fullText.match(/employees\s*\(?\s*~?(\d[\d,\.]+)/i);
+
+    if (empMatch) {
+      employees = empMatch[1]?.replace(/,/g, "") + " employees";
+    }
+
     // 3️⃣ Get summary metadata
     const summaryRes = await http.get(
       `https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(pageTitle)}`,
@@ -58,6 +68,7 @@ async function getWikipedia(company) {
       description: summaryData.description || "",
       website: summaryData.content_urls?.desktop?.page || fullUrl,
       wikipediaUrl: summaryData.content_urls?.desktop?.page || fullUrl,
+      employees,
     };
 
     return { summary: summaryData.extract || "", fullText, infobox };
@@ -71,7 +82,6 @@ async function getWikipedia(company) {
 async function getNews(company) {
   const apiKey = process.env.NEWS_API_KEY;
 
-  // 🧩 Local mock data (used if API fails or rate-limited)
   const mockNews = [
     {
       title: `${company} announces major AI breakthrough`,
@@ -105,7 +115,6 @@ async function getNews(company) {
     },
   ];
 
-  // 🧩 No API key? Return mock instantly
   if (!apiKey) {
     console.warn("⚠️ No NEWS_API_KEY found — using mock news data.");
     return mockNews;
@@ -116,7 +125,6 @@ async function getNews(company) {
       params: { qInTitle: company, language: "en", pageSize: 6, sortBy: "relevancy", apiKey },
     });
 
-    // 🧱 Handle rate limits or no articles
     if (data.status !== "ok" || !data.articles?.length) {
       console.warn(`⚠️ NewsAPI limit or no data for ${company} — using mock news.`);
       return mockNews;
@@ -128,7 +136,6 @@ async function getNews(company) {
       const ageDays = (now - pubDate) / (1000 * 60 * 60 * 24);
       const recencyScore = Math.max(0, 1 - ageDays / 30);
 
-      // 🧠 Smart categorization based on title keywords
       const title = a.title?.toLowerCase() || "";
       const category = /funding|investment|ipo|raise|seed/i.test(title)
         ? "Funding"
@@ -164,9 +171,6 @@ async function getNews(company) {
     return mockNews;
   }
 }
-
-
-
 /* ------------------------- ✍️ Key Point Extractor ------------------------- */
 function extractKeyPoints(text) {
   if (!text) return [];
@@ -203,6 +207,7 @@ Return JSON with:
  "company": string,
  "industry": string|null,
  "headquarters": string|null,
+ "size": string|null,
  "mission": string|null,
  "values": string[]|null,
  "culture": string|null,
@@ -214,6 +219,7 @@ Return JSON with:
 
 Rules:
 - Use Wikipedia/News when possible.
+- If size is not available, infer reasonable employee count (e.g., "10,000+ employees").
 - Never leave fields blank or null; use concise inferred data instead.
 - Executives: include CEO, CTO, CFO, Founder if known.
 - ProductsServices: 3–6 examples of main offerings.
@@ -275,6 +281,7 @@ From public knowledge, fill them in realistically and return JSON only:
       company: aiData.company || company,
       industry: aiData.industry || "Technology",
       headquarters: aiData.headquarters || "Mountain View, California, USA",
+      size: aiData.size || null,
       mission:
         aiData.mission ||
         "To innovate and deliver transformative technology to improve daily life.",
@@ -304,6 +311,7 @@ From public knowledge, fill them in realistically and return JSON only:
     console.error("❌ OpenAI enrichment error:", err.message);
     return {
       company,
+      size: null,
       industry: "Technology",
       headquarters: "Not Available",
       mission: "Mission not available.",
@@ -327,7 +335,6 @@ function buildSocialLinks(name) {
     youtube: `https://www.youtube.com/results?search_query=${encodeURIComponent(name)}+official`,
   };
 }
-
 /* ------------------------- 🚀 Main Endpoint ------------------------- */
 router.get("/", async (req, res) => {
   const company = (req.query.company || "").trim();
@@ -345,12 +352,17 @@ router.get("/", async (req, res) => {
       wiki?.fullText || wiki?.summary,
       news.map((n) => n.title)
     );
+    
+    const finalSize =
+      ai?.size ||
+      wiki?.infobox?.employees ||
+      null;
 
     const data = {
       basics: {
         industry: ai?.industry || wiki?.infobox?.description || "N/A",
         headquarters: ai?.headquarters || "N/A",
-        size: null,
+        size: finalSize,
       },
       missionValuesCulture: {
         mission: ai?.mission || null,
@@ -361,7 +373,7 @@ router.get("/", async (req, res) => {
       productsServices: ai?.productsServices || [],
       competitiveLandscape: ai?.competitiveLandscape || [],
       summary: ai?.summary || wiki?.summary || "",
-      recentNews: news, // ✅ renamed and enriched for UC-064
+      recentNews: news,
       social: buildSocialLinks(company),
     };
 
@@ -369,7 +381,10 @@ router.get("/", async (req, res) => {
     res.json({ success: true, data });
   } catch (err) {
     console.error("❌ Research Error:", err.message);
-    res.status(500).json({ success: false, message: "Error generating company research." });
+    res.status(500).json({
+      success: false,
+      message: "Error generating company research.",
+    });
   }
 });
 

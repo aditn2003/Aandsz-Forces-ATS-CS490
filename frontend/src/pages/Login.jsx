@@ -13,8 +13,14 @@ export default function Login() {
   async function handleLogin() {
     try {
       const { data } = await api.post("/login", form);
+
       alert("✅ Login successful!");
       setToken(data.token);
+
+      // 🔥 Save userId
+      const payload = JSON.parse(atob(data.token.split(".")[1]));
+      localStorage.setItem("userId", payload.id);
+
       navigate("/profile/info");
     } catch (e) {
       alert(e?.response?.data?.error || "❌ Login failed");
@@ -25,8 +31,14 @@ export default function Login() {
     try {
       const idToken = credentialResponse.credential;
       const { data } = await api.post("/google", { idToken });
+
       alert("✅ Google login successful!");
       setToken(data.token);
+
+      // 🔥 Save userId
+      const payload = JSON.parse(atob(data.token.split(".")[1]));
+      localStorage.setItem("userId", payload.id);
+
       navigate("/profile/info");
     } catch (e) {
       alert(e?.response?.data?.error || "Google login failed");
