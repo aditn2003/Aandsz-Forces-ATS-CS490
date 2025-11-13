@@ -69,7 +69,8 @@ router.post("/", auth, async (req, res) => {
         applicationDate || null,
       ]
     );
-    res.json({ message: "Job saved successfully", job: result.rows[0] });
+    // Return 200 OK with the job object
+    res.status(200).json({ job: result.rows[0] }); 
   } catch (err) {
     console.error("❌ Job insert error:", err);
     res.status(500).json({ error: "Database error" });
@@ -275,7 +276,7 @@ router.get("/stats", auth, async (req, res) => {
 // ==================================================================
 //
 // ---------- GET ARCHIVED JOBS (AC-2) ----------
-// ***** THIS ROUTE WAS MOVED HERE - BEFORE /:id *****
+// ***** THIS ROUTE IS CORRECTLY PLACED - BEFORE /:id *****
 router.get("/archived", auth, async (req, res) => {
   try {
     const result = await pool.query(
@@ -464,10 +465,10 @@ router.put("/:id/archive", auth, async (req, res) => {
     if (result.rows.length === 0) {
       return res.status(404).json({ error: "Job not found" });
     }
-    res.json(result.rows[0]);
+    res.status(200).json({ job: result.rows[0] }); // <-- Send 200 OK
   } catch (err) {
     console.error("❌ Archive job error:", err.message);
-    res.status(500).json({ error: "Database error" });
+    res.status(500).json({ error: "Database error" }); // <-- FIX: Added catch block
   }
 });
 
@@ -483,10 +484,10 @@ router.put("/:id/restore", auth, async (req, res) => {
     if (result.rows.length === 0) {
       return res.status(404).json({ error: "Job not found" });
     }
-    res.json(result.rows[0]);
+    res.status(200).json({ job: result.rows[0] }); // <-- Send 200 OK
   } catch (err) {
     console.error("❌ Restore job error:", err.message);
-    res.status(500).json({ error: "Database error" });
+    res.status(500).json({ error: "Database error" }); // <-- FIX: Added catch block
   }
 });
 

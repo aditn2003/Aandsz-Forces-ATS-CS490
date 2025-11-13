@@ -55,14 +55,14 @@ app.use(express.json());
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 // ===== PostgreSQL Setup =====
-const pool = new Pool({
+export const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
 });
 
-pool
-  .connect()
-  .then(() => console.log("✅ Connected to PostgreSQL"))
-  .catch((err) => console.error("❌ DB connection error:", err.message));
+//pool
+  //.connect()
+  //.then(() => console.log("✅ Connected to PostgreSQL"))
+  //.catch((err) => console.error("❌ DB connection error:", err.message));
 
 // ===== Helpers =====
 const JWT_SECRET = process.env.JWT_SECRET || "dev_secret_change_me";
@@ -518,5 +518,12 @@ app.post("/test-reminders", async (req, res) => {
     res.status(500).json({ error: "Failed to run reminder job" });
   }
 });
+
 // ===== Start Server =====
-app.listen(4000, () => console.log("✅ API running at http://localhost:4000"));
+// Only start the server if this file is run directly (not imported)
+if (process.env.NODE_ENV !== 'test') {
+  app.listen(4000, () => console.log("✅ API running at http://localhost:4000"));
+}
+
+// Export the app for testing
+export default app;

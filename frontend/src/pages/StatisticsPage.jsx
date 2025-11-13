@@ -22,7 +22,7 @@ import {
   ResponsiveContainer,
 } from 'recharts';
 import { CSVLink } from 'react-csv';
-import { api } from '../api'; // <-- IMPORT YOUR API FILE
+import { api } from '../api';
 
 // Helper to convert month number to name
 const monthNames = [
@@ -46,9 +46,7 @@ const StatisticsPage = () => {
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        // --- THIS IS THE CHANGED PART ---
-        // We now use 'api.get' which automatically adds your token
-        const res = await api.get('/api/jobs/stats'); 
+        const res = await api.get('/api/jobs/stats');
         setStats(res.data);
       } catch (err) {
         setError('Failed to load statistics. Is your backend running?');
@@ -59,8 +57,6 @@ const StatisticsPage = () => {
     };
     fetchStats();
   }, []);
-
-  // (The rest of the file is exactly the same as before)
 
   // Format data for the monthly volume chart
   const formattedMonthlyData = stats?.monthlyVolume.map((item) => ({
@@ -138,7 +134,8 @@ const StatisticsPage = () => {
         )}
       </Box>
       
-      {/* KPI Cards */}
+      {/* === THIS IS THE FIX === */}
+      {/* Row 1: KPI Cards */}
       <Grid container spacing={3}>
         <Grid item xs={12} sm={6} md={3}>
           <Card>
@@ -172,7 +169,10 @@ const StatisticsPage = () => {
             </CardContent>
           </Card>
         </Grid>
-
+      </Grid>
+      
+      {/* Row 2: Charts (with some margin-top) */}
+      <Grid container spacing={3} sx={{ mt: 1 }}>
         {/* Monthly Applications Chart (AC-4) */}
         <Grid item xs={12} md={6}>
           <Card>
@@ -211,6 +211,8 @@ const StatisticsPage = () => {
           </Card>
         </Grid>
       </Grid>
+      {/* === END OF FIX === */}
+
     </Container>
   );
 };

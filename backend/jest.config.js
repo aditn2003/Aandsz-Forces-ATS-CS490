@@ -4,6 +4,7 @@ export default {
   testMatch: ["**/tests/**/*.test.js"],
   setupFiles: ["<rootDir>/tests/setup.js"],
   verbose: true,
+  forceExit: true, // <-- ADD THIS LINE
   coverageThreshold: {
     global: {
       branches: 85,

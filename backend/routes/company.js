@@ -6,6 +6,8 @@ import dotenv from "dotenv";
 import multer from "multer";
 import path from "path";
 import fs from "fs";
+import axios from "axios";
+import { GoogleGenerativeAI } from "@google/generative-ai";
 
 dotenv.config();
 const { Pool } = pkg;
@@ -41,27 +43,121 @@ function auth(req, res, next) {
   }
 }
 
+//
+// ==================================================================
+//               NEW COMPANY RESEARCH ROUTE (AC #3)
+// ==================================================================
+//
+// ⚠️ Note: This must be placed BEFORE the '/:name' route
+//
+
+// Initialize Google AI
+// --- THIS IS THE FIX ---
+// Force the client to use the v1 API endpoint, not the old v1beta
+const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY, {
+  apiEndpoint: "https://generativelanguage.googleapis.com/v1",
+}); 
+const model = genAI.getGenerativeModel({ model: "gemini-pro" }); 
+// ---------------------
+
+
+router.post("/research", auth, async (req, res) => {
+  const { companyName } = req.body;
+  if (!companyName) {
+    return res.status(400).json({ error: "Company name is required" });
+  }
+
+  try {
+    // 1. Check if company already exists
+    const existing = await pool.query(
+      "SELECT * FROM companies WHERE LOWER(name)=LOWER($1)",
+      [companyName.toLowerCase()]
+    );
+
+    if (existing.rows.length > 0) {
+      // If it exists, just return it
+      return res.status(200).json({ company: existing.rows[0] });
+    }
+
+    // 2. Fetch news (for context)
+    const newsResponse = await axios.get(
+      `https://newsapi.org/v2/everything?q=${encodeURIComponent(
+        companyName
+      )}&apiKey=${process.env.NEWS_API_KEY}&pageSize=5`
+    );
+    const articles = newsResponse.data.articles.map((a) => ({
+      title: a.title,
+      description: a.description,
+      url: a.url,
+    }));
+
+    // 3. Call Generative AI for research
+    const prompt = `Research the company "${companyName}". Give me a JSON object with these keys: "basics" (one-sentence description), "mission_values_culture" (a short paragraph), "executives" (an array of strings with "Name - Title"), "products_services" (an array of 2-3 main products/services), "competitive_landscape" (a short paragraph). Here are some recent news articles for context: ${JSON.stringify(
+      articles
+    )}`;
+
+    const result = await model.generateContent(prompt);
+    const response = await result.response;
+    // Clean up markdown formatting from the AI response
+    const aiText = response.text().replace(/```json|```/g, "").trim(); 
+
+    let aiData;
+    try {
+      aiData = JSON.parse(aiText);
+    } catch (e) {
+      console.error("AI JSON parse error:", aiText);
+      return res.status(500).json({ error: "Failed to parse AI response" });
+    }
+
+    // 4. Save to database
+    const newCompany = await pool.query(
+      `INSERT INTO companies (
+        name, basics, mission_values_culture, executives, 
+        products_services, competitive_landscape, news, description, industry
+       ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+       RETURNING *`,
+      [
+        companyName,
+        JSON.stringify(aiData.basics || {}),
+        JSON.stringify(aiData.mission_values_culture || {}),
+        JSON.stringify(aiData.executives || []),
+        JSON.stringify(aiData.products_services || []),
+        JSON.stringify(aiData.competitive_landscape || {}),
+        JSON.stringify(articles),
+        aiData.basics, // Use the 'basics' as the default description
+        aiData.industry || ''
+      ]
+    );
+
+    res.status(200).json({ company: newCompany.rows[0] });
+  } catch (err) {
+    console.error("❌ Company research error:", err);
+    res.status(500).json({ error: "Server error during company research" });
+  }
+});
+
+
 // ✅ Get company by name (returns full consistent object)
 router.get("/:name", auth, async (req, res) => {
   try {
     const { name } = req.params;
     const result = await pool.query(
       `SELECT
-         id,
-         name,
-         COALESCE(size, '') AS size,
-         COALESCE(industry, '') AS industry,
-         COALESCE(location, '') AS location,
-         COALESCE(website, '') AS website,
-         COALESCE(description, 'No description yet.') AS description,
-         COALESCE(mission, '') AS mission,
-         COALESCE(news, '') AS news,
-         COALESCE(glassdoor_rating, 0) AS glassdoor_rating,
-         COALESCE(contact_email, '') AS contact_email,
-         COALESCE(contact_phone, '') AS contact_phone,
-         COALESCE(logo_url, '') AS logo_url
-       FROM companies
-       WHERE LOWER(name)=LOWER($1)`,
+          id,
+          name,
+          COALESCE(size, '') AS size,
+          COALESCE(industry, '') AS industry,
+          COALESCE(location, '') AS location,
+          COALESCE(website, '') AS website,
+          COALESCE(description, 'No description yet.') AS description,
+          COALESCE(mission, '') AS mission,
+          COALESCE(news, '') AS news,
+          COALESCE(glassdoor_rating, 0) AS glassdoor_rating,
+          COALESCE(contact_email, '') AS contact_email,
+          COALESCE(contact_phone, '') AS contact_phone,
+          COALESCE(logo_url, '') AS logo_url
+        FROM companies
+        WHERE LOWER(name)=LOWER($1)`,
       [name]
     );
 
