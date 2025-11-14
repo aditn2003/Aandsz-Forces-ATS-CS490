@@ -22,7 +22,8 @@ export default function ProjectSection({ token }) {
   }, [token]);
 
   async function deleteProject(id) {
-    if (!window.confirm("Are you sure you want to delete this project?")) return;
+    if (!window.confirm("Are you sure you want to delete this project?"))
+      return;
     try {
       await api.delete(`/api/projects/${id}`, {
         headers: { Authorization: `Bearer ${token}` },

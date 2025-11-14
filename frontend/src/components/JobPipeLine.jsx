@@ -25,7 +25,8 @@ const STAGES = [
   { name: "Rejected", color: "#f87171" },
 ];
 
-export default function JobPipeline({ token }) {
+// ⭐ ONLY ADDITION #1 — add onAnalyzeSkills support
+export default function JobPipeline({ token, onAnalyzeSkills }) {
   const [jobs, setJobs] = useState([]);
   const [dragged, setDragged] = useState(null);
   const [filter, setFilter] = useState("All");
@@ -253,123 +254,143 @@ export default function JobPipeline({ token }) {
               </h3>
 
               <div className="column-content">
-                {stageJobs.map((job) => (
-                  <div
-                    key={job.id}
-                    className={`job-card ${
-                      selectedJobs.includes(job.id) ? "selected" : ""
-                    }`}
-                    draggable
-                    onDragStart={() => setDragged(job)}
-                    onClick={(e) => {
-                      if (e.shiftKey) {
-                        e.stopPropagation();
-                        setSelectedJobs((prev) =>
-                          prev.includes(job.id)
-                            ? prev.filter((id) => id !== job.id)
-                            : [...prev, job.id]
-                        );
-                      } else {
-                        setSelectedJobId(job.id);
-                      }
-                    }}
-                  >
-                    <input
-                      type="checkbox"
-                      checked={selectedJobs.includes(job.id)}
-                      onClick={(e) => e.stopPropagation()}
-                      onChange={(e) => {
-                        e.stopPropagation();
-                        setSelectedJobs((prev) =>
-                          prev.includes(job.id)
-                            ? prev.filter((id) => id !== job.id)
-                            : [...prev, job.id]
-                        );
-                      }}
-                    />
+              {stageJobs.map((job) => (
+  <div key={job.id} className="job-wrapper">
 
-                    {/* 🧩 Job Info + Logo aligned right */}
-                    <div className="job-info-with-logo">
-                      <div className="job-info">
-                        <strong
-                          dangerouslySetInnerHTML={{
-                            __html: highlight(job.title, filters.search),
-                          }}
-                        />
-                        <p
-                          dangerouslySetInnerHTML={{
-                            __html: highlight(job.company, filters.search),
-                          }}
-                        />
-                        {job.deadline && (
-                          <small
-                            style={{
-                              color: deadlineColor(job.deadline),
-                              fontWeight: 500,
-                              display: "block",
-                            }}
-                          >
-                            {daysUntilDeadline(job.deadline) < 0
-                              ? `Overdue (${Math.abs(
-                                  daysUntilDeadline(job.deadline)
-                                )} days ago)`
-                              : `${daysUntilDeadline(
-                                  job.deadline
-                                )} days remaining`}
-                          </small>
-                        )}
-                        <small>
-                          {formatDaysInStage(
-                            job.status_updated_at || job.created_at
-                          )}
-                        </small>
-                      </div>
+    {/* ✔ Checkbox OUTSIDE card, so it works */}
+    <input
+      type="checkbox"
+      className="job-select-checkbox"
+      checked={selectedJobs.includes(job.id)}
+      onClick={(e) => e.stopPropagation()}
+      onChange={(e) => {
+        e.stopPropagation();
+        setSelectedJobs((prev) =>
+          prev.includes(job.id)
+            ? prev.filter((id) => id !== job.id)
+            : [...prev, job.id]
+        );
+      }}
+    />
 
-                      {/* 🏢 Logo on right */}
-                      <div
-                        className="logo-wrapper"
-                        onMouseEnter={() => setHoveredLogo(job.id)}
-                        onMouseLeave={() => setHoveredLogo(null)}
-                      >
-                        <img
-                          src={
-                            companyLogos[job.company] ||
-                            job.company_logo_url ||
-                            "/company-placeholder.png"
-                          }
-                          alt={`${job.company} Logo`}
-                          className="company-logo-right"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setSelectedCompany(job.company);
-                          }}
-                          onError={(e) =>
-                            (e.currentTarget.src = "/company-placeholder.png")
-                          }
-                        />
-                        {hoveredLogo === job.id && (
-                          <div className="react-tooltip">View Company Info</div>
-                        )}
-                      </div>
-                    </div>
-                    
-                    {/* --- ADD THIS ACTION BAR --- */}
-                    <div className="job-card-actions">
-                      <button 
-                        className="job-card-btn-archive" 
-                        title="Archive Job"
-                        onClick={(e) => {
-                          e.stopPropagation(); // Prevents the modal from opening
-                          handleArchive(job.id);
-                        }}
-                      >
-                        <FaArchive /> Archive
-                      </button>
-                    </div>
-                    {/* --------------------------- */}
-                    
-                  </div>
-                ))}
+    {/* ============================
+        CLICKABLE JOB CARD
+    ============================ */}
+    <div
+      className={`job-card ${
+        selectedJobs.includes(job.id) ? "selected" : ""
+      }`}
+      draggable
+      onDragStart={() => setDragged(job)}
+      onClick={(e) => {
+        if (e.shiftKey) {
+          e.stopPropagation();
+          setSelectedJobs((prev) =>
+            prev.includes(job.id)
+              ? prev.filter((id) => id !== job.id)
+              : [...prev, job.id]
+          );
+        } else {
+          setSelectedJobId(job.id);
+        }
+      }}
+    >
+      <div className="job-info-with-logo">
+        <div className="job-info">
+          <strong
+            dangerouslySetInnerHTML={{
+              __html: highlight(job.title, filters.search),
+            }}
+          />
+          <p
+            dangerouslySetInnerHTML={{
+              __html: highlight(job.company, filters.search),
+            }}
+          />
+
+          {job.deadline && (
+            <small
+              style={{
+                color: deadlineColor(job.deadline),
+                fontWeight: 500,
+                display: "block",
+              }}
+            >
+              {daysUntilDeadline(job.deadline) < 0
+                ? `Overdue (${Math.abs(
+                    daysUntilDeadline(job.deadline)
+                  )} days ago)`
+                : `${daysUntilDeadline(
+                    job.deadline
+                  )} days remaining`}
+            </small>
+          )}
+
+          <small>
+            {formatDaysInStage(
+              job.status_updated_at || job.created_at
+            )}
+          </small>
+        </div>
+
+        {/* 🏢 Logo */}
+        <div
+          className="logo-wrapper"
+          onMouseEnter={() => setHoveredLogo(job.id)}
+          onMouseLeave={() => setHoveredLogo(null)}
+        >
+          <img
+            src={
+              companyLogos[job.company] ||
+              job.company_logo_url ||
+              "/company-placeholder.png"
+            }
+            alt={`${job.company} Logo`}
+            className="company-logo-right"
+            onClick={(e) => {
+              e.stopPropagation();
+              setSelectedCompany(job.company);
+            }}
+            onError={(e) =>
+              (e.currentTarget.src = "/company-placeholder.png")
+            }
+          />
+          {hoveredLogo === job.id && (
+            <div className="react-tooltip">View Company Info</div>
+          )}
+        </div>
+      </div>
+    </div>
+
+    {/* ============================
+        ACTION BAR BELOW CARD
+    ============================ */}
+    <div className="job-card-actions-bar">
+      {onAnalyzeSkills && (
+        <button
+          className="job-card-btn-analyze"
+          onClick={(e) => {
+            e.stopPropagation();
+            onAnalyzeSkills(job.id);
+          }}
+        >
+          🔍 Analyze Skills
+        </button>
+      )}
+
+      <button
+        className="job-card-btn-archive"
+        onClick={(e) => {
+          e.stopPropagation();
+          handleArchive(job.id);
+        }}
+      >
+        <FaArchive /> Archive
+      </button>
+    </div>
+  </div>
+))}
+
                 {stageJobs.length === 0 && (
                   <p className="empty-column">No jobs match filters.</p>
                 )}

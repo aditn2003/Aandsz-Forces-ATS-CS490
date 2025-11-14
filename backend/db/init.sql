@@ -138,6 +138,7 @@ CREATE TABLE IF NOT EXISTS jobs (
 CREATE INDEX IF NOT EXISTS idx_jobs_user_id ON jobs(user_id);
 CREATE INDEX IF NOT EXISTS idx_jobs_status ON jobs(status);
 CREATE TABLE IF NOT EXISTS companies (
+CREATE TABLE IF NOT EXISTS companies (
     id SERIAL PRIMARY KEY,
     name VARCHAR(255) UNIQUE NOT NULL,
     size VARCHAR(100),
@@ -156,6 +157,7 @@ CREATE TABLE IF NOT EXISTS companies (
 );
 -- resume_templates table
 CREATE TABLE IF NOT EXISTS resume_templates (
+CREATE TABLE IF NOT EXISTS resume_templates (
     id SERIAL PRIMARY KEY,
     user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
     name VARCHAR(100) NOT NULL,
@@ -168,6 +170,7 @@ CREATE TABLE IF NOT EXISTS resume_templates (
     is_default BOOLEAN DEFAULT false,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+CREATE TABLE IF NOT EXISTS resumes (
 CREATE TABLE IF NOT EXISTS resumes (
     id SERIAL PRIMARY KEY,
     user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
@@ -212,6 +215,7 @@ VALUES (
     ) ON CONFLICT DO NOTHING;
 
 
+CREATE TABLE IF NOT EXISTS resume_presets (
 CREATE TABLE IF NOT EXISTS resume_presets (
     id SERIAL PRIMARY KEY,
     user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
@@ -323,3 +327,25 @@ VALUES
         FALSE
     )
 ON CONFLICT DO NOTHING;
+
+ALTER TABLE public.jobs
+ADD COLUMN IF NOT EXISTS "offerDate" DATE;
+
+CREATE TABLE IF NOT EXISTS match_history (
+  id SERIAL PRIMARY KEY,
+  user_id INTEGER NOT NULL,
+  job_id INTEGER NOT NULL,
+  match_score INTEGER NOT NULL,
+  skills_score INTEGER,
+  experience_score INTEGER,
+  education_score INTEGER,
+  strengths TEXT,
+  gaps TEXT,
+  improvements TEXT,
+  weights JSONB,         -- stores personalized weighting used
+  details JSONB,         -- raw AI response for future use
+  created_at TIMESTAMP DEFAULT NOW()
+);
+ALTER TABLE jobs
+ADD COLUMN required_skills TEXT[];
+

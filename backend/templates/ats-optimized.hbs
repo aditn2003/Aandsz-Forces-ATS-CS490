@@ -2,131 +2,49 @@
 <html>
   <head>
     <meta charset="UTF-8" />
-    <title>{{summary.full_name}} — {{summary.title}}</title>
+    <title>{{summary.full_name}} – {{summary.title}}</title>
     <link rel="stylesheet" href="resume.css" />
   </head>
   <body>
     <!-- ================= HEADER ================= -->
     <header class="header">
       <h1 class="name">{{summary.full_name}}</h1>
-
       {{#if summary.title}}
-      <h2 class="headline">
-        {{summary.title}}
-
-        {{#if summary.links.linkedin}}
-          | <a href="{{summary.links.linkedin}}" target="_blank">LinkedIn</a>
-        {{/if}}
-        {{#if summary.links.github}}
-          | <a href="{{summary.links.github}}" target="_blank">GitHub</a>
-        {{/if}}
-        {{#if summary.contact.email}}
-          | {{summary.contact.email}}
-        {{/if}}
-        {{#if summary.contact.phone}}
-          | {{summary.contact.phone}}
-        {{/if}}
-        {{#if summary.contact.location}}
-          | {{summary.contact.location}}
-        {{/if}}
-      </h2>
+      <div class="job-title">{{summary.title}}</div>
       {{/if}}
-    </header>
-
-    <!-- ================= EDUCATION ================= -->
-    {{#if education.length}}
-    <section class="section education-section">
-      <h3 class="section-title">Education</h3>
-      {{#each education}}
-      <div class="education-item">
-        <div class="edu-header">
-          <div class="edu-left">
-            <strong>{{institution}}</strong>{{#if location}}, {{location}}{{/if}}
-          </div>
-          <div class="edu-right">
-            {{#if graduation_date}}
-              <span>Expected Graduation: {{formatDate graduation_date}}</span>
-            {{/if}}
-          </div>
-        </div>
-
-        <div class="edu-details">
-          <div class="edu-degree">
-            {{education_level}} in {{field_of_study}}
-          </div>
-          {{#if gpa}}
-          <div class="edu-gpa">Current GPA: <strong>{{gpa}}</strong></div>
-          {{/if}}
-        </div>
-
-        {{#if honors}}
-        <div class="edu-honors">
-          Honors: {{honors}}
-        </div>
-        {{/if}}
+      
+      <div class="contact-info">
+        {{#if summary.contact.location}}{{summary.contact.location}}{{/if}}
+        {{#if summary.contact.email}} • {{summary.contact.email}}{{/if}}
+        {{#if summary.contact.phone}} • {{summary.contact.phone}}{{/if}}
       </div>
-      {{/each}}
-    </section>
-    {{/if}}
+    </header>
 
     <!-- ================= SUMMARY ================= -->
     {{#if summary.bio}}
     <section class="section">
-      <h3 class="section-title">Professional Summary</h3>
+      <h3 class="section-title">PROFESSIONAL SUMMARY</h3>
       <p>{{summary.bio}}</p>
     </section>
     {{/if}}
 
     <!-- ================= EXPERIENCE ================= -->
-    {{#if experience.length}}
-    <section class="section">
-      <h3 class="section-title">Work Experience</h3>
-      {{#each experience}}
-      <div class="exp-item">
-        <div class="exp-header">
-          <div class="exp-left">
-            <strong>{{company}}</strong>
-            {{#if title}} | <em>{{title}}</em>{{/if}}
-            {{#if link}} | <a href="{{link}}" target="_blank">GitHub</a>{{/if}}
-          </div>
-          <div class="exp-right">
-            {{formatDateRange start_date end_date current}}
-          </div>
-        </div>
-
-        {{!-- {{#if location}}
-        <div class="exp-location">{{location}}</div>
-        {{/if}} --}}
-
-        {{#if description}}
-        <ul>
-          {{#each (splitLines description)}}
-          <li>{{this}}</li>
-          {{/each}}
-        </ul>
-        {{/if}}
-      </div>
-      {{/each}}
-    </section>
-    {{/if}}
-<!-- ================= PROJECTS ================= -->
-{{#if projects.length}}
+{{#if experience.length}}
 <section class="section">
-  <h3 class="section-title">Projects</h3>
-  {{#each projects}}
-  <div class="project-item">
-    <div class="project-header">
-      <strong>{{name}}</strong>
-      {{#if repository_link}}
-        <a href="{{repository_link}}" target="_blank"> | GitHub</a>
-      {{/if}}
+  <h3 class="section-title">PROFESSIONAL EXPERIENCE</h3>
+  {{#each experience}}
+  <div class="exp-item">
+    <div class="exp-header">
+      <div class="exp-left">
+        <strong>{{company}}</strong>
+      </div>
+
+      <div class="exp-right">
+        {{formatDateRange start_date end_date current}}
+      </div>
     </div>
 
-    {{#if technologies}}
-    <div class="project-tech">
-      <em>{{technologies}}</em>
-    </div>
-    {{/if}}
+    <div class="exp-title">{{title}}</div>
 
     {{#if description}}
     <ul>
@@ -140,71 +58,127 @@
 </section>
 {{/if}}
 
-    <!-- ================= SKILLS ================= -->
-   <!-- ================= TECHNICAL SKILLS ================= -->
-{{#if skills.length}}
-<section class="section">
-  <h3 class="section-title">Technical Skills</h3>
-
-  {{#if skillCategories.programming.length}}
-  <p><strong>Programming Languages:</strong>
-    {{#each skillCategories.programming}}{{capitalize this}}{{#unless @last}}, {{/unless}}{{/each}}
-  </p>
-  {{/if}}
-
-  {{#if skillCategories.libraries.length}}
-  <p><strong>Libraries & Frameworks:</strong>
-    {{#each skillCategories.libraries}}{{capitalize this}}{{#unless @last}}, {{/unless}}{{/each}}
-  </p>
-  {{/if}}
-
-  {{#if skillCategories.tools.length}}
-  <p><strong>Data Tools & Platforms:</strong>
-    {{#each skillCategories.tools}}{{capitalize this}}{{#unless @last}}, {{/unless}}{{/each}}
-  </p>
-  {{/if}}
-
-  {{#if skillCategories.certifications.length}}
-  <p><strong>Certifications:</strong>
-    {{#each skillCategories.certifications}}{{capitalize this}}{{#unless @last}}, {{/unless}}{{/each}}
-  </p>
-  {{/if}}
-
-  {{#if skillCategories.soft.length}}
-  <p><strong>Soft Skills:</strong>
-    {{#each skillCategories.soft}}{{capitalize this}}{{#unless @last}}, {{/unless}}{{/each}}
-  </p>
-  {{/if}}
-
-  {{#if skillCategories.languages.length}}
-  <p><strong>Languages:</strong>
-    {{#each skillCategories.languages}}{{capitalize this}}{{#unless @last}}, {{/unless}}{{/each}}
-  </p>
-  {{/if}}
-</section>
-{{/if}}
-<!-- ================= CERTIFICATIONS ================= -->
-{{#if certifications.length}}
-<section class="section">
-  <h3 class="section-title">Certifications</h3>
-  {{#each certifications}}
-  <div class="cert-item">
-    <div class="cert-header">
-      <strong>{{name}}</strong>
-      {{#if organization}} | <em>{{organization}}</em>{{/if}}
-      {{#if category}} | {{category}}{{/if}}
-      {{#if date_earned}}
-        <span class="right">{{formatDate date_earned}}</span>
+    <!-- ================= EDUCATION ================= -->
+    {{#if education.length}}
+   <section class="section education-section">
+  <h3 class="section-title">EDUCATION</h3>
+  {{#each education}}
+  <div class="education-item">
+    <div class="edu-line">
+      <strong>{{education_level}} in {{field_of_study}}</strong>
+      {{#if institution}} | {{institution}}{{/if}}
+      {{#if location}} | {{location}}{{/if}}
+      {{#if gpa}} | GPA: {{gpa}}{{/if}}
+      {{#if graduation_date}}
+        <span class="edu-date"> | {{formatDate graduation_date}}</span>
       {{/if}}
     </div>
 
-    {{#if cert_number}}
-    <div class="cert-number">Certificate ID: {{cert_number}}</div>
+    {{#if honors}}
+      <div class="edu-meta">{{honors}}</div>
     {{/if}}
   </div>
   {{/each}}
 </section>
+
+
+
 {{/if}}
+
+    <!-- ================= PROJECTS ================= -->
+    {{#if projects.length}}
+    <section class="section">
+      <h3 class="section-title">PROJECTS</h3>
+      {{#each projects}}
+      <div class="project-item">
+        <div class="project-header">
+          <strong>{{name}}</strong>
+          {{#if repository_link}}
+            <a href="{{repository_link}}" target="_blank" class="project-link">GitHub</a>
+          {{/if}}
+        </div>
+
+        {{#if technologies}}
+        <div class="project-tech">Technologies Used: {{technologies}}</div>
+        {{/if}}
+
+        {{#if description}}
+        <ul>
+          {{#each (splitLines description)}}
+          <li>{{this}}</li>
+          {{/each}}
+        </ul>
+        {{/if}}
+      </div>
+      {{/each}}
+    </section>
+    {{/if}}
+
+    <!-- ================= TECHNICAL SKILLS ================= -->
+    {{#if skills.length}}
+    <section class="section">
+      <h3 class="section-title">ADDITIONAL INFORMATION</h3>
+
+      {{#if skillCategories.programming.length}}
+      <p><strong>Programming Languages:</strong>
+        {{#each skillCategories.programming}}{{this}}{{#unless @last}}, {{/unless}}{{/each}}
+      </p>
+      {{/if}}
+
+      {{#if skillCategories.libraries.length}}
+      <p><strong>Libraries & Frameworks:</strong>
+        {{#each skillCategories.libraries}}{{this}}{{#unless @last}}, {{/unless}}{{/each}}
+      </p>
+      {{/if}}
+
+      {{#if skillCategories.tools.length}}
+      <p><strong>Tools & Technologies:</strong>
+        {{#each skillCategories.tools}}{{this}}{{#unless @last}}, {{/unless}}{{/each}}
+      </p>
+      {{/if}}
+
+      {{#if skillCategories.certifications.length}}
+      <p><strong>Certifications:</strong>
+        {{#each skillCategories.certifications}}{{this}}{{#unless @last}}, {{/unless}}{{/each}}
+      </p>
+      {{/if}}
+
+      {{#if skillCategories.soft.length}}
+      <p><strong>Soft Skills:</strong>
+        {{#each skillCategories.soft}}{{this}}{{#unless @last}}, {{/unless}}{{/each}}
+      </p>
+      {{/if}}
+
+      {{#if skillCategories.languages.length}}
+      <p><strong>Languages:</strong>
+        {{#each skillCategories.languages}}{{this}}{{#unless @last}}, {{/unless}}{{/each}}
+      </p>
+      {{/if}}
+    </section>
+    {{/if}}
+
+    <!-- ================= CERTIFICATIONS ================= -->
+    {{#if certifications.length}}
+    <section class="section">
+      <h3 class="section-title">CERTIFICATIONS</h3>
+      {{#each certifications}}
+      <div class="cert-item">
+        <div class="cert-header">
+          <strong>{{name}}</strong>
+          {{#if organization}} | <em>{{organization}}</em>{{/if}}
+          {{#if category}} | {{category}}{{/if}}
+          {{#if date_earned}}
+            <span class="right">{{formatDate date_earned}}</span>
+          {{/if}}
+        </div>
+
+        {{#if cert_number}}
+        <div class="cert-number">Certificate ID: {{cert_number}}</div>
+        {{/if}}
+      </div>
+      {{/each}}
+    </section>
+    {{/if}}
 
   </body>
 </html>

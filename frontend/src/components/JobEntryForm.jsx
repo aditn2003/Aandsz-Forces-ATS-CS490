@@ -13,13 +13,27 @@ export default function JobEntryForm({ token, onSaved, onCancel }) {
     description: "",
     industry: "",
     type: "",
+    required_skills: ""   // ⭐ NEW FIELD (string)
   });
 
   const [loading, setLoading] = useState(false);
+
   async function saveJob() {
     if (!form.title.trim() || !form.company.trim()) {
       return alert("Job Title and Company Name are required.");
     }
+
+    // ⭐ convert comma-separated string → array
+    const skillsArray =
+      form.required_skills
+        .split(",")
+        .map((s) => s.trim().toLowerCase())
+        .filter((s) => s.length > 0);
+
+    const payload = {
+      ...form,
+      required_skills: skillsArray   // ⭐ send array to backend
+    };
 
     try {
       setLoading(true);
@@ -29,15 +43,12 @@ export default function JobEntryForm({ token, onSaved, onCancel }) {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify(form),
+        body: JSON.stringify(payload),  // ⭐ now sending required_skills
       });
 
       if (!res.ok) throw new Error("Failed to save job");
 
-      // alert("✅ Job entry saved successfully!");
-
-      // ⬇️ trigger refresh immediately
-      onSaved?.(); // this will call loadJobs() in JobPipeline
+      onSaved?.();
     } catch (err) {
       console.error("Job save error:", err);
       alert("❌ Could not save job entry.");
@@ -137,6 +148,16 @@ export default function JobEntryForm({ token, onSaved, onCancel }) {
         <option value="internship">Internship</option>
         <option value="contract">Contract</option>
       </select>
+
+      {/* ⭐ NEW REQUIRED SKILLS FIELD */}
+      <label>Required Skills (comma-separated)</label>
+      <input
+        value={form.required_skills}
+        onChange={(e) =>
+          setForm({ ...form, required_skills: e.target.value })
+        }
+        placeholder="e.g., Python, React, SQL, AWS"
+      />
 
       <div className="button-group">
         <button onClick={saveJob} disabled={loading}>
