@@ -25,7 +25,9 @@ import resumePresetsRoutes from "./routes/resumePresets.js";
 import sectionPresetsRoutes from "./routes/sectionPresets.js";
 import jobDescriptionsRoutes from "./routes/jobDescriptions.js";
 import jobRoutes from "./routes/job.js";
-import jobImportRoutes from "./routes/jobRoutes.js"; 
+import jobImportRoutes from "./routes/jobRoutes.js"; import coverLetterExportRoutes from "./routes/coverLetterExport.js";
+
+
 // ====== 🔔 DAILY DEADLINE REMINDER CRON JOB (UC-012) ======
 import crons from "node-cron";
 import puppeteer from "puppeteer";
@@ -363,6 +365,8 @@ app.use("/api", educationRoutes);
 app.use("/api", certifications);
 app.use("/api", projectRoutes);
 app.use("/api", jobImportRoutes);
+
+app.use("/api/cover-letter/export", coverLetterExportRoutes);
 
 
 // ===== Global Error Handler =====
