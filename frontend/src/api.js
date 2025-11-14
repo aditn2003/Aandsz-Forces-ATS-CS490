@@ -11,15 +11,40 @@ export const api = axios.create({
   headers: { "Content-Type": "application/json" },
 });
 
+/* -------------------------------------------------------
+   ⬆️ REQUEST INTERCEPTOR — attach token
+------------------------------------------------------- */
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem("token");
   if (token) config.headers.Authorization = `Bearer ${token}`;
   return config;
 });
 
-/* ============================================================
-   COMPANY RESEARCH
-============================================================ */
+/* -------------------------------------------------------
+   ⬇️ RESPONSE INTERCEPTOR — auto logout on 401
+------------------------------------------------------- */
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response && error.response.status === 401) {
+      console.warn(
+        "🔐 401 detected — token invalid or expired. Logging out..."
+      );
+
+      // Remove token immediately
+      localStorage.removeItem("token");
+
+      // Force redirect to login AND prevent Back button returning
+      window.location.replace("/login");
+    }
+
+    return Promise.reject(error);
+  }
+);
+
+/* -------------------------------------------------------
+   Company Research API
+------------------------------------------------------- */
 export async function fetchCompanyResearch(company) {
   try {
     const res = await api.get(`/api/company-research`, {
@@ -36,7 +61,6 @@ export async function fetchCompanyResearch(company) {
 
 /* ============================================================
    COVER LETTER TEMPLATES — Phase 2 Actions
-============================================================ */
 
 // ✏️ Edit template
 export const updateTemplate = (id, data) =>
@@ -53,7 +77,6 @@ export const duplicateTemplate = (id) =>
 
 /* ============================================================
    COVER LETTER EXPORT
-============================================================ */
     // === Cover Letter Export ===
     export function exportPDF(payload) {
       return api.post("/api/cover-letter/export/pdf", payload, {

@@ -25,10 +25,14 @@ import resumePresetsRoutes from "./routes/resumePresets.js";
 import sectionPresetsRoutes from "./routes/sectionPresets.js";
 import jobDescriptionsRoutes from "./routes/jobDescriptions.js";
 import companyResearchRoutes from "./routes/companyResearch.js";
+import matchRoutes from "./routes/match.js";
+import skillsGapRoutes from "./routes/skillsGap.js";
+import skillProgressRoutes from "./routes/skillProgress.js";
+import interviewInsights from "./routes/interviewInsights.js";
+import salaryResearchRouter from "./routes/salaryResearch.js";
 import coverLetterTemplatesRouter from "./routes/coverLetterTemplates.js";
 import coverLetterAIRoutes from "./routes/coverLetterAI.js";
 import coverLetterExportRoutes from "./routes/coverLetterExport.js";
-
 
 
 // ====== 🔔 DAILY DEADLINE REMINDER CRON JOB (UC-012) ======
@@ -340,10 +344,13 @@ app.use("/api", educationRoutes);
 app.use("/api", certifications);
 app.use("/api", projectRoutes);
 app.use("/api/jobs", jobRoutes);
+app.use("/api/skills-gap", skillsGapRoutes);
+app.use("/api/skill-progress", skillProgressRoutes);
+app.use("/api/salary-research", salaryResearchRouter);
+
 app.use("/api/cover-letter", coverLetterTemplatesRouter);
 app.use("/api/cover-letter", coverLetterAIRoutes);
 app.use("/api/cover-letter/export", coverLetterExportRoutes);
-
 
 
 // ===== Global Error Handler =====
@@ -512,6 +519,10 @@ app.use("/api", resumePresetsRoutes);
 app.use("/api", sectionPresetsRoutes);
 app.use("/api", jobDescriptionsRoutes);
 app.use("/api/company-research", companyResearchRoutes);
+app.use("/api/match", matchRoutes);
+app.use("/api/skill-progress", skillProgressRoutes);
+app.use("/api/interview-insights", interviewInsights);
+
 const REMINDER_DAYS =
   parseInt(process.env.REMINDER_DAYS_BEFORE || "3", 10) || 3;
 
