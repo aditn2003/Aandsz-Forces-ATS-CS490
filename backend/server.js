@@ -32,6 +32,8 @@ import interviewInsights from "./routes/interviewInsights.js";
 import salaryResearchRouter from "./routes/salaryResearch.js";
 import coverLetterTemplatesRouter from "./routes/coverLetterTemplates.js";
 import coverLetterAIRoutes from "./routes/coverLetterAI.js";
+import coverLetterExportRoutes from "./routes/coverLetterExport.js";
+
 
 // ====== 🔔 DAILY DEADLINE REMINDER CRON JOB (UC-012) ======
 import crons from "node-cron";
@@ -348,6 +350,8 @@ app.use("/api/salary-research", salaryResearchRouter);
 
 app.use("/api/cover-letter", coverLetterTemplatesRouter);
 app.use("/api/cover-letter", coverLetterAIRoutes);
+app.use("/api/cover-letter/export", coverLetterExportRoutes);
+
 
 // ===== Global Error Handler =====
 app.use((err, req, res, next) => {
