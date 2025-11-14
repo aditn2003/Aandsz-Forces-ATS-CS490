@@ -26,6 +26,7 @@ function auth(req, res, next) {
   }
 }
 
+
 // ---------- CREATE JOB ----------
 router.post("/", auth, async (req, res) => {
   const {
@@ -40,6 +41,7 @@ router.post("/", auth, async (req, res) => {
     industry,
     type,
     applicationDate,
+    required_skills   // ⭐ ADDED
   } = req.body;
 
   if (!title?.trim() || !company?.trim()) {
@@ -50,9 +52,11 @@ router.post("/", auth, async (req, res) => {
     const result = await pool.query(
       `INSERT INTO jobs (
          user_id, title, company, location, salary_min, salary_max, url, deadline,
-         description, industry, type, status, status_updated_at, created_at, "applicationDate"
+         description, industry, type, status, status_updated_at, created_at,
+         "applicationDate", required_skills   -- ⭐ ADDED
        )
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,'Interested',NOW(),NOW(), $12)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,'Interested',NOW(),NOW(),
+               $12, $13)   -- ⭐ ADDED
        RETURNING *`,
       [
         req.userId,
@@ -67,14 +71,17 @@ router.post("/", auth, async (req, res) => {
         industry || "",
         type || "",
         applicationDate || null,
+        Array.isArray(required_skills) ? required_skills : []  // ⭐ ADDED
       ]
     );
+
     res.json({ message: "Job saved successfully", job: result.rows[0] });
   } catch (err) {
     console.error("❌ Job insert error:", err);
     res.status(500).json({ error: "Database error" });
   }
 });
+
 
 // ---------- LIST ALL JOBS (Filters out archived) ----------
 router.get("/", auth, async (req, res) => {
@@ -93,7 +100,7 @@ router.get("/", auth, async (req, res) => {
 
     const params = [req.userId];
     // This line correctly filters out archived jobs
-    const whereClauses = ["user_id = $1", `"isArchived" = false`]; 
+    const whereClauses = ["user_id = $1", `isarchived = false`]; 
     let i = 2;
 
     if (search) {
@@ -180,7 +187,7 @@ router.get("/stats", auth, async (req, res) => {
     const query = `
       WITH user_jobs AS (
         -- Filter out archived jobs from stats
-        SELECT * FROM jobs WHERE user_id = $1 AND "isArchived" = false 
+        SELECT * FROM jobs WHERE user_id = $1 AND isarchived = false 
       ),
       
       -- AC-1: Total jobs by status
@@ -279,7 +286,7 @@ router.get("/stats", auth, async (req, res) => {
 router.get("/archived", auth, async (req, res) => {
   try {
     const result = await pool.query(
-      `SELECT * FROM jobs WHERE user_id = $1 AND "isArchived" = true
+      `SELECT * FROM jobs WHERE user_id = $1 AND isarchived = true
        ORDER BY status_updated_at DESC`,
       [req.userId]
     );
@@ -457,7 +464,7 @@ router.put("/:id/archive", auth, async (req, res) => {
   const { id } = req.params;
   try {
     const result = await pool.query(
-      `UPDATE jobs SET "isArchived" = true, status_updated_at = NOW()
+      `UPDATE jobs SET isarchived = true, status_updated_at = NOW()
        WHERE id = $1 AND user_id = $2 RETURNING *`,
       [id, req.userId]
     );
@@ -476,7 +483,7 @@ router.put("/:id/restore", auth, async (req, res) => {
   const { id } = req.params;
   try {
     const result = await pool.query(
-      `UPDATE jobs SET "isArchived" = false, status_updated_at = NOW()
+      `UPDATE jobs SET isarchived = false, status_updated_at = NOW()
        WHERE id = $1 AND user_id = $2 RETURNING *`,
       [id, req.userId]
     );

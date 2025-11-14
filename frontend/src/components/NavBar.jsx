@@ -12,7 +12,11 @@ import {
   FaBriefcase,
   FaChartBar,
   FaArchive,
-  FaBuilding, // ✅ new icon for Company Research
+  FaStar,
+  FaComments,
+  FaDollarSign, // 💰 NEW ICON
+  FaBuilding,
+  FaEnvelope, // ✅ Icon for Cover Letter
 } from "react-icons/fa";
 import { NavLink, useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
@@ -20,6 +24,12 @@ import { useAuth } from "../contexts/AuthContext";
 export default function NavBar() {
   const { authed, logout } = useAuth();
   const navigate = useNavigate();
+
+  // 🔥 Custom logout handler to block Back button returning to protected pages
+  const handleLogout = () => {
+    logout(); // Removes token + clears auth context
+    window.location.replace("/login"); // Prevents back button access
+  };
 
   return (
     <header className="navbar">
@@ -41,29 +51,55 @@ export default function NavBar() {
             <NavLink to="/resume">
               <FaFileAlt /> Resume
             </NavLink>
+
+            {/* ✅ NEW Cover Letter TAB */}
+            <NavLink to="/cover-letter">
+              <FaEnvelope /> Cover Letter
+            </NavLink>
+
             <NavLink to="/jobs">
               <FaBriefcase /> Jobs
             </NavLink>
-            {/* --- ADD THIS NEW LINK --- */}
+
+            {/* ⭐ JOB MATCH */}
+            <NavLink to="/job-match">
+              <FaStar /> Job Match
+            </NavLink>
+
+            {/* 📊 Statistics */}
             <NavLink to="/statistics">
               <FaChartBar /> Statistics
             </NavLink>
-            {/* --------------------------- */}
-            {/* --- ADD THIS NEW LINK --- */}
+
+            {/* 🗄️ Archived */}
+
             <NavLink to="/archived">
               <FaArchive /> Archived
             </NavLink>
-            {/* --------------------------- */}
 
-            {/* ✅ New UC-063 NavLink */}
+            {/* 🏢 Company Research */}
             <NavLink to="/company-research">
-              <FaBuilding /> Research
+              <FaBuilding /> Company Research
             </NavLink>
 
+            {/* 💰 Salary Research */}
+            <NavLink to="/salary-research">
+              <FaDollarSign /> Salary Research
+            </NavLink>
+
+            {/* 🗨️ INTERVIEW INSIGHTS */}
+            <NavLink to="/interviews">
+              <FaComments /> Interviews
+            </NavLink>
+
+            {/* 👤 Profile */}
             <NavLink to="/profile/info">
               <FaUser /> Profile
             </NavLink>
-            <button onClick={logout} className="logout-btn">
+
+            {/* 🚪 Logout */}
+
+            <button onClick={handleLogout} className="logout-btn">
               <FaSignOutAlt /> Logout
             </button>
           </>
@@ -72,6 +108,7 @@ export default function NavBar() {
             <NavLink to="/login">
               <FaSignInAlt /> Login
             </NavLink>
+
             <NavLink to="/register">
               <FaUserPlus /> Register
             </NavLink>
