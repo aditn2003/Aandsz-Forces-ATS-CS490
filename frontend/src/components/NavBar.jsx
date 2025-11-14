@@ -12,7 +12,6 @@ import {
   FaBriefcase,
   FaChartBar,
   FaArchive,
-  FaBuilding,
   FaStar,
   FaComments,
   FaDollarSign, // 💰 NEW ICON

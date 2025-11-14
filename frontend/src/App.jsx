@@ -26,8 +26,6 @@ import MatchCompare from "./pages/Match/MatchCompare.jsx";
 import SkillsGapAnalysis from "./pages/SkillsGap/SkillsGapAnalysis";
 import Interviews from "./pages/Interviews/Interviews";
 import SalaryResearch from "./pages/Salary/SalaryResearch";
-
-import CompanyResearch from "./pages/CompanyResearch";
 import CoverLetter from "./pages/CoverLetter"; // ✅ ADDED (UC-55)
 
 // ---------- Resume Flow ----------
